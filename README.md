@@ -1,12 +1,12 @@
-# Sistema de Entrega Recepción (SER)
+# Programa de Desarrollo Institucional (PDI)
 
 <p align="center">
-    <img src="resources/img/logo.png" alt="Logo SER" width="200"/>
+    <img src="resources/img/logo.png" alt="Logo PDI" width="200"/>
 </p>
 
 ## Descripción
 
-Sistema de entrega recepción (SER) es un sistema de gestión de entregas, a traves de formatos definidos por el usuario, enfocado pero no limitado al ámbito publico.
+Programa de Desarrollo Institucional (PDI) es un sistema de seguimiento del proyecto de desarrollo institucional, asi como una herramienta para la medición de los resultados de los proyectos de desarrollo institucional, enfocado pero no limitado al ámbito publico.
 
 ## Requisitos
 
