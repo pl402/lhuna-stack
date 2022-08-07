@@ -17,7 +17,7 @@ const props = defineProps({
   <AppLayout title="Escritorio">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
       <h3 class="mx-4 my-4 mb-0 text-lg text-gray-700">
-        Entregas activas
+        Escritorio
       </h3>
     </div>
   </AppLayout>
