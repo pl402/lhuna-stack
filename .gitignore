@@ -2,6 +2,7 @@
 
 /storage/*.key
 /storage/pdfs
+/storage/evidencias
 /vendor
 .env
 .env.backup

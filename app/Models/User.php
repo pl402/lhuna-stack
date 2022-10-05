@@ -24,11 +24,7 @@ class User extends Authenticatable
      *
      * @var string[]
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $fillable = ["name", "titulo", "email", "password"];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -36,10 +32,10 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password',
-        'remember_token',
-        'two_factor_recovery_codes',
-        'two_factor_secret',
+        "password",
+        "remember_token",
+        "two_factor_recovery_codes",
+        "two_factor_secret",
     ];
 
     /**
@@ -48,7 +44,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        "email_verified_at" => "datetime",
     ];
 
     /**
@@ -56,27 +52,43 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $appends = [
-        'profile_photo_url',
-    ];
+    protected $appends = ["profile_photo_url"];
 
-    protected $with = ['roles', 'permissions'];
+    protected $with = ["roles", "permissions"];
 
     public function scopeFiltros($query, array $filtros)
     {
-        $query->when($filtros['name'] ?? null, function ($query, $name) {
-            return $query->where('name', $name);
-        })->when($filtros['email'] ?? null, function ($query, $email) {
-            return $query->where('email', $email);
-        })->when($filtros['id'] ?? null, function ($query, $id) {
-            return $query->where('id', $id);
-        });
+        $query
+            ->when($filtros["name"] ?? null, function ($query, $name) {
+                return $query->where("name", $name);
+            })
+            ->when($filtros["titulo"] ?? null, function ($query, $name) {
+                return $query->where("titulo", $name);
+            })
+            ->when($filtros["email"] ?? null, function ($query, $email) {
+                return $query->where("email", $email);
+            })
+            ->when($filtros["id"] ?? null, function ($query, $id) {
+                return $query->where("id", $id);
+            });
     }
 
     public function scopeFiltro($query, $key)
     {
-        return $query->orWhere('name', 'LIKE', "%{$key}%")
-                ->orWhere('email', 'LIKE', "%{$key}%")
-                ->orWhere('id', 'LIKE', "%{$key}%");
+        return $query
+            ->orWhere("name", "LIKE", "%{$key}%")
+            ->orWhere("titulo", "LIKE", "%{$key}%")
+            ->orWhere("email", "LIKE", "%{$key}%")
+            ->orWhere("id", "LIKE", "%{$key}%");
+    }
+
+    public function areas()
+    {
+        return $this->hasMany(Area::class, "enlace_id", "id");
+    }
+
+    public function tiular_de_area()
+    {
+        return $this->hasMany(Area::class, "titular_id", "id");
     }
 }

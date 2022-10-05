@@ -1,24 +1,39 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
-import { reactive, ref, watch, toRefs } from "vue";
-import { Link } from "@inertiajs/inertia-vue3";
+import { toRefs, computed } from "vue";
 import Tabla from "@/Components/Tabla.vue";
-import JetButton from "@/Jetstream/Button.vue";
-import ButtonLink from "@/Components/ButtonLink.vue";
-import { BadgeCheckIcon } from "@heroicons/vue/solid";
-import { notify } from "notiwind";
+import ButtonReportes from "@/Components/ButtonReportes.vue";
 
 const props = defineProps({
 
 });
+
 </script>
 
+<style>
+.slide-fade-enter-active {
+    transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+    transition: all 0.3s ease-in;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+    transform: translateX(-20px);
+    opacity: 0;
+}
+</style>
+
 <template>
-  <AppLayout title="Escritorio">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-      <h3 class="mx-4 my-4 mb-0 text-lg text-gray-700">
-        Escritorio
-      </h3>
-    </div>
-  </AppLayout>
+    <AppLayout title="Escritorio">
+        <div class="py-4">
+                <div class="flex flex-col items-center justify-center mt-10">
+                    <p class="text-xl font-medium text-gray-500">
+                        Escritorio
+                    </p>
+                </div>
+        </div>
+    </AppLayout>
 </template>

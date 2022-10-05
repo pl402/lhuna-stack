@@ -1,12 +1,12 @@
-# Programa de Desarrollo Institucional (PDI)
+# Sistema de sistema (Sys)
 
 <p align="center">
-    <img src="resources/img/logo.png" alt="Logo PDI" width="200"/>
+    <img src="resources/img/logo.png" alt="Logo SiP" width="200"/>
 </p>
 
 ## Descripción
 
-Programa de Desarrollo Institucional (PDI) es un sistema de seguimiento del proyecto de desarrollo institucional, asi como una herramienta para la medición de los resultados de los proyectos de desarrollo institucional, enfocado pero no limitado al ámbito publico.
+Descripción del sistema
 
 ## Requisitos
 
@@ -19,13 +19,13 @@ Programa de Desarrollo Institucional (PDI) es un sistema de seguimiento del proy
 1. Clonar este repositorio:
 
     ```
-    $ git clone git@github.com:pl402/pdi.git
+    $ git clone git@github.com:pl402/sistema.git
     ```
 
 2. Entrar en el directorio del repositorio:
 
     ```
-    $ cd pdi
+    $ cd sistema
     ```
 
 3. Instalar dependencias:
@@ -41,9 +41,10 @@ Programa de Desarrollo Institucional (PDI) es un sistema de seguimiento del proy
 
     ```
     $ mysql -u root -p
-    mysql> create database pdi;
-    mysql> grant all on pdi.* to usuario@localhost identified by 'password';
-    mysql> quit
+    mysql> CREATE DATABASE sistema;
+    mysql> CREATE USER 'sistema'@'localhost' IDENTIFIED BY 'C0n7r4s3ña!';
+    mysql> GRANT ALL ON *.* TO 'sistema'@'localhost' WITH GRANT OPTION;
+    mysql> QUIT
     ```
 
 2. Configurar variables de entorno:
@@ -57,9 +58,9 @@ Programa de Desarrollo Institucional (PDI) es un sistema de seguimiento del proy
         DB_CONNECTION=mysql
         DB_HOST=127.0.0.1
         DB_PORT=3306
-        DB_DATABASE=pdi
+        DB_DATABASE=sistema
         DB_USERNAME=usuario
-        DB_PASSWORD=password
+        DB_PASSWORD=C0n7r4s3ña!
         ```
     3. Generar clave de encriptación de la aplicación:
 
@@ -92,3 +93,46 @@ Programa de Desarrollo Institucional (PDI) es un sistema de seguimiento del proy
     ```
     $ npm run production
     ```
+
+6. Una vez instalado, ejecute el siguiente comando para ejecutar en segundo plano el demonio de la cola de tareas:
+
+    ```
+    $ nohup php artisan queue:work &
+    ```
+
+7. Se recomienda crear un servicio para ejecutar el demonio de la cola de tareas (ejemplo para Ubuntu, systemd):
+
+    1. Abrir o crear archivo `sistema-queue.service` en `/etc/systemd/system`
+
+        ```
+        $ sudo nano /etc/systemd/system/sistema-queue.service
+        ```
+
+    2. Copiar el siguiente contenido:
+
+        ```
+        [Unit]
+        Description=sistema Queue Worker
+        After=network.target
+
+        # Cambiar la ruta de /usr/bin/php por la ruta de su instalación de php y
+        # la ruta de /var/www/er por la ruta de su instalación del proyecto (laravel)
+        [Service]
+        User=www-data
+        Group=www-data
+        WorkingDirectory=/var/www/sistema
+        ExecStart=/usr/bin/php /var/www/sistema/artisan queue:work --sleep=3 --tries=3
+        Restart=always
+
+        [Install]
+        WantedBy=multi-user.target
+        ```
+
+    3. Guardar y cerrar el archivo
+
+    4. Habilitar el servicio
+
+        ```
+        $ sudo systemctl start sistema-queue
+        $ sudo systemctl enable sistema-queue
+        ```

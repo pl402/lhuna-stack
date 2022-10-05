@@ -27,6 +27,9 @@
          $ancestros[] = $actual->nombre;
      }
      
+     // Revertir el orden de los ancestros
+     $ancestros = array_reverse($ancestros);
+     
      $primeraLinea = $configuraciones->where('clave', 'Reporte / Titulo / Primera Línea')->first();
      $segundaLinea = $configuraciones->where('clave', 'Reporte / Titulo / Segunda Línea')->first();
      $terceraLinea = $configuraciones->where('clave', 'Reporte / Titulo / Tercera Línea')->first();
@@ -36,7 +39,7 @@
 
  <head>
      <meta charset="UTF-8" />
-     <title>Reporte Anexo {{ $anexo->clave }}</title>
+     <title>Reporte Header</title>
      <style>
          {{ $css }}
 
@@ -64,15 +67,14 @@
      <div class="w-full">
          <table class="w-full whitespace-no-wrap m-0 p-0">
              <tr>
-                 <td rowspan="4" class="w-24 m-0 p-0">
+                 <td rowspan="5" class="w-24 m-0 p-0">
                      <img src="{{ public_path($logoIzquierda->valor) }}" alt="Logo" class="w-24 m-0 p-0 mb-2">
                  </td>
                  <td colspan='2' class="text-sm font-bold text-center m-0 p-0">
                      {{ $primeraLinea->valor }}
                  </td>
-                 <td rowspan="4" class="w-24 m-0 p-0 text-right">
-                     <img src="{{ public_path($logoDerecha->valor) }}" alt="Logo"
-                         class="w-24 m-0 p-0 mb-2 ml-auto">
+                 <td rowspan="5" class="w-24 m-0 p-0 text-right">
+                     <img src="{{ public_path($logoDerecha->valor) }}" alt="Logo" class="w-24 m-0 p-0 mb-2 ml-auto">
                  </td>
              </tr>
              <tr>
@@ -93,18 +95,12 @@
                  </td>
              </tr>
              <tr>
-                 <td colspan='2' class="text-sm text-left pb-2"><span class="font-bold">ANEXO:
-                     </span>{{ $anexo->numero }} /
-                     {{ $anexo->clave }} /
-                     {{ $anexo->nombre }}
-                 </td>
-                 <td colspan='2' class="text-sm text-right pb-2"><span class="font-bold">{{ $entrega->tipo }}:
-                     </span>
-                     {{ $meses[$entrega->mes] }} /
-                     {{ $entrega->anio }}
+                 <td colspan='2' class="text-sm font-semibold text-center">
+                     PDI - {{ $pdi->nombre }}
                  </td>
              </tr>
          </table>
+         <br />
      </div>
  </body>
 

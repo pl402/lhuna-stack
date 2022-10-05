@@ -13,16 +13,19 @@ class TablaReportes extends Migration
      */
     public function up()
     {
-        // Crea tabla de reportes con los campos: id, uuid, anexo_id, entrega_id, user_id, titulo, estatus, archivo, created_at, updated_at
-        Schema::create('reportes', function (Blueprint $table) {
+        // Crea tabla de reportes con los campos: id, uuid, proyecto_uuid, area_id, user_id, titulo, estatus, archivo, created_at, updated_at
+        Schema::create("reportes", function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->unique()->default(DB::raw('(UUID())'));
-            $table->unsignedBigInteger('entrega_id');
-            $table->unsignedBigInteger('anexo_id')->nullable();
-            $table->unsignedBigInteger('user_id');
-            $table->string('titulo');
-            $table->string('estatus')->default('Generando');
-            $table->string('archivo')->nullable();
+            $table
+                ->uuid("uuid")
+                ->unique()
+                ->default(DB::raw("(UUID())"));
+            $table->uuid("proyecto_uuid");
+            $table->unsignedBigInteger("area_id")->nullable();
+            $table->unsignedBigInteger("user_id");
+            $table->string("titulo");
+            $table->string("estatus")->default("Generando");
+            $table->string("archivo")->nullable();
             $table->timestamps();
         });
     }
@@ -35,6 +38,6 @@ class TablaReportes extends Migration
     public function down()
     {
         //
-        Schema::dropIfExists('reportes');
+        Schema::dropIfExists("reportes");
     }
 }

@@ -18,14 +18,6 @@
          '12' => 'Diciembre',
      ];
      
-     $actual = $area;
-     $ancestros = [];
-     $ancestros[] = $actual->nombre;
-     
-     while ($actual->ancestry) {
-         $actual = $actual->ancestry;
-         $ancestros[] = $actual->nombre;
-     }
      $fecha = date('j') . ' de ' . $meses[date('n')] . ' del ' . date('Y') . ' a las ' . date('H:i:s');
      
      $nombreContra = $configuraciones->where('clave', 'Reporte / Firma / Nombre Contralor(a)')->first();
@@ -35,7 +27,7 @@
 
  <head>
      <meta charset="UTF-8" />
-     <title>Reporte Anexo {{ $anexo->clave }}</title>
+     <title>Reporte Footer</title>
      <style>
          {{ $css }}
 
@@ -70,6 +62,14 @@
              width: 33%;
          }
 
+         .w40 {
+             width: 40%;
+         }
+
+         .w20 {
+             width: 20%;
+         }
+
          .footer_footer {
              vertical-align: bottom;
              font-size: 7pt;
@@ -81,71 +81,76 @@
  <body>
      <div class="w-full">
          <table class="w-full whitespace-no-wrap m-0 p-0">
-             @if ($entrega->tipo == 'Entrega')
+             @if (true)
                  <tr>
-                     <td class="wtercio text-center">
+                     <td class="w40 text-center text-xs">
+                         Reportó
+                     </td>
+                     <td class="w20 text-center text-xs">
+
+                     </td>
+                     <td class="w40 text-center text-xs">
+                         Revisó
+                     </td>
+                 </tr>
+                 <tr>
+                     <td class="w40 text-center">
                          <div class="firma_linea"></div>
                      </td>
-                     <td class="wtercio text-center">
-                         <div class="firma_linea"></div>
+                     <td class="w20 text-center">
+
                      </td>
-                     <td class="wtercio text-center">
+                     <td class="w40 text-center">
                          <div class="firma_linea"></div>
                      </td>
                  </tr>
                  <tr>
-                     <td class="wtercio text-center text-sm">
-                         <div class="font-bold">{{ $entrega->titular->name }}</div>
-                         <div class="text-sm">{{ $entrega->cargo_titular }}</div>
+                     <td class="w40 text-center text-sm">
+                         <div class="font-bold">{{ $area->enlace ? $area->enlace->titulo : '' }}
+                             {{ $area->enlace ? $area->enlace->name : '--' }}</div>
+                         <div class="text-sm">
+                             {{ $area->enlace_cargo && $area->enlace_cargo != '' ? $area->enlace_cargo : '-' }}</div>
+                         <div class="text-xs">Enlace</div>
                      </td>
-                     <td class="wtercio text-center text-sm">
-                         <div class="font-bold">{{ $nombreContra->valor }}</div>
-                         <div class="text-sm">{{ $cargoContra->valor }}</div>
-                         <div class="text-xs">{{ $leyendaContra->valor }}</div>
+                     <td class="w20 text-center text-sm">
+
                      </td>
-                     <td class="wtercio text-center text-sm">
-                         <div class="font-bold">{{ $entrega->receptor->name }}</div>
-                         <div class="text-sm">{{ $entrega->cargo_receptor }}</div>
+                     <td class="w40 text-center text-sm">
+                         <div class="font-bold">{{ $area->titular ? $area->titular->titulo : '' }}
+                             {{ $area->titular ? $area->titular->name : '--' }}</div>
+                         <div class="text-sm">
+                             {{ $area->titular_cargo && $area->titular_cargo != '' ? $area->titular_cargo : '-' }}</div>
+                         <div class="text-xs">Revisó</div>
                      </td>
                  </tr>
              @else
                  <tr>
-                     <td class="wtercio text-center">
+                     <td class="w40 text-center">
                      </td>
-                     <td class="wtercio text-center">
+                     <td class="w20 text-center">
                          <div class="firma_linea"></div>
                      </td>
-                     <td class="wtercio text-center">
+                     <td class="w40 text-center">
                      </td>
                  </tr>
                  <tr>
-                     <td class="wtercio text-center text-sm">
+                     <td class="w40 text-center text-sm">
                          <div class="font-bold"></div>
                          <div class="text-sm"></div>
+                         <div class="text-xs"></div>
                      </td>
-                     <td class="wtercio text-center text-sm">
-                         <div class="font-bold">{{ $entrega->titular->name }}</div>
-                         <div class="text-sm">{{ $entrega->cargo_titular }}</div>
+                     <td class="w20 text-center text-sm">
+                         <div class="font-bold"> </div>
+                         <div class="text-sm"> </div>
                          <div class="text-xs">RESPONSALBE DE INFORMACIÓN</div>
                      </td>
-                     <td class="wtercio text-center text-sm">
+                     <td class="w40 text-center text-sm">
                          <div class="font-bold"></div>
                          <div class="text-sm"></div>
+                         <div class="text-xs"></div>
                      </td>
                  </tr>
              @endif
-             <tr>
-                 <td class="wtercio text-left text-xs footer_footer">
-                     <br />
-                     Página:
-                 </td>
-                 <td class="wtercio text-center text-xs footer_footer">
-                     Generado el {{ $fecha }}
-                 </td>
-                 <td class="wtercio text-right text-xs footer_footer">
-                     Sistema Entrega Recepción
-                 </td>
-             </tr>
          </table>
      </div>
  </body>

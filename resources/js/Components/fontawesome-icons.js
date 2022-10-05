@@ -26,7 +26,22 @@ import {
     faGears,
     faFileArrowDown,
     faClone,
+    faMaximize,
+    faArrowTrendUp,
+    faListCheck,
+    faStar,
+    faBuildingColumns,
+    faFileWord,
+    faFileExcel,
+    faFilePowerpoint,
+    faFileImage,
+    faFileArchive,
+    faFileAudio,
+    faFileVideo,
+    faFile,
+    faExclamationTriangle,
 } from "@fortawesome/free-solid-svg-icons";
+
 
 library.add(
     faAngleLeft,
@@ -53,7 +68,21 @@ library.add(
     faCircleCheck,
     faGears,
     faFileArrowDown,
-    faClone
+    faClone,
+    faMaximize,
+    faArrowTrendUp,
+    faListCheck,
+    faStar,
+    faBuildingColumns,
+    faFileWord,
+    faFileExcel,
+    faFilePowerpoint,
+    faFileImage,
+    faFileArchive,
+    faFileAudio,
+    faFileVideo,
+    faFile,
+    faExclamationTriangle
 );
 
 export default FontAwesomeIcon;

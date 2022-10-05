@@ -3,7 +3,7 @@ require('./bootstrap');
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/inertia-vue3';
 import { InertiaProgress } from '@inertiajs/progress';
-import FontAwesomeIcon from "./Components/fontawesome-icons";
+import FontAwesomeIcon from "@/Components/fontawesome-icons";
 import Notifications from 'notiwind';
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Entrega Recepción';

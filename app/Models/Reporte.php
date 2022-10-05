@@ -10,41 +10,44 @@ class Reporte extends Model
     use HasFactory;
 
     protected $fillable = [
-        'anexo_id',
-        'entrega_id',
-        'user_id',
-        'titulo',
-        'estatus',
-        'archivo',
+        "proyecto_uuid",
+        "area_id",
+        "user_id",
+        "titulo",
+        "estatus",
+        "archivo",
     ];
 
     public function scopeFiltros($query, array $filtros)
     {
-        $query->when($filtros['titulo'] ?? null, function ($query, $titulo) {
-            return $query->where('titulo', $titulo);
-        })->when($filtros['estatus'] ?? null, function ($query, $estatus) {
-            return $query->where('estatus', $estatus);
-        })->when($filtros['id'] ?? null, function ($query, $id) {
-            return $query->where('id', $id);
-        });
+        $query
+            ->when($filtros["titulo"] ?? null, function ($query, $titulo) {
+                return $query->where("titulo", $titulo);
+            })
+            ->when($filtros["estatus"] ?? null, function ($query, $estatus) {
+                return $query->where("estatus", $estatus);
+            })
+            ->when($filtros["id"] ?? null, function ($query, $id) {
+                return $query->where("id", $id);
+            });
     }
 
     public function scopeFiltro($query, $key)
     {
-        return $query->orWhere('titulo', 'LIKE', "%{$key}%")
-                ->orWhere('estatus', 'LIKE', "%{$key}%")
-                ->orWhere('id', 'LIKE', "%{$key}%");
+        return $query
+            ->orWhere("titulo", "LIKE", "%{$key}%")
+            ->orWhere("estatus", "LIKE", "%{$key}%")
+            ->orWhere("id", "LIKE", "%{$key}%");
     }
 
-
-    public function anexo()
+    public function area()
     {
-        return $this->belongsTo(Anexo::class);
+        return $this->belongsTo(Area::class);
     }
 
-    public function entrega()
+    public function proyecto()
     {
-        return $this->belongsTo(Entrega::class);
+        return $this->belongsTo(Proyecto::class, "proyecto_uuid", "uuid");
     }
 
     public function user()

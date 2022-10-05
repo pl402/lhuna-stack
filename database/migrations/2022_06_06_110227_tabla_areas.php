@@ -13,12 +13,16 @@ class TablaAreas extends Migration
      */
     public function up()
     {
-        Schema::create('areas', function (Blueprint $table) {
+        Schema::create("areas", function (Blueprint $table) {
             $table->id();
-            $table->string('nombre');
-            $table->string('descripcion')->nullable();
-            $table->string('estatus', 50)->default('Activo');
-            $table->integer('area_padre')->nullable();
+            $table->string("nombre");
+            $table->string("descripcion")->nullable();
+            $table->string("estatus", 50)->default("Activo");
+            $table->integer("area_padre")->nullable();
+            $table->unsignedBigInteger("enlace_id")->nullable();
+            $table->string("enlace_cargo")->nullable();
+            $table->unsignedBigInteger("titular_id")->nullable();
+            $table->string("titular_cargo")->nullable();
             $table->timestamps();
         });
     }
@@ -31,6 +35,6 @@ class TablaAreas extends Migration
     public function down()
     {
         //
-        Schema::dropIfExists('areas');
+        Schema::dropIfExists("areas");
     }
 }
