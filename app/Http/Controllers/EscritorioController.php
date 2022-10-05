@@ -9,5 +9,9 @@ use Inertia\Inertia;
 
 class EscritorioController extends Controller
 {
-   
+    // Pagina principal
+    public function index()
+    {
+        return Inertia::render("Escritorio");
+    }
 }

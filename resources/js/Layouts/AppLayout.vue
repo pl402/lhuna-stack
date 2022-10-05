@@ -98,17 +98,6 @@ const menu = [
             usePage().props.value.auth.roles[0] === "Contraloría",
     },
     {
-        name: "PDI",
-        href: route("pdis.index"),
-        active:
-            route().current("pdis.index") ||
-            route().current("pdis.search") ||
-            route().current("pdis"),
-        show:
-            usePage().props.value.auth.roles[0] === "Administrador" ||
-            usePage().props.value.auth.roles[0] === "Contraloría",
-    },
-    {
         name: "Configuraciones",
         href: route("configuraciones.index"),
         active:
@@ -597,7 +586,7 @@ const menu = [
                                 >© lhuna.dev - 2022</a
                             >
                         </div>
-                        <div>Sistema PDI</div>
+                        <div>Lhuna Stack</div>
                     </div>
                 </div>
             </footer>

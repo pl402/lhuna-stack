@@ -1,12 +1,12 @@
-# Sistema de sistema (Sys)
+# Lhuna Stack
 
 <p align="center">
-    <img src="resources/img/logo.png" alt="Logo SiP" width="200"/>
+    <img src="resources/img/logo.png" alt="Logo LS" width="200"/>
 </p>
 
 ## Descripción
 
-Descripción del sistema
+Descripción del lhuna_stack
 
 ## Requisitos
 
@@ -19,13 +19,13 @@ Descripción del sistema
 1. Clonar este repositorio:
 
     ```
-    $ git clone git@github.com:pl402/sistema.git
+    $ git clone git@github.com:pl402/lhuna-stack.git
     ```
 
 2. Entrar en el directorio del repositorio:
 
     ```
-    $ cd sistema
+    $ cd lhuna-stack
     ```
 
 3. Instalar dependencias:
@@ -41,9 +41,9 @@ Descripción del sistema
 
     ```
     $ mysql -u root -p
-    mysql> CREATE DATABASE sistema;
-    mysql> CREATE USER 'sistema'@'localhost' IDENTIFIED BY 'C0n7r4s3ña!';
-    mysql> GRANT ALL ON *.* TO 'sistema'@'localhost' WITH GRANT OPTION;
+    mysql> CREATE DATABASE lhuna-stack;
+    mysql> CREATE USER 'lhuna-stack'@'localhost' IDENTIFIED BY 'C0n7r4s3ña!';
+    mysql> GRANT ALL ON *.* TO 'lhuna-stack'@'localhost' WITH GRANT OPTION;
     mysql> QUIT
     ```
 
@@ -58,8 +58,8 @@ Descripción del sistema
         DB_CONNECTION=mysql
         DB_HOST=127.0.0.1
         DB_PORT=3306
-        DB_DATABASE=sistema
-        DB_USERNAME=usuario
+        DB_DATABASE=lhuna-stack
+        DB_USERNAME=lhuna-stack
         DB_PASSWORD=C0n7r4s3ña!
         ```
     3. Generar clave de encriptación de la aplicación:
@@ -102,17 +102,17 @@ Descripción del sistema
 
 7. Se recomienda crear un servicio para ejecutar el demonio de la cola de tareas (ejemplo para Ubuntu, systemd):
 
-    1. Abrir o crear archivo `sistema-queue.service` en `/etc/systemd/system`
+    1. Abrir o crear archivo `lhuna-stack-queue.service` en `/etc/systemd/system`
 
         ```
-        $ sudo nano /etc/systemd/system/sistema-queue.service
+        $ sudo nano /etc/systemd/system/lhuna-stack-queue.service
         ```
 
     2. Copiar el siguiente contenido:
 
         ```
         [Unit]
-        Description=sistema Queue Worker
+        Description=Lhuna Stack Queue Worker
         After=network.target
 
         # Cambiar la ruta de /usr/bin/php por la ruta de su instalación de php y
@@ -120,8 +120,8 @@ Descripción del sistema
         [Service]
         User=www-data
         Group=www-data
-        WorkingDirectory=/var/www/sistema
-        ExecStart=/usr/bin/php /var/www/sistema/artisan queue:work --sleep=3 --tries=3
+        WorkingDirectory=/var/www/lhuna-stack
+        ExecStart=/usr/bin/php /var/www/lhuna-stack/artisan queue:work --sleep=3 --tries=3
         Restart=always
 
         [Install]
@@ -133,6 +133,6 @@ Descripción del sistema
     4. Habilitar el servicio
 
         ```
-        $ sudo systemctl start sistema-queue
-        $ sudo systemctl enable sistema-queue
+        $ sudo systemctl start lhuna-stack-queue
+        $ sudo systemctl enable lhuna-stack-queue
         ```
