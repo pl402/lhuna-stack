@@ -51,7 +51,7 @@ defineExpose({ focus: () => autocomplete.value.focus() });
     <Combobox v-model="modelValue" @update:modelValue="onChange">
         <div class="relative mt-1">
             <ComboboxInput
-                class="border-zinc-400 focus:border-zinc-400 focus:ring focus:ring-zinc-400 focus:ring-opacity-50 rounded-2xl shadow-sm w-full disabled:text-zinc-500"
+                class="border-zinc-400 focus:border-zinc-400 focus:ring focus:ring-zinc-400 focus:ring-opacity-50 rounded-md shadow-sm w-full disabled:text-zinc-500"
                 :displayValue="(opcion) => opcion.name"
                 :class="(opcion) => (opcion.name === '' ? 'text-zinc-400' : '')"
                 @change="query = $event.target.value"
@@ -77,7 +77,7 @@ defineExpose({ focus: () => autocomplete.value.focus() });
                 leave-to-class="transform opacity-0 scale-95"
             >
                 <ComboboxOptions
-                    class="absolute mt-1 max-h-60 w-full overflow-auto rounded-2xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm z-50"
+                    class="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm z-50"
                 >
                     <div
                         v-if="filteredOpcion.length === 0 && query !== ''"
