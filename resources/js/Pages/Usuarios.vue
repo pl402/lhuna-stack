@@ -1,6 +1,6 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
-import { useForm } from "@inertiajs/inertia-vue3";
+import { useForm } from "@inertiajs/vue3";
 import { reactive, ref, toRefs } from "vue";
 import JetDialogModal from "@/Jetstream/DialogModal";
 import JetInput from "@/Jetstream/Input.vue";
@@ -92,40 +92,13 @@ let roles = [
         name: "Administrador",
     },
     {
-        name: "Contraloría",
-    },
-    {
-        name: "Jefe de Área",
-    },
-    {
-        name: "Enlace",
+        name: "Usuario",
     },
 ];
 
-if (!isAdmin()) {
-    roles = [
-        {
-            name: "Administrador",
-            disabled: true,
-        },
-        {
-            name: "Contraloría",
-            disabled: true,
-        },
-        {
-            name: "Jefe de Área",
-        },
-        {
-            name: "Enlace",
-        },
-    ];
-}
-
 const bg_color = {
     Administrador: "bg-red-600",
-    Contraloría: "bg-orange-600",
-    "Jefe de Área": "bg-blue-700",
-    Enlace: "bg-blue-500",
+    Usuario: "bg-orange-600",
 };
 
 const nuevoUsuarioDo = () => {
@@ -133,6 +106,7 @@ const nuevoUsuarioDo = () => {
     error.titulo = "";
     error.email = "";
     error.password = "";
+    idActual.value = null;
     form.post(route("usuarios.store"), {
         preserveScroll: true,
         onSuccess: (rest) => {
@@ -391,11 +365,7 @@ const borraUsuarioDo = () => {
                         v-if="accion === 'edit'"
                         @click="estadoModalEliminaUsuario = true"
                         class="-mt-1 float-right"
-                        :disabled="
-                            $page.props.auth.roles[0] === 'Contraloría' &&
-                            (form.rol === 'Administrador' ||
-                                form.rol === 'Contraloría')
-                        "
+                        :disabled="idActual === 1 || form.processing"
                     >
                         <font-awesome-icon icon="trash" class="mr-2" />
                         Eliminar Usuario
@@ -435,7 +405,6 @@ const borraUsuarioDo = () => {
                             type="text"
                             class="mt-1 block w-full"
                             required
-                            autofocus
                         />
 
                         <JetInputError :message="error.titulo" class="mt-2" />
@@ -486,6 +455,7 @@ const borraUsuarioDo = () => {
                             class="mt-1 block w-full"
                             required
                             :options="roles"
+                            :disabled="idActual === 1"
                         />
                         <JetInputError :message="error.rol" class="mt-2" />
                     </label>
@@ -520,13 +490,7 @@ const borraUsuarioDo = () => {
                             @click="editaUsuarioDo"
                             :class="{ 'opacity-25': form.processing }"
                             class="float-right"
-                            :disabled="
-                                ((form.rol === 'Administrador' ||
-                                    form.rol === 'Contraloría') &&
-                                    $page.props.auth.roles[0] ===
-                                        'Contraloría') ||
-                                form.processing
-                            "
+                            :disabled="form.processing"
                         >
                             <font-awesome-icon
                                 icon="floppy-disk"

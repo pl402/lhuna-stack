@@ -40,6 +40,8 @@ import {
     faFileVideo,
     faFile,
     faExclamationTriangle,
+    faMagnifyingGlass,
+    faSpinner,
 } from "@fortawesome/free-solid-svg-icons";
 
 
@@ -82,7 +84,9 @@ library.add(
     faFileAudio,
     faFileVideo,
     faFile,
-    faExclamationTriangle
+    faExclamationTriangle,
+    faMagnifyingGlass,
+    faSpinner
 );
 
 export default FontAwesomeIcon;

@@ -21,61 +21,31 @@ class DatabaseSeeder extends Seeder
     {
         //
         $admin = Role::create(["name" => "Administrador"]);
-        $contraloria = Role::create(["name" => "Contraloría"]);
-        $jefeArea = Role::create(["name" => "Jefe de Área"]);
-        $enlace = Role::create(["name" => "Enlace"]);
-        
+        $usuario = Role::create(["name" => "Usuario"]);
+
         //Permisos Usuarios
         Permission::create(["name" => "usuarios.index"]);
         Permission::create(["name" => "usuarios.store"]);
         Permission::create(["name" => "usuarios.update"]);
         Permission::create(["name" => "usuarios.destroy"]);
-        //Permisos Areas
-        Permission::create(["name" => "areas.index"]);
-        Permission::create(["name" => "areas.store"]);
-        Permission::create(["name" => "areas.update"]);
-        Permission::create(["name" => "areas.destroy"]);
+
         //Permisos Configuraciones
         Permission::create(["name" => "configuraciones.index"]);
         Permission::create(["name" => "configuraciones.store"]);
         Permission::create(["name" => "configuraciones.update"]);
         Permission::create(["name" => "configuraciones.destroy"]);
-        //Permisos Reportes
-        Permission::create(["name" => "reportes.index"]);
-        Permission::create(["name" => "reportes.store"]);
-        Permission::create(["name" => "reportes.update"]);
-        Permission::create(["name" => "reportes.destroy"]);
-     
+
         //Permisos de Administrador a Usuarios
         $admin->givePermissionTo("usuarios.index");
         $admin->givePermissionTo("usuarios.store");
         $admin->givePermissionTo("usuarios.update");
         $admin->givePermissionTo("usuarios.destroy");
-        //Permisos de Administrador a Areas
-        $admin->givePermissionTo("areas.index");
-        $admin->givePermissionTo("areas.store");
-        $admin->givePermissionTo("areas.update");
-        $admin->givePermissionTo("areas.destroy");
+
         //Permisos de Administrador a Configuraciones
         $admin->givePermissionTo("configuraciones.index");
         $admin->givePermissionTo("configuraciones.store");
         $admin->givePermissionTo("configuraciones.update");
         $admin->givePermissionTo("configuraciones.destroy");
-        //Permisos de Administrador a Reportes
-        $admin->givePermissionTo("reportes.index");
-        $admin->givePermissionTo("reportes.store");
-        $admin->givePermissionTo("reportes.update");
-        $admin->givePermissionTo("reportes.destroy");
-
-        //Permisos de Contraloría a Usuarios
-        $contraloria->givePermissionTo("usuarios.index");
-        $contraloria->givePermissionTo("usuarios.store");
-        $contraloria->givePermissionTo("usuarios.update");
-        //Permisos de Contraloria a Usuarios
-        $contraloria->givePermissionTo("reportes.index");
-        $contraloria->givePermissionTo("reportes.store");
-        $contraloria->givePermissionTo("reportes.update");
-        $contraloria->givePermissionTo("reportes.destroy");
 
         // Crea usuario administrador
         $user = new User();
@@ -85,68 +55,18 @@ class DatabaseSeeder extends Seeder
         $user->save();
         $user->assignRole($admin);
 
-        // Crea usuario enlace
-        $user = new User();
-        $user->name = "Enlace del Sistema";
-        $user->email = "enlace@correo.com";
-        $user->password = bcrypt("enlace2022");
-        $user->save();
-        $user->assignRole($enlace);
-
+        // Configuración logo Login
         $configuracion = new Configuracion();
-        $configuracion->clave = "Reporte / Titulo / Primera Línea";
-        $configuracion->valor = "PODER LEGISLATIVO";
-        $configuracion->tipo = "Texto";
-        $configuracion->save();
-
-        $configuracion = new Configuracion();
-        $configuracion->clave = "Reporte / Titulo / Segunda Línea";
-        $configuracion->valor = "H. CONGRESO DEL ESTADO DE NAYARIT";
-        $configuracion->tipo = "Texto";
-        $configuracion->save();
-
-        $configuracion = new Configuracion();
-        $configuracion->clave = "Reporte / Titulo / Tercera Línea";
-        $configuracion->tipo = "Texto";
-        $configuracion->valor = "XXXIII LEGISLATURA";
-        $configuracion->save();
-
-        $configuracion = new Configuracion();
-        $configuracion->clave = "Reporte / Logo / Izquierda";
-        $configuracion->tipo = "Imagen";
-        $configuracion->valor = "/img/logo_doc.png";
-        $configuracion->save();
-
-        $configuracion = new Configuracion();
-        $configuracion->clave = "Reporte / Logo / Derecha";
+        $configuracion->clave = "Acceso / Logo";
         $configuracion->tipo = "Imagen";
         $configuracion->valor = "/img/logo.png";
         $configuracion->save();
 
+        // Configuración logo Navbar
         $configuracion = new Configuracion();
-        $configuracion->clave = "Reporte / Firma / Nombre Contralor(a)";
-        $configuracion->tipo = "Texto";
-        $configuracion->valor = "Salma Judith Sepúlveda López";
-        $configuracion->save();
-
-        $configuracion = new Configuracion();
-        $configuracion->clave = "Reporte / Firma / Cargo Contralor(a)";
-        $configuracion->tipo = "Texto";
-        $configuracion->valor =
-            "Contralora Interna del Congreso del Estado de Nayarit";
-        $configuracion->save();
-
-        $configuracion = new Configuracion();
-        $configuracion->clave = "Reporte / Firma / Leyenda Contralor(a)";
-        $configuracion->tipo = "Texto";
-        $configuracion->valor =
-            "Quien interviene para dar fe de la celebración del acto";
-        $configuracion->save();
-
-        $configuracion = new Configuracion();
-        $configuracion->clave = "Captura / Fecha Limite";
-        $configuracion->tipo = "Fecha";
-        $configuracion->valor = "2022-10-01";
+        $configuracion->clave = "Barra de Navegación / Logo";
+        $configuracion->tipo = "Imagen";
+        $configuracion->valor = "/img/logo-nav.png";
         $configuracion->save();
     }
 }

@@ -1,13 +1,13 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
-import { usePage, Link, useForm } from "@inertiajs/inertia-vue3";
+import { usePage, Link, useForm } from "@inertiajs/vue3";
 import { reactive, ref, watch, toRefs } from "vue";
 import JetDialogModal from "@/Jetstream/DialogModal";
 import JetInput from "@/Jetstream/Input.vue";
 import JetLabel from "@/Jetstream/Label.vue";
 import JetButton from "@/Jetstream/Button.vue";
 import Tabla from "@/Components/Tabla.vue";
-import { Inertia } from "@inertiajs/inertia";
+import { router } from "@inertiajs/vue3";
 import Paginador from "@/Components/Paginador.vue";
 import { notify } from "notiwind";
 import JetInputError from "@/Jetstream/InputError.vue";

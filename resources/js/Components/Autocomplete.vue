@@ -18,11 +18,15 @@ const props = defineProps({
 });
 
 var modelValue = ref(props.modelValue);
+var options = ref(props.options);
 var selected = ref(props.modelValue);
 
-if (!props.modelValue) {
-    props.modelValue.value = "";
-    props.modelValue.name = "";
+if (!modelValue.value) {
+    // Agrega un valor vacio para que se pueda seleccionar
+    options.value.unshift({ name: "", value: "", disabled: true });
+
+    // Selecciona el valor vacio
+    modelValue.value = options.value[0];
 }
 
 const emit = defineEmits(["update:modelValue"]);
@@ -32,8 +36,8 @@ let query = ref("");
 
 let filteredOpcion = computed(() =>
     query.value === ""
-        ? props.options
-        : props.options.filter((opcion) =>
+        ? options.value
+        : options.value.filter((opcion) =>
               opcion.name
                   .toLowerCase()
                   .replace(/\s+/g, "")
@@ -51,9 +55,11 @@ defineExpose({ focus: () => autocomplete.value.focus() });
     <Combobox v-model="modelValue" @update:modelValue="onChange">
         <div class="relative mt-1">
             <ComboboxInput
-                class="border-zinc-400 focus:border-zinc-400 focus:ring focus:ring-zinc-400 focus:ring-opacity-50 rounded-md shadow-sm w-full disabled:text-zinc-500"
+                class="border-slate-400 focus:border-slate-400 focus:ring focus:ring-slate-400 focus:ring-opacity-50 rounded-md shadow-sm w-full disabled:text-slate-500"
                 :displayValue="(opcion) => opcion.name"
-                :class="(opcion) => (opcion.name === '' ? 'text-zinc-400' : '')"
+                :class="
+                    (opcion) => (opcion.name === '' ? 'text-slate-400' : '')
+                "
                 @change="query = $event.target.value"
                 :placeholder="props.placeholder"
                 :disabled="props.disabled"
@@ -63,7 +69,7 @@ defineExpose({ focus: () => autocomplete.value.focus() });
                 :disabled="props.disabled"
             >
                 <SelectorIcon
-                    class="h-5 w-5 text-zinc-400"
+                    class="h-5 w-5 text-slate-400"
                     aria-hidden="true"
                 />
             </ComboboxButton>
@@ -81,7 +87,7 @@ defineExpose({ focus: () => autocomplete.value.focus() });
                 >
                     <div
                         v-if="filteredOpcion.length === 0 && query !== ''"
-                        class="relative cursor-default select-none py-2 px-4 text-zinc-400"
+                        class="relative cursor-default select-none py-2 px-4 text-slate-400"
                     >
                         Sin resultados
                     </div>
@@ -96,8 +102,8 @@ defineExpose({ focus: () => autocomplete.value.focus() });
                         <li
                             class="relative cursor-default select-none py-2 pl-10 pr-4"
                             :class="{
-                                'bg-zinc-600 text-white': active,
-                                'text-zinc-900': !active,
+                                'bg-slate-600 text-white': active,
+                                'text-slate-900': !active,
                             }"
                         >
                             <span
@@ -114,7 +120,7 @@ defineExpose({ focus: () => autocomplete.value.focus() });
                                 class="absolute inset-y-0 left-0 flex items-center pl-3"
                                 :class="{
                                     'text-white': active,
-                                    'text-zinc-600': !active,
+                                    'text-slate-600': !active,
                                 }"
                             >
                                 <CheckIcon class="h-5 w-5" aria-hidden="true" />

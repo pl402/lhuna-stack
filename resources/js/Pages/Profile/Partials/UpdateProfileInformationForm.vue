@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from "vue";
-import { Inertia } from "@inertiajs/inertia";
-import { Link, useForm } from "@inertiajs/inertia-vue3";
+import { router } from "@inertiajs/vue3";
+import { Link, useForm } from "@inertiajs/vue3";
 import JetButton from "@/Jetstream/Button.vue";
 import JetFormSection from "@/Jetstream/FormSection.vue";
 import JetInput from "@/Jetstream/Input.vue";
@@ -60,7 +60,7 @@ const updatePhotoPreview = () => {
 };
 
 const deletePhoto = () => {
-    Inertia.delete(route("current-user-photo.destroy"), {
+    router.delete(route("current-user-photo.destroy"), {
         preserveScroll: true,
         onSuccess: () => {
             photoPreview.value = null;
@@ -87,30 +87,53 @@ const clearPhotoFileInput = () => {
 
         <template #form>
             <!-- Profile Photo -->
-            <div v-if="$page.props.jetstream.managesProfilePhotos" class="col-span-6 sm:col-span-4">
+            <div
+                v-if="$page.props.jetstream.managesProfilePhotos"
+                class="col-span-6 sm:col-span-4"
+            >
                 <!-- Profile Photo File Input -->
-                <input ref="photoInput" type="file" class="hidden" @change="updatePhotoPreview" />
+                <input
+                    ref="photoInput"
+                    type="file"
+                    class="hidden"
+                    @change="updatePhotoPreview"
+                />
 
                 <JetLabel for="photo" value="Foto" />
 
                 <!-- Current Profile Photo -->
                 <div v-show="!photoPreview" class="mt-2">
-                    <img :src="user.profile_photo_url" :alt="user.name" class="rounded-full h-20 w-20 object-cover" />
+                    <img
+                        :src="user.profile_photo_url"
+                        :alt="user.name"
+                        class="rounded-full h-20 w-20 object-cover"
+                    />
                 </div>
 
                 <!-- New Profile Photo Preview -->
                 <div v-show="photoPreview" class="mt-2">
-                    <span class="block rounded-full w-20 h-20 bg-cover bg-no-repeat bg-center" :style="
-                        'background-image: url(\'' + photoPreview + '\');'
-                    " />
+                    <span
+                        class="block rounded-full w-20 h-20 bg-cover bg-no-repeat bg-center"
+                        :style="
+                            'background-image: url(\'' + photoPreview + '\');'
+                        "
+                    />
                 </div>
 
-                <JetSecondaryButton class="mt-2 mr-2" type="button" @click.prevent="selectNewPhoto">
+                <JetSecondaryButton
+                    class="mt-2 mr-2"
+                    type="button"
+                    @click.prevent="selectNewPhoto"
+                >
                     Seleccione una nueva foto
                 </JetSecondaryButton>
 
-                <JetSecondaryButton v-if="user.profile_photo_path" type="button" class="mt-2"
-                    @click.prevent="deletePhoto">
+                <JetSecondaryButton
+                    v-if="user.profile_photo_path"
+                    type="button"
+                    class="mt-2"
+                    @click.prevent="deletePhoto"
+                >
                     Eliminar foto
                 </JetSecondaryButton>
 
@@ -120,31 +143,52 @@ const clearPhotoFileInput = () => {
             <!-- Name -->
             <div class="col-span-6 sm:col-span-4">
                 <JetLabel for="name" value="Nombre" />
-                <JetInput id="name" v-model="form.name" type="text" class="mt-1 block w-full" autocomplete="name" />
+                <JetInput
+                    id="name"
+                    v-model="form.name"
+                    type="text"
+                    class="mt-1 block w-full"
+                    autocomplete="name"
+                />
                 <JetInputError :message="form.errors.name" class="mt-2" />
             </div>
 
             <!-- Email -->
             <div class="col-span-6 sm:col-span-4">
                 <JetLabel for="email" value="Email" />
-                <JetInput id="email" v-model="form.email" type="email" class="mt-1 block w-full" />
+                <JetInput
+                    id="email"
+                    v-model="form.email"
+                    type="email"
+                    class="mt-1 block w-full"
+                />
                 <JetInputError :message="form.errors.email" class="mt-2" />
 
-                <div v-if="
-                    $page.props.jetstream.hasEmailVerification &&
-                    user.email_verified_at === null
-                ">
+                <div
+                    v-if="
+                        $page.props.jetstream.hasEmailVerification &&
+                        user.email_verified_at === null
+                    "
+                >
                     <p class="text-sm mt-2">
                         Su dirección de correo electrónico no está verificada.
 
-                        <Link :href="route('verification.send')" method="post" as="button"
-                            class="underline text-gray-600 hover:text-gray-900" @click.prevent="sendEmailVerification">
-                        Haga clic aquí para volver a enviar el correo
-                        electrónico de verificación.
+                        <Link
+                            :href="route('verification.send')"
+                            method="post"
+                            as="button"
+                            class="underline text-gray-600 hover:text-gray-900"
+                            @click.prevent="sendEmailVerification"
+                        >
+                            Haga clic aquí para volver a enviar el correo
+                            electrónico de verificación.
                         </Link>
                     </p>
 
-                    <div v-show="verificationLinkSent" class="mt-2 font-medium text-sm text-green-600">
+                    <div
+                        v-show="verificationLinkSent"
+                        class="mt-2 font-medium text-sm text-green-600"
+                    >
                         Se ha enviado un nuevo enlace de verificación a su
                         dirección de correo electrónico..
                     </div>
@@ -157,7 +201,10 @@ const clearPhotoFileInput = () => {
                 Salvado.
             </JetActionMessage>
 
-            <JetButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+            <JetButton
+                :class="{ 'opacity-25': form.processing }"
+                :disabled="form.processing"
+            >
                 Guardar
             </JetButton>
         </template>

@@ -1,5 +1,5 @@
 <script setup>
-import { useForm } from "@inertiajs/inertia-vue3";
+import { useForm } from "@inertiajs/vue3";
 import { ref } from "vue";
 import JetButton from "@/Jetstream/Button.vue";
 import JetDropdown from "@/Jetstream/Dropdown.vue";

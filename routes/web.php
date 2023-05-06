@@ -48,23 +48,6 @@ Route::middleware([
         ])->name("usuarios.search");
     });
 
-    Route::group(["prefix" => "areas"], function () {
-        Route::get("/", [AreasController::class, "index"])->name("areas.index");
-        Route::post("/nuevo", [AreasController::class, "store"])->name(
-            "areas.store"
-        );
-        Route::post("/edita/{id}", [AreasController::class, "update"])->name(
-            "areas.update"
-        );
-        Route::post("/elimina/{id}", [AreasController::class, "destroy"])->name(
-            "areas.destroy"
-        );
-        Route::get("/buscar/{filtro}", [
-            AreasController::class,
-            "search",
-        ])->name("areas.search");
-    });
-
     Route::group(["prefix" => "configuraciones"], function () {
         Route::get("/", [ConfiguracionesController::class, "index"])->name(
             "configuraciones.index"
@@ -85,34 +68,5 @@ Route::middleware([
             ConfiguracionesController::class,
             "search",
         ])->name("configuraciones.search");
-    });
-
-    Route::group(["prefix" => "reportes"], function () {
-        Route::get("/", [ReportesController::class, "index"])->name(
-            "reportes.index"
-        );
-        Route::get("/buscar/{filtro}", [
-            ReportesController::class,
-            "search",
-        ])->name("reportes.search");
-        Route::get("/descarga/{uuid}", [
-            ReportesController::class,
-            "descarga",
-        ])->name("reportes.descarga");
-    });
-
-    Route::group(["prefix" => "/reporte/{uuid}/area/{id}"], function () {
-        Route::post("/genera", [ReportesController::class, "area"])->name(
-            "reportes.area"
-        );
-        Route::get("/", [ReportesController::class, "area_list"])->name(
-            "reportes.area.list"
-        );
-    });
-
-    Route::group(["prefix" => "/reporte/{uuid}"], function () {
-        Route::post("/genera", [ReportesController::class, "pdi"])->name(
-            "reportes.pdi"
-        );
     });
 });

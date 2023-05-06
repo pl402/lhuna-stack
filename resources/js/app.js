@@ -1,8 +1,7 @@
 require('./bootstrap');
 
 import { createApp, h } from 'vue';
-import { createInertiaApp } from '@inertiajs/inertia-vue3';
-import { InertiaProgress } from '@inertiajs/progress';
+import { createInertiaApp } from '@inertiajs/vue3';
 import FontAwesomeIcon from "@/Components/fontawesome-icons";
 import Notifications from 'notiwind';
 
@@ -11,8 +10,11 @@ const appName = window.document.getElementsByTagName('title')[0]?.innerText || '
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) => require(`./Pages/${name}.vue`),
-    setup({ el, app, props, plugin }) {
-        return createApp({ render: () => h(app, props) })
+    progress: {
+        color: '#4B5563',
+    },
+    setup({ el, App, props, plugin }) {
+        return createApp({ render: () => h(App, props) })
             .component("font-awesome-icon", FontAwesomeIcon)
             .use(plugin)
             .use(Notifications)
@@ -20,5 +22,3 @@ createInertiaApp({
             .mount(el);
     },
 });
-
-InertiaProgress.init({ color: '#4B5563' });

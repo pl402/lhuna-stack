@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from "vue";
-import { Head, Link, useForm } from "@inertiajs/inertia-vue3";
+import { Head, Link, useForm } from "@inertiajs/vue3";
 import JetAuthenticationCard from "@/Jetstream/AuthenticationCard.vue";
 import JetAuthenticationCardLogo from "@/Jetstream/AuthenticationCardLogo.vue";
 import JetButton from "@/Jetstream/Button.vue";
@@ -21,7 +21,6 @@ const verificationLinkSent = computed(
 </script>
 
 <template>
-
     <Head title="Verificación de Email" />
 
     <JetAuthenticationCard>
@@ -35,24 +34,38 @@ const verificationLinkSent = computed(
             no recibiste el correo electrónico, con gusto te enviaremos otro.
         </div>
 
-        <div v-if="verificationLinkSent" class="mb-4 font-medium text-sm text-green-600">
+        <div
+            v-if="verificationLinkSent"
+            class="mb-4 font-medium text-sm text-green-600"
+        >
             Se ha enviado un nuevo enlace de verificación a la dirección de
             correo electrónico que proporcionó en la configuración de su perfil.
         </div>
 
         <form @submit.prevent="submit">
             <div class="mt-4 flex items-center justify-between">
-                <JetButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                <JetButton
+                    :class="{ 'opacity-25': form.processing }"
+                    :disabled="form.processing"
+                >
                     Reenviar correo electrónico de verificación
                 </JetButton>
 
                 <div>
-                    <Link :href="route('profile.show')" class="underline text-sm text-gray-600 hover:text-gray-900">
-                    Editar perfil</Link>
+                    <Link
+                        :href="route('profile.show')"
+                        class="underline text-sm text-gray-600 hover:text-gray-900"
+                    >
+                        Editar perfil</Link
+                    >
 
-                    <Link :href="route('logout')" method="post" as="button"
-                        class="underline text-sm text-gray-600 hover:text-gray-900 ml-2">
-                    Cerrar sesión
+                    <Link
+                        :href="route('logout')"
+                        method="post"
+                        as="button"
+                        class="underline text-sm text-gray-600 hover:text-gray-900 ml-2"
+                    >
+                        Cerrar sesión
                     </Link>
                 </div>
             </div>

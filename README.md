@@ -41,9 +41,9 @@ Descripción del lhuna_stack
 
     ```
     $ mysql -u root -p
-    mysql> CREATE DATABASE lhuna-stack;
-    mysql> CREATE USER 'lhuna-stack'@'localhost' IDENTIFIED BY 'C0n7r4s3ña!';
-    mysql> GRANT ALL ON *.* TO 'lhuna-stack'@'localhost' WITH GRANT OPTION;
+    mysql> CREATE DATABASE lhuna;
+    mysql> CREATE USER 'lhuna'@'localhost' IDENTIFIED BY 'C0n7r4s3ña!';
+    mysql> GRANT ALL ON *.* TO 'lhuna'@'localhost' WITH GRANT OPTION;
     mysql> QUIT
     ```
 
@@ -58,8 +58,8 @@ Descripción del lhuna_stack
         DB_CONNECTION=mysql
         DB_HOST=127.0.0.1
         DB_PORT=3306
-        DB_DATABASE=lhuna-stack
-        DB_USERNAME=lhuna-stack
+        DB_DATABASE=lhuna
+        DB_USERNAME=lhuna
         DB_PASSWORD=C0n7r4s3ña!
         ```
     3. Generar clave de encriptación de la aplicación:

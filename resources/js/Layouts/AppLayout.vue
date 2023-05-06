@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch } from "vue";
-import { Inertia } from "@inertiajs/inertia";
-import { Head, Link, usePage } from "@inertiajs/inertia-vue3";
+import { router } from "@inertiajs/vue3";
+import { Head, Link, usePage } from "@inertiajs/vue3";
 import JetApplicationMark from "@/Jetstream/ApplicationMark.vue";
 import JetBanner from "@/Jetstream/Banner.vue";
 import JetDropdown from "@/Jetstream/Dropdown.vue";
@@ -19,7 +19,7 @@ defineProps({
 const showingNavigationDropdown = ref(false);
 
 const switchToTeam = (team) => {
-    Inertia.put(
+    router.put(
         route("current-team.update"),
         {
             team_id: team.id,
@@ -31,10 +31,10 @@ const switchToTeam = (team) => {
 };
 
 const logout = () => {
-    Inertia.post(route("logout"));
+    router.post(route("logout"));
 };
 
-const error = computed(() => usePage().props.value.flash?.error || null);
+const error = computed(() => usePage().props.flash?.error || null);
 const show = ref(false);
 
 watch(error, async () => {
@@ -73,29 +73,7 @@ const menu = [
             route().current("usuarios.index") ||
             route().current("usuarios.search") ||
             route().current("usuarios"),
-        show:
-            usePage().props.value.auth.roles[0] === "Administrador" ||
-            usePage().props.value.auth.roles[0] === "Contraloría",
-    },
-    {
-        name: "Areas",
-        href: route("areas.index"),
-        active:
-            route().current("areas.index") ||
-            route().current("areas.search") ||
-            route().current("areas"),
-        show: usePage().props.value.auth.roles[0] === "Administrador",
-    },
-    {
-        name: "Reportes",
-        href: route("reportes.index"),
-        active:
-            route().current("reportes.index") ||
-            route().current("reportes.search") ||
-            route().current("reportes"),
-        show:
-            usePage().props.value.auth.roles[0] === "Administrador" ||
-            usePage().props.value.auth.roles[0] === "Contraloría",
+        show: usePage().props.auth.roles[0] === "Administrador",
     },
     {
         name: "Configuraciones",
@@ -104,7 +82,7 @@ const menu = [
             route().current("configuraciones.index") ||
             route().current("configuraciones.search") ||
             route().current("configuraciones"),
-        show: usePage().props.value.auth.roles[0] === "Administrador",
+        show: usePage().props.auth.roles[0] === "Administrador",
     },
 ];
 </script>
@@ -114,7 +92,7 @@ const menu = [
         <Head :title="title" />
         <div class="min-h-screen bg-slate-100">
             <nav
-                class="bg-slate-100/80 border-b border-slate-100 sticky top-0 z-50 shadow-lg"
+                class="bg-slate-100/70 border-b border-slate-100 sticky top-0 z-50 shadow-lg backdrop-blur-sm"
             >
                 <!-- Primary Navigation Menu -->
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

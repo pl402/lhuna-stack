@@ -1,5 +1,5 @@
 /node_modules
-
+/public/config
 /storage/*.key
 /storage/pdfs
 /storage/evidencias

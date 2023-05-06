@@ -11,9 +11,6 @@
         "production": "mix --production"
     },
     "devDependencies": {
-        "@inertiajs/inertia": "^0.11.0",
-        "@inertiajs/inertia-vue3": "^0.6.0",
-        "@inertiajs/progress": "^0.2.7",
         "@prettier/plugin-php": "^0.18.9",
         "@tailwindcss/forms": "^0.5.0",
         "@tailwindcss/typography": "^0.5.2",
@@ -36,6 +33,7 @@
         "@fortawesome/vue-fontawesome": "^3.0.0-5",
         "@headlessui/vue": "^1.6.2",
         "@heroicons/vue": "^1.0.6",
+        "@inertiajs/vue3": "^1.0.6",
         "moment": "^2.29.3",
         "notiwind": "^1.2.5",
         "vue-currency-input": "^2.5.1"
