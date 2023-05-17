@@ -102,7 +102,7 @@ class UsuariosController extends Controller
                 "password" => Hash::make($datos["password"]),
             ]);
 
-            $usuario->assignRole(request("rol") ? request("rol") : "Enlace");
+            $usuario->assignRole(request("rol") ? request("rol") : "Usuario");
 
             return redirect()
                 ->back()
@@ -136,7 +136,7 @@ class UsuariosController extends Controller
                 $usuario->password = Hash::make($datos["password"]);
             }
             $usuario->roles()->detach();
-            $usuario->assignRole(request("rol") ? request("rol") : "Enlace");
+            $usuario->assignRole(request("rol") ? request("rol") : "Usuario");
             $usuario->save();
 
             return redirect()

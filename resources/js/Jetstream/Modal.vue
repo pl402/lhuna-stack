@@ -55,58 +55,72 @@ const maxWidthClass = computed(() => {
         lg: "sm:max-w-lg",
         xl: "sm:max-w-xl",
         "2xl": "sm:max-w-2xl",
+        "3xl": "sm:max-w-3xl",
+        "4xl": "sm:max-w-4xl",
+        "5xl": "sm:max-w-5xl",
+        "6xl": "sm:max-w-6xl",
     }[props.maxWidth];
 });
 </script>
 
+<style>
+.nested-enter-active,
+.nested-leave-active {
+    transition: all 0.2s ease-in-out;
+}
+/* delay leave of parent element */
+.nested-leave-active {
+    transition-delay: 0.15s;
+}
+
+.nested-enter-from,
+.nested-leave-to {
+    opacity: 0;
+}
+
+/* we can also transition nested elements using nested selectors */
+.nested-enter-active .inner,
+.nested-leave-active .inner {
+    transition: all 0.2s ease-in-out;
+}
+/* delay enter of nested element */
+.nested-enter-active .inner {
+    transition-delay: 0.15s;
+}
+
+.nested-enter-from .inner,
+.nested-leave-to .inner {
+    transform: translateY(30px);
+    /*
+  	Hack around a Chrome 96 bug in handling nested opacity transitions.
+    This is not needed in other browsers or Chrome 99+ where the bug
+    has been fixed.
+  */
+    opacity: 0.001;
+}
+</style>
+
 <template>
     <teleport to="body">
-        <transition
-            enter-active-class="transition duration-100 ease-out"
-            enter-from-class="transform scale-95 opacity-0"
-            enter-to-class="transform scale-100 opacity-100"
-            leave-active-class="transition duration-75 ease-out"
-            leave-from-class="transform scale-100 opacity-100"
-            leave-to-class="transform scale-95 opacity-0"
-        >
+        <Transition name="nested">
             <div
-                v-show="show"
-                class="fixed inset-0 overflow-y-auto px-4 py-6 sm:px-0 z-50"
+                v-if="show"
+                class="fixed inset-0 overflow-y-auto px-4 py-16 sm:px-0 z-50"
                 scroll-region
             >
-                <transition
-                    enter-active-class="transition duration-100 ease-out"
-                    enter-from-class="transform scale-95 opacity-0"
-                    enter-to-class="transform scale-100 opacity-100"
-                    leave-active-class="transition duration-75 ease-out"
-                    leave-from-class="transform scale-100 opacity-100"
-                    leave-to-class="transform scale-95 opacity-0"
-                >
+                <div class="fixed inset-0 transform transition-all outer">
                     <div
-                        v-show="show"
-                        class="fixed inset-0 transform transition-all"
-                    >
-                        <div class="absolute inset-0 bg-slate-500/80" />
-                    </div>
-                </transition>
+                        class="absolute inset-0 backdrop-blur-sm bg-gradient-radial from-slate-700/40 to-slate-800/80"
+                    />
+                </div>
 
-                <transition
-                    enter-active-class="transition duration-100 ease-out"
-                    enter-from-class="transform scale-95 opacity-0"
-                    enter-to-class="transform scale-100 opacity-100"
-                    leave-active-class="transition duration-75 ease-out"
-                    leave-from-class="transform scale-100 opacity-100"
-                    leave-to-class="transform scale-95 opacity-0"
+                <div
+                    class="mb-6 bg-white rounded-lg shadow-xl transform transition-all sm:w-full sm:mx-auto inner"
+                    :class="maxWidthClass"
                 >
-                    <div
-                        v-show="show"
-                        class="mb-6 bg-white rounded-lg shadow-xl transform transition-all sm:w-full sm:mx-auto"
-                        :class="maxWidthClass"
-                    >
-                        <slot v-if="show" />
-                    </div>
-                </transition>
+                    <slot />
+                </div>
             </div>
-        </transition>
+        </Transition>
     </teleport>
 </template>

@@ -41,8 +41,30 @@ import {
     faFile,
     faExclamationTriangle,
     faMagnifyingGlass,
+    faLink,
+    faCheck,
     faSpinner,
+    faFileArrowUp,
+    faRedo,
+    faRotateRight,
+    faFileZipper,
+    faTriangleExclamation,
+    faCircle,
+    faIdCard,
+    faCog,
+    faSquarePen,
+    faFileInvoice,
+    faGaugeHigh,
+    faHome,
+    faRightFromBracket,
+    faUsers,
+    faChevronDown,
+    faChevronUp,
+    faFileInvoiceDollar,
+    faClock,
 } from "@fortawesome/free-solid-svg-icons";
+
+import { faSquarePlus as farSquarePlus, faSquareMinus as farSquareMinus } from "@fortawesome/free-regular-svg-icons";
 
 
 library.add(
@@ -86,7 +108,30 @@ library.add(
     faFile,
     faExclamationTriangle,
     faMagnifyingGlass,
-    faSpinner
+    faLink,
+    faCheck,
+    faSpinner,
+    faFileArrowUp,
+    faRedo,
+    faRotateRight,
+    faStar,
+    faFileZipper,
+    faTriangleExclamation,
+    faCircle,
+    faIdCard,
+    faCog,
+    faSquarePen,
+    faFileInvoice,
+    faGaugeHigh,
+    faHome,
+    farSquarePlus,
+    farSquareMinus,
+    faRightFromBracket,
+    faUsers,
+    faChevronDown,
+    faChevronUp,
+    faFileInvoiceDollar,
+    faClock
 );
 
 export default FontAwesomeIcon;

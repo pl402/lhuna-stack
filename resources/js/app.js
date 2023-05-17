@@ -5,7 +5,7 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import FontAwesomeIcon from "@/Components/fontawesome-icons";
 import Notifications from 'notiwind';
 
-const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Entrega Recepción';
+const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Lhuna-Stack';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

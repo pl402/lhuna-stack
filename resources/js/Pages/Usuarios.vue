@@ -3,6 +3,7 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import { useForm } from "@inertiajs/vue3";
 import { reactive, ref, toRefs } from "vue";
 import JetDialogModal from "@/Jetstream/DialogModal";
+import JetConfirmationModal from "@/Jetstream/ConfirmationModal";
 import JetInput from "@/Jetstream/Input.vue";
 import JetLabel from "@/Jetstream/Label.vue";
 import JetButton from "@/Jetstream/Button.vue";
@@ -56,7 +57,7 @@ const orderByObject = ref(
 const nuevoUsuario = () => {
     accion.value = "new";
     form.reset("name", "titulo", "email", "password", "rol");
-    form.rol = "Enlace";
+    form.rol = "Usuario";
     error.name = "";
     error.titulo = "";
     error.email = "";
@@ -235,7 +236,7 @@ const borraUsuarioDo = () => {
 <template>
     <AppLayout title="Usuarios">
         <div class="py-4">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="max-w-full mx-auto px-8">
                 <div
                     class="bg-white overflow-hidden shadow-xl sm:rounded-lg border border-slate-300/90"
                 >
@@ -350,7 +351,6 @@ const borraUsuarioDo = () => {
             @submit.prevent="accion === 'new' ? nuevoUsuarioDo : editaUsuarioDo"
         >
             <JetDialogModal
-                v-if="estadoModalUsuario === true"
                 :show="estadoModalUsuario"
                 @close="estadoModalUsuario = false"
                 max-width="md"
@@ -479,10 +479,18 @@ const borraUsuarioDo = () => {
                             :disabled="form.processing"
                             class="float-right"
                         >
-                            <font-awesome-icon
-                                icon="user-plus"
-                                class="mr-2"
-                            />Crear Usuario
+                            <template v-if="form.processing">
+                                <font-awesome-icon
+                                    icon="spinner"
+                                    class="mr-2 animate-spin"
+                                />Creando...
+                            </template>
+                            <template v-else>
+                                <font-awesome-icon
+                                    icon="plus"
+                                    class="mr-2"
+                                />Crear Usuario
+                            </template>
                         </JetButton>
 
                         <JetButton
@@ -492,20 +500,26 @@ const borraUsuarioDo = () => {
                             class="float-right"
                             :disabled="form.processing"
                         >
-                            <font-awesome-icon
-                                icon="floppy-disk"
-                                class="mr-2"
-                            />Guardar Cambios
+                            <template v-if="form.processing">
+                                <font-awesome-icon
+                                    icon="spinner"
+                                    class="mr-2 animate-spin"
+                                />Guardando...
+                            </template>
+                            <template v-else>
+                                <font-awesome-icon
+                                    icon="floppy-disk"
+                                    class="mr-2"
+                                />Guardar Cambios
+                            </template>
                         </JetButton>
                     </div>
                 </template>
             </JetDialogModal>
         </form>
-        <JetDialogModal
-            v-if="estadoModalEliminaUsuario === true"
+        <JetConfirmationModal
             :show="estadoModalEliminaUsuario"
             @close="estadoModalEliminaUsuario = false"
-            max-width="md"
         >
             <template #title>Eliminar usuario</template>
             <template #content>
@@ -539,6 +553,6 @@ const borraUsuarioDo = () => {
                     </JetDangerButton>
                 </div>
             </template>
-        </JetDialogModal>
+        </JetConfirmationModal>
     </AppLayout>
 </template>

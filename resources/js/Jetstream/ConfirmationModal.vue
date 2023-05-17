@@ -1,7 +1,7 @@
 <script setup>
-import Modal from './Modal.vue';
+import Modal from "./Modal.vue";
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(["close"]);
 
 defineProps({
     show: {
@@ -10,7 +10,7 @@ defineProps({
     },
     maxWidth: {
         type: String,
-        default: '2xl',
+        default: "2xl",
     },
     closeable: {
         type: Boolean,
@@ -19,7 +19,7 @@ defineProps({
 });
 
 const close = () => {
-    emit('close');
+    emit("close");
 };
 </script>
 
@@ -30,11 +30,13 @@ const close = () => {
         :closeable="closeable"
         @close="close"
     >
-        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 rounded-t-lg">
             <div class="sm:flex sm:items-start">
-                <div class="mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                <div
+                    class="mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-20 sm:w-20"
+                >
                     <svg
-                        class="h-6 w-6 text-red-600"
+                        class="h-full w-full text-red-600 p-2 sm:p-4"
                         stroke="currentColor"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -48,19 +50,21 @@ const close = () => {
                     </svg>
                 </div>
 
-                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 class="text-lg">
+                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left pl-4">
+                    <h3 class="text-lg font-bold">
                         <slot name="title" />
                     </h3>
 
-                    <div class="mt-2">
+                    <div class="mt-2 text-lg">
                         <slot name="content" />
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="flex flex-row justify-end px-6 py-4 bg-gray-100 text-right">
+        <div
+            class="flex flex-row justify-end px-4 py-2 border-b-2 border-slate-200/95 border-t-2 border-t-solid bg-slate-100 rounded-b-lg"
+        >
             <slot name="footer" />
         </div>
     </Modal>

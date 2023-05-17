@@ -81,14 +81,4 @@ class User extends Authenticatable
             ->orWhere("email", "LIKE", "%{$key}%")
             ->orWhere("id", "LIKE", "%{$key}%");
     }
-
-    public function areas()
-    {
-        return $this->hasMany(Area::class, "enlace_id", "id");
-    }
-
-    public function tiular_de_area()
-    {
-        return $this->hasMany(Area::class, "titular_id", "id");
-    }
 }

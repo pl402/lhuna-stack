@@ -2,9 +2,7 @@
 use App\Http\Controllers\AreasController;
 use App\Http\Controllers\CapturaController;
 use App\Http\Controllers\ConfiguracionesController;
-use App\Http\Controllers\EntregasController;
 use App\Http\Controllers\EscritorioController;
-use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\UsuariosController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
