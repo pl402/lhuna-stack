@@ -235,113 +235,111 @@ const borraUsuarioDo = () => {
 </script>
 <template>
     <AppLayout title="Usuarios">
-        <div class="py-4">
-            <div class="max-w-full mx-auto px-8">
-                <div
-                    class="bg-white overflow-hidden shadow-xl sm:rounded-lg border border-slate-300/90"
-                >
-                    <Buscador
-                        v-model="buscar"
-                        :orderByObject="orderByObject"
-                        ruta="usuarios"
-                        autofocus
-                    />
-                    <Tabla v-if="usuarios.data.length > 0">
-                        <template #col>
-                            <th class="px-4 py-1 w-20">
-                                <Ordena
-                                    v-model="orderByObject"
-                                    ruta="usuarios"
-                                    :buscar="buscar"
-                                    titulo="ID"
-                                    campo="id"
-                                />
-                            </th>
-                            <th class="px-4 py-1">
-                                <Ordena
-                                    v-model="orderByObject"
-                                    ruta="usuarios"
-                                    :buscar="buscar"
-                                    titulo="Nombre"
-                                    campo="name"
-                                />
-                            </th>
-                            <th class="px-4 py-1">
-                                <Ordena
-                                    v-model="orderByObject"
-                                    ruta="usuarios"
-                                    :buscar="buscar"
-                                    titulo="Titulo"
-                                    campo="titulo"
-                                />
-                            </th>
-                            <th class="px-4 py-1 w-72">
-                                <Ordena
-                                    v-model="orderByObject"
-                                    ruta="usuarios"
-                                    :buscar="buscar"
-                                    titulo="Email"
-                                    campo="email"
-                                />
-                            </th>
-                            <th class="px-4 py-1 w-36">Rol</th>
-                            <th
-                                class="px-4 py-1 w-5 text-center sticky right-0 bg-slate-200/50 border-l border-slate-200"
-                            >
-                                <JetButton @click="nuevoUsuario">
-                                    <font-awesome-icon icon="add" />
-                                </JetButton>
-                            </th>
-                        </template>
-                        <template #row>
-                            <tr
-                                class="text-slate-700 hover:bg-slate-300 border-b border-slate-200"
-                                v-for="usuario in usuarios.data"
-                                :key="usuario.id"
-                            >
-                                <td class="px-4 py-1">{{ usuario.id }}</td>
-                                <td class="px-4 py-1">{{ usuario.name }}</td>
-                                <td class="px-4 py-1">{{ usuario.titulo }}</td>
-                                <td class="px-4 py-1">{{ usuario.email }}</td>
-                                <td class="px-4 py-1">
-                                    <div v-for="p in usuario.roles" :key="p.id">
-                                        <span
-                                            class="text-gray-200 mr-1 mb-1 px-1 rounded nowrap"
-                                            :class="bg_color[p.name]"
-                                        >
-                                            {{ p.name }}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td
-                                    class="px-4 py-1 text-center sticky right-0 bg-slate-200/50 border-l border-slate-200"
-                                >
-                                    <JetButton
-                                        class="bg-blue-500 hover:bg-blue-700 text-white"
-                                        @click="editaUsuario(usuario)"
-                                    >
-                                        <font-awesome-icon icon="user-edit" />
-                                    </JetButton>
-                                </td>
-                            </tr>
-                        </template>
-                        <template #pagination>
-                            <Paginador
-                                :links="usuarios.links"
-                                :total="usuarios.total"
-                                :to="usuarios.to"
-                                :from="usuarios.from"
+        <div class="max-w-full mx-auto px-0 sm:px-8 py-4 pt-0 sm:pt-4">
+            <div
+                class="bg-white overflow-hidden shadow-xl sm:rounded-lg border border-slate-300/90"
+            >
+                <Buscador
+                    v-model="buscar"
+                    :orderByObject="orderByObject"
+                    ruta="usuarios"
+                    autofocus
+                />
+                <Tabla v-if="usuarios.data.length > 0">
+                    <template #col>
+                        <th class="px-4 py-1 w-20">
+                            <Ordena
+                                v-model="orderByObject"
+                                ruta="usuarios"
+                                :buscar="buscar"
+                                titulo="ID"
+                                campo="id"
                             />
-                        </template>
-                    </Tabla>
-                    <div v-else class="text-center p-5 text-slate-500 text-md">
-                        Sin Usuarios
-                        <br />
-                        <JetButton @click="nuevoUsuario" class="mt-2">
-                            <font-awesome-icon icon="add" class="mr-2" />Agregar
-                            Nuevo Usuario
-                        </JetButton>
-                    </div>
+                        </th>
+                        <th class="px-4 py-1">
+                            <Ordena
+                                v-model="orderByObject"
+                                ruta="usuarios"
+                                :buscar="buscar"
+                                titulo="Nombre"
+                                campo="name"
+                            />
+                        </th>
+                        <th class="px-4 py-1">
+                            <Ordena
+                                v-model="orderByObject"
+                                ruta="usuarios"
+                                :buscar="buscar"
+                                titulo="Titulo"
+                                campo="titulo"
+                            />
+                        </th>
+                        <th class="px-4 py-1 w-72">
+                            <Ordena
+                                v-model="orderByObject"
+                                ruta="usuarios"
+                                :buscar="buscar"
+                                titulo="Email"
+                                campo="email"
+                            />
+                        </th>
+                        <th class="px-4 py-1 w-36">Rol</th>
+                        <th
+                            class="px-4 py-1 w-5 text-center sticky right-0 bg-slate-200/50 border-l border-slate-200"
+                        >
+                            <JetButton @click="nuevoUsuario">
+                                <font-awesome-icon icon="add" />
+                            </JetButton>
+                        </th>
+                    </template>
+                    <template #row>
+                        <tr
+                            class="text-slate-700 hover:bg-slate-300 border-b border-slate-200"
+                            v-for="usuario in usuarios.data"
+                            :key="usuario.id"
+                        >
+                            <td class="px-4 py-1">{{ usuario.id }}</td>
+                            <td class="px-4 py-1">{{ usuario.name }}</td>
+                            <td class="px-4 py-1">{{ usuario.titulo }}</td>
+                            <td class="px-4 py-1">{{ usuario.email }}</td>
+                            <td class="px-4 py-1">
+                                <div v-for="p in usuario.roles" :key="p.id">
+                                    <span
+                                        class="text-gray-200 mr-1 mb-1 px-1 rounded nowrap"
+                                        :class="bg_color[p.name]"
+                                    >
+                                        {{ p.name }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td
+                                class="px-4 py-1 text-center sticky right-0 bg-slate-200/50 border-l border-slate-200"
+                            >
+                                <JetButton
+                                    class="bg-blue-500 hover:bg-blue-700 text-white"
+                                    @click="editaUsuario(usuario)"
+                                >
+                                    <font-awesome-icon icon="user-edit" />
+                                </JetButton>
+                            </td>
+                        </tr>
+                    </template>
+                    <template #pagination>
+                        <Paginador
+                            :links="usuarios.links"
+                            :total="usuarios.total"
+                            :to="usuarios.to"
+                            :from="usuarios.from"
+                        />
+                    </template>
+                </Tabla>
+                <div v-else class="text-center p-5 text-slate-500 text-md">
+                    Sin Usuarios
+                    <br />
+                    <JetButton @click="nuevoUsuario" class="mt-2">
+                        <font-awesome-icon icon="add" class="mr-2" />Agregar
+                        Nuevo Usuario
+                    </JetButton>
                 </div>
             </div>
         </div>

@@ -99,26 +99,6 @@ const menu = [
     opacity: 1;
     filter: none;
 }
-
-.slide-enter-active,
-.slide-leave-active {
-    transition: all 0.5s ease-out;
-}
-
-.slide-enter,
-.slide-leave-to {
-    transform: translateX(-100%);
-}
-
-.page-enter-active,
-.page-leave-active {
-    transition: opacity 0.5s;
-}
-
-.page-enter,
-.page-leave-to {
-    opacity: 0;
-}
 </style>
 
 <template>
@@ -144,10 +124,18 @@ const menu = [
                             </div>
                         </div>
                         <h2
-                            class="text-xl font-bold text-slate-900 flex my-auto"
+                            class="text-lg font-bold text-slate-900 flex my-auto truncate"
                         >
-                            Lhuna-Stack
+                            <!-- Titulo menu celular -->
+                            Lhuna-Stack<span
+                                class="font-light text-slate-500 mx-2"
+                                >/</span
+                            ><span
+                                class="font-medium text-slate-800 truncate"
+                                >{{ title }}</span
+                            >
                         </h2>
+
                         <!-- Hamburger -->
                         <div class="-mr-2 flex items-center sm:hidden">
                             <button
@@ -214,12 +202,12 @@ const menu = [
                                 :active="route().current('profile.show')"
                             >
                                 <font-awesome-icon
-                                    icon="user"
+                                    icon="user-gear"
                                     class="w-5 mr-2"
-                                />Usuario
-                                {{ $page.props.auth.roles[0] }}
+                                />{{ $page.props.user.name }}
                                 <div class="font-medium text-sm text-slate-800">
-                                    {{ $page.props.user.name }}
+                                    Usuario
+                                    {{ $page.props.auth.roles[0] }}
                                 </div>
                             </JetResponsiveNavLink>
 
@@ -255,6 +243,7 @@ const menu = [
                             <h2
                                 class="text-xl font-bold text-slate-900 flex-1 text-center"
                             >
+                                <!-- Titulo menu lateral oculto -->
                                 Lhuna-Stack
                             </h2>
                             <div class="ml-auto">
@@ -303,39 +292,6 @@ const menu = [
                             ></div>
                             <!-- Responsive Settings Options -->
                             <div>
-                                <div class="space-y-1">
-                                    <JetResponsiveNavLink
-                                        :href="route('profile.show')"
-                                        :active="
-                                            route().current('profile.show')
-                                        "
-                                    >
-                                        <font-awesome-icon
-                                            icon="user"
-                                            class="w-5 mr-2"
-                                        />Usuario
-                                        {{ $page.props.auth.roles[0] }}
-                                        <div
-                                            class="font-medium text-sm text-slate-800"
-                                        >
-                                            {{ $page.props.user.name }}
-                                        </div>
-                                    </JetResponsiveNavLink>
-
-                                    <!-- Authentication -->
-                                    <form
-                                        method="POST"
-                                        @submit.prevent="logout"
-                                    >
-                                        <JetResponsiveNavLink as="button">
-                                            <font-awesome-icon
-                                                icon="right-from-bracket"
-                                                class="w-5 mr-2"
-                                            />Cerrar sesión
-                                        </JetResponsiveNavLink>
-                                    </form>
-                                </div>
-
                                 <!-- Page Footer -->
                                 <footer
                                     class="bg-white shadow-2xl absolute bottom-0 w-full border-t border-slate-100"
@@ -368,7 +324,7 @@ const menu = [
                 >
                     <!-- Page Heading -->
                     <header
-                        class="bg-white/80 border-b border-slate-300/90 sticky sm:top-0 top-12 z-10 backdrop-blur-sm shadow flex"
+                        class="bg-white/80 border-b border-slate-300/90 sticky sm:top-0 top-12 z-10 backdrop-blur-sm shadow hidden sm:flex"
                     >
                         <div
                             class="items-center hidden sm:flex md:flex transition-all duration-300 ease-in-out w-60"
@@ -382,6 +338,7 @@ const menu = [
                             <h2
                                 class="text-xl font-bold text-slate-900 flex-1 text-center"
                             >
+                                <!-- Titulo menu lateral oculto -->
                                 Lhuna-Stack
                             </h2>
                             <button
@@ -413,13 +370,74 @@ const menu = [
                                 {{ title }}
                             </h2>
                         </div>
+                        <!-- Settings Dropdown -->
+                        <div class="relative">
+                            <JetDropdown align="left" width="48">
+                                <template #trigger>
+                                    <span class="inline-flex rounded-md m-3">
+                                        <button
+                                            type="button"
+                                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-slate-500 bg-slate-100 hover:text-slate-700 focus:outline-none transition"
+                                        >
+                                            <font-awesome-icon
+                                                icon="user"
+                                                class="w-5 mr-2"
+                                            />
+                                            {{ $page.props.user.name }}
+                                            <svg
+                                                class="ml-2 -mr-0.5 h-4 w-4"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                            >
+                                                <path
+                                                    fill-rule="evenodd"
+                                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                    clip-rule="evenodd"
+                                                />
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </template>
+
+                                <template #content>
+                                    <!-- Account Management -->
+                                    <div
+                                        class="block px-4 py-2 text-xs text-slate-400"
+                                    >
+                                        Usuario
+                                        {{ $page.props.auth.roles[0] }}
+                                    </div>
+
+                                    <JetDropdownLink
+                                        :href="route('profile.show')"
+                                    >
+                                        <font-awesome-icon
+                                            icon="user-gear"
+                                            class="w-5 mr-2"
+                                        />Perfil
+                                    </JetDropdownLink>
+
+                                    <div class="border-t border-slate-300" />
+
+                                    <!-- Authentication -->
+                                    <form @submit.prevent="logout">
+                                        <JetDropdownLink as="button">
+                                            <font-awesome-icon
+                                                icon="right-from-bracket"
+                                                class="w-5 mr-2"
+                                            />Cerrar sesión
+                                        </JetDropdownLink>
+                                    </form>
+                                </template>
+                            </JetDropdown>
+                        </div>
                     </header>
-                    <Transition name="page" mode="out-in" appear>
-                        <!-- Page Content -->
-                        <main :key="$page.url" class="mt-12 sm:mt-0">
-                            <slot />
-                        </main>
-                    </Transition>
+                    <!-- Page Content -->
+
+                    <main :key="$page.url" class="mt-12 sm:mt-0">
+                        <slot />
+                    </main>
                 </div>
             </div>
         </div>

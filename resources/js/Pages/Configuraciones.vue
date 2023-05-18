@@ -182,94 +182,90 @@ const clearPhotoFileInput = () => {
 
 <template>
     <AppLayout title="Configuraciones">
-        <div class="py-4">
-            <div class="max-w-full mx-auto px-8">
-                <div
-                    class="bg-white overflow-hidden shadow-xl sm:rounded-lg border border-slate-300/90"
-                >
-                    <Buscador
-                        v-model="buscar"
-                        :orderByObject="orderByObject"
-                        ruta="configuraciones"
-                        autofocus
-                    />
-                    <Tabla v-if="configuraciones.data.length > 0">
-                        <template #col>
-                            <th class="px-4 py-1 w-32">
-                                <Ordena
-                                    v-model="orderByObject"
-                                    ruta="configuraciones"
-                                    :buscar="buscar"
-                                    titulo="ID"
-                                    campo="id"
-                                />
-                            </th>
-                            <th class="px-4 py-1">
-                                <Ordena
-                                    v-model="orderByObject"
-                                    ruta="configuraciones"
-                                    :buscar="buscar"
-                                    titulo="Nombre"
-                                    campo="clave"
-                                />
-                            </th>
-                            <th class="px-4 py-1">
-                                <Ordena
-                                    v-model="orderByObject"
-                                    ruta="configuraciones"
-                                    :buscar="buscar"
-                                    titulo="Descripción"
-                                    campo="valor"
-                                />
-                            </th>
-                            <th
-                                class="px-4 py-1 w-5 text-center sticky right-0 bg-slate-200/50 border-l border-slate-200"
-                            >
-                                Acciones
-                            </th>
-                        </template>
-                        <template #row>
-                            <tr
-                                class="text-slate-700 hover:bg-slate-300 border-b border-slate-200"
-                                v-for="configuracion in configuraciones.data"
-                                :key="configuracion.id"
-                            >
-                                <td class="px-4 py-1">
-                                    {{ configuracion.id }}
-                                </td>
-                                <td class="px-4 py-1">
-                                    {{ configuracion.clave }}
-                                </td>
-                                <td class="px-4 py-1">
-                                    {{ configuracion.valor }}
-                                </td>
-                                <td
-                                    class="px-4 py-1 text-center sticky right-0 bg-slate-200/50 border-l border-slate-200"
-                                >
-                                    <JetButton
-                                        class="bg-blue-500 hover:bg-blue-700 text-white"
-                                        @click="
-                                            editaConfiguracion(configuracion)
-                                        "
-                                    >
-                                        <font-awesome-icon icon="pen" />
-                                    </JetButton>
-                                </td>
-                            </tr>
-                        </template>
-                        <template #pagination>
-                            <Paginador
-                                :links="configuraciones.links"
-                                :total="configuraciones.total"
-                                :to="configuraciones.to"
-                                :from="configuraciones.from"
+        <div class="max-w-full mx-auto px-0 sm:px-8 py-4 pt-0 sm:pt-4">
+            <div
+                class="bg-white overflow-hidden shadow-xl sm:rounded-lg border border-slate-300/90"
+            >
+                <Buscador
+                    v-model="buscar"
+                    :orderByObject="orderByObject"
+                    ruta="configuraciones"
+                    autofocus
+                />
+                <Tabla v-if="configuraciones.data.length > 0">
+                    <template #col>
+                        <th class="px-4 py-1 w-32">
+                            <Ordena
+                                v-model="orderByObject"
+                                ruta="configuraciones"
+                                :buscar="buscar"
+                                titulo="ID"
+                                campo="id"
                             />
-                        </template>
-                    </Tabla>
-                    <div v-else class="text-center p-5 text-slate-500 text-md">
-                        Sin resultados
-                        <br />
-                    </div>
+                        </th>
+                        <th class="px-4 py-1">
+                            <Ordena
+                                v-model="orderByObject"
+                                ruta="configuraciones"
+                                :buscar="buscar"
+                                titulo="Nombre"
+                                campo="clave"
+                            />
+                        </th>
+                        <th class="px-4 py-1">
+                            <Ordena
+                                v-model="orderByObject"
+                                ruta="configuraciones"
+                                :buscar="buscar"
+                                titulo="Descripción"
+                                campo="valor"
+                            />
+                        </th>
+                        <th
+                            class="px-4 py-1 w-5 text-center sticky right-0 bg-slate-200/50 border-l border-slate-200"
+                        >
+                            Acciones
+                        </th>
+                    </template>
+                    <template #row>
+                        <tr
+                            class="text-slate-700 hover:bg-slate-300 border-b border-slate-200"
+                            v-for="configuracion in configuraciones.data"
+                            :key="configuracion.id"
+                        >
+                            <td class="px-4 py-1">
+                                {{ configuracion.id }}
+                            </td>
+                            <td class="px-4 py-1">
+                                {{ configuracion.clave }}
+                            </td>
+                            <td class="px-4 py-1">
+                                {{ configuracion.valor }}
+                            </td>
+                            <td
+                                class="px-4 py-1 text-center sticky right-0 bg-slate-200/50 border-l border-slate-200"
+                            >
+                                <JetButton
+                                    class="bg-blue-500 hover:bg-blue-700 text-white"
+                                    @click="editaConfiguracion(configuracion)"
+                                >
+                                    <font-awesome-icon icon="pen" />
+                                </JetButton>
+                            </td>
+                        </tr>
+                    </template>
+                    <template #pagination>
+                        <Paginador
+                            :links="configuraciones.links"
+                            :total="configuraciones.total"
+                            :to="configuraciones.to"
+                            :from="configuraciones.from"
+                        />
+                    </template>
+                </Tabla>
+                <div v-else class="text-center p-5 text-slate-500 text-md">
+                    Sin resultados
+                    <br />
                 </div>
             </div>
         </div>
