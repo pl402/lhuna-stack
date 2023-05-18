@@ -16,24 +16,35 @@ defineProps({
     title: String,
 });
 
-const showDropNav = ref(false);
+const showDropNav = ref(
+    localStorage.showDropNav ? localStorage.showDropNav === "true" : true
+);
+
+// Espera a que se cargue la pagina para ocultar el menu
+router.on("finish", () => {
+    showDropNav.value = false;
+    localStorage.showDropNav = showDropNav.value;
+});
 
 const logout = () => {
     router.post(route("logout"));
 };
-const isOpen = ref(
-    localStorage.menuShow ? localStorage.menuShow === "true" : true
-);
+const isOpen = ref(localStorage.isOpen ? localStorage.isOpen === "true" : true);
 const error = computed(() => usePage().props.flash?.error || null);
 
 const cierraMenu = () => {
     isOpen.value = false;
-    localStorage.menuShow = isOpen.value;
+    localStorage.isOpen = isOpen.value;
 };
 
 const abreMenu = () => {
     isOpen.value = true;
-    localStorage.menuShow = isOpen.value;
+    localStorage.isOpen = isOpen.value;
+};
+
+const changeShowDropNav = () => {
+    showDropNav.value = !showDropNav.value;
+    localStorage.showDropNav = showDropNav.value;
 };
 
 watch(error, async () => {
@@ -140,7 +151,7 @@ const menu = [
                         <div class="-mr-2 flex items-center sm:hidden">
                             <button
                                 class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-slate-500 hover:bg-slate-100 focus:outline-none focus:bg-slate-100 focus:text-slate-500 transition"
-                                @click="showDropNav = !showDropNav"
+                                @click="changeShowDropNav"
                             >
                                 <svg
                                     class="h-6 w-6"
