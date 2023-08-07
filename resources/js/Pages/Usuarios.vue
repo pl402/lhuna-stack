@@ -7,6 +7,7 @@ import JetConfirmationModal from "@/Jetstream/ConfirmationModal";
 import JetInput from "@/Jetstream/Input.vue";
 import JetLabel from "@/Jetstream/Label.vue";
 import JetButton from "@/Jetstream/Button.vue";
+import JetSecondaryButton from "@/Jetstream/SecondaryButton.vue";
 import Tabla from "@/Components/Tabla.vue";
 import Paginador from "@/Components/Paginador.vue";
 import { notify } from "notiwind";
@@ -96,6 +97,40 @@ let roles = [
         name: "Usuario",
     },
 ];
+
+const filtros = ref({
+    id: {
+        value: "",
+        type: "number",
+        label: "ID",
+        placeholder: "ID",
+    },
+    name: {
+        value: "",
+        type: "text",
+        label: "Nombre",
+        placeholder: "Nombre",
+    },
+    titulo: {
+        value: "",
+        type: "text",
+        label: "Título",
+        placeholder: "Título",
+    },
+    email: {
+        value: "",
+        type: "email",
+        label: "Email",
+        placeholder: "Email",
+    },
+    rol: {
+        value: "",
+        type: "select",
+        label: "Rol",
+        placeholder: "Rol",
+        options: roles,
+    },
+});
 
 const bg_color = {
     Administrador: "bg-red-600",
@@ -243,6 +278,7 @@ const borraUsuarioDo = () => {
                     v-model="buscar"
                     :orderByObject="orderByObject"
                     ruta="usuarios"
+                    :filtros="filtros"
                     autofocus
                 />
                 <Tabla v-if="usuarios.data.length > 0">
@@ -460,13 +496,13 @@ const borraUsuarioDo = () => {
                 </template>
                 <template #footer>
                     <div class="w-1/2">
-                        <JetButton
+                        <JetSecondaryButton
                             @click="estadoModalUsuario = false"
                             class="bg-opacity-95"
                             type="cancel"
                             :disabled="form.processing"
                             :class="{ 'opacity-25': form.processing }"
-                            >Cancelar</JetButton
+                            >Cancelar</JetSecondaryButton
                         >
                     </div>
                     <div class="w-1/2">
@@ -530,13 +566,13 @@ const borraUsuarioDo = () => {
             </template>
             <template #footer>
                 <div class="w-1/2">
-                    <JetButton
+                    <JetSecondaryButton
                         @click="estadoModalEliminaUsuario = false"
                         class="bg-opacity-95"
                         type="cancel"
                         :disabled="form.processing"
                         :class="{ 'opacity-25': form.processing }"
-                        >Cancelar</JetButton
+                        >Cancelar</JetSecondaryButton
                     >
                 </div>
                 <div class="w-1/2">

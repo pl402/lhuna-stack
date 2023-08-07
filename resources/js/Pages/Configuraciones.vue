@@ -6,6 +6,7 @@ import JetDialogModal from "@/Jetstream/DialogModal";
 import JetInput from "@/Jetstream/Input.vue";
 import JetLabel from "@/Jetstream/Label.vue";
 import JetButton from "@/Jetstream/Button.vue";
+import JetSecondaryButton from "@/Jetstream/SecondaryButton.vue";
 import Tabla from "@/Components/Tabla.vue";
 import { router } from "@inertiajs/vue3";
 import Paginador from "@/Components/Paginador.vue";
@@ -381,14 +382,14 @@ const clearPhotoFileInput = () => {
                 </template>
                 <template #footer>
                     <div class="w-1/2">
-                        <JetButton
+                        <JetSecondaryButton
                             @click="estadoModalConfiguracion = false"
                             class="bg-opacity-95"
                             type="cancel"
                             :class="{ 'opacity-25': form.processing }"
                             :disabled="form.processing"
                             >Cancelar
-                        </JetButton>
+                        </JetSecondaryButton>
                     </div>
                     <div class="w-1/2">
                         <JetButton
