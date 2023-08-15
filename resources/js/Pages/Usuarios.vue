@@ -101,30 +101,35 @@ let roles = [
 const filtros = ref({
     id: {
         value: "",
+        activo: false,
         type: "number",
         label: "ID",
         placeholder: "ID",
     },
     name: {
         value: "",
+        activo: false,
         type: "text",
         label: "Nombre",
         placeholder: "Nombre",
     },
     titulo: {
         value: "",
+        activo: false,
         type: "text",
         label: "Título",
         placeholder: "Título",
     },
     email: {
         value: "",
+        activo: false,
         type: "email",
         label: "Email",
         placeholder: "Email",
     },
     rol: {
         value: "",
+        activo: false,
         type: "select",
         label: "Rol",
         placeholder: "Rol",

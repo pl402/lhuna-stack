@@ -122,39 +122,16 @@ export default {};
         </div>
 
         <transition name="slide-up" mode="out-in">
-            <div v-if="muestraFiltros" class="m-1 block w-full pl-10 p-[5px]">
-                <h4 class="text-slate-500 font-bold text-lg">Filtros</h4>
+            <div
+                v-if="muestraFiltros"
+                class="m-1 block w-full pl-10 pr-10 pb-2"
+            >
+                <h4 class="text-slate-500 font-bold text-lg pt-[5px]">
+                    Filtros
+                </h4>
 
                 <label v-for="(filtro, index) in filtros" class="block mb-1">
-                    <JetLabel
-                        :for="'filtro-' + index"
-                        class="block text-sm font-medium text-slate-700"
-                    >
-                        {{ filtro.label }}
-                    </JetLabel>
-                    <Select
-                        v-if="filtro.type === 'select'"
-                        :id="'filtro-' + index"
-                        v-model="filtro.value"
-                        :options="filtro.options"
-                        class="mt-1 block w-full"
-                    />
-                    <NumberInput
-                        v-else-if="filtro.type === 'number'"
-                        :id="'filtro-' + index"
-                        v-model="filtro.value"
-                        type="text"
-                        :placeholder="filtro.placeholder"
-                        class="mt-1 block w-full"
-                    />
-                    <JetInput
-                        v-else
-                        :id="'filtro-' + index"
-                        v-model="filtro.value"
-                        :type="filtro.type"
-                        :placeholder="filtro.placeholder"
-                        class="mt-1 block w-full"
-                    />
+                    <template v-if="filtro.activo"> </template>
                 </label>
                 <div class="flex justify-between mt-4">
                     <div class="w-1/2">
@@ -186,7 +163,7 @@ export default {};
                 class="m-1 block w-full pl-10 h-10"
                 :class="{
                     'rounded-r-md': !filtros,
-                    'rounded-r-none mr-12': filtros,
+                    'mr-1 pr-12': filtros,
                 }"
                 :placeholder="titulo"
                 v-model="buscar"
@@ -199,9 +176,9 @@ export default {};
         <button
             v-if="filtros"
             @click="abreFiltros"
-            class="absolute w-10 inset-y-1 right-2 flex items-center rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-opacity-50 border-slate-400 border h-10 transition-all duration-200 ease-in-out"
+            class="absolute w-10 inset-y-1 right-1 flex items-center rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-opacity-50 border-slate-400 border h-10 transition-all duration-200 ease-in-out"
             :class="{
-                'bg-slate-200  border-l-0 rounded-l-none': !muestraFiltros,
+                'bg-slate-200 rounded-l-none': !muestraFiltros,
                 'bg-slate-300 shadow-inner': muestraFiltros,
             }"
             title="Mostrar filtros"
