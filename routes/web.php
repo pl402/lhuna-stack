@@ -44,6 +44,9 @@ Route::middleware([
             UsuariosController::class,
             "search",
         ])->name("usuarios.search");
+        Route::get("/filtro", [UsuariosController::class, "filter"])->name(
+            "usuarios.filter"
+        );
     });
 
     Route::group(["prefix" => "configuraciones"], function () {

@@ -64,6 +64,7 @@ import {
     faClock,
     faUserGear,
     faFilter,
+    faEdit,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { faSquarePlus as farSquarePlus, faSquareMinus as farSquareMinus } from "@fortawesome/free-regular-svg-icons";
@@ -135,7 +136,8 @@ library.add(
     faFileInvoiceDollar,
     faClock,
     faUserGear,
-    faFilter
+    faFilter,
+    faEdit
 );
 
 export default FontAwesomeIcon;

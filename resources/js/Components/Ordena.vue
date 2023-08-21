@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from "vue";
 import { router } from "@inertiajs/vue3";
-import JetInput from "@/Jetstream/Input.vue";
 
 const props = defineProps({
     modelValue: Object,
@@ -10,9 +9,11 @@ const props = defineProps({
     campo: String,
     buscar: String,
     params: Object,
+    filtros: Array,
 });
 
 const buscar = ref(props.buscar ? props.buscar : "");
+const filtros = ref(props.filtros ? props.filtros : []);
 const ruta = ref(props.ruta ? props.ruta : "");
 const campo = ref(props.campo ? props.campo : "");
 const titulo = ref(props.titulo ? props.titulo : "");
@@ -32,21 +33,40 @@ const ordena = (key) => {
         orderByObject.value.sort = "asc";
     }
 
-    if (buscar.value.length > 0) {
+    if (filtros.value.length > 0) {
         router.get(
-            route(ruta.value + ".search", buscar.value),
-            {
-                orderBy: orderByObject.value,
-            },
-            { preserveState: true }
+            route(
+                ruta.value + ".filter",
+                {
+                    filtros: filtros.value,
+                    orderBy: orderByObject.value,
+                    ...params.value,
+                },
+                { preserveState: true }
+            )
+        );
+    } else if (buscar.value.length > 0) {
+        router.get(
+            route(
+                ruta.value + ".search",
+                {
+                    filtro: buscar.value,
+                    orderBy: orderByObject.value,
+                    ...params.value,
+                },
+                { preserveState: true }
+            )
         );
     } else {
         router.get(
-            route(ruta.value + ".index"),
-            {
-                orderBy: orderByObject.value,
-            },
-            { preserveState: true }
+            route(
+                ruta.value + ".index",
+                {
+                    orderBy: orderByObject.value,
+                    ...params.value,
+                },
+                { preserveState: true }
+            )
         );
     }
 };

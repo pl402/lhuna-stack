@@ -58,19 +58,38 @@ class User extends Authenticatable
 
     public function scopeFiltros($query, array $filtros)
     {
-        $query
-            ->when($filtros["name"] ?? null, function ($query, $name) {
-                return $query->where("name", $name);
-            })
-            ->when($filtros["titulo"] ?? null, function ($query, $name) {
-                return $query->where("titulo", $name);
-            })
-            ->when($filtros["email"] ?? null, function ($query, $email) {
-                return $query->where("email", $email);
-            })
-            ->when($filtros["id"] ?? null, function ($query, $id) {
-                return $query->where("id", $id);
-            });
+        /* Procesa los filtros cargados 
+         el formato es un array con los siguientes campos:
+         [
+            {
+                "campo" => "name"
+                "nombre_campo" => "Nombre"
+                "condicion" => "!="
+                "valor" => "123"
+                "conjuncion" => "AND"
+            }, 
+            ...
+         ]
+         */
+
+        foreach ($filtros as $filtro) {
+            $campo = $filtro["campo"];
+            $condicion = $filtro["condicion"];
+            $valor = $filtro["valor"];
+            $conjuncion = $filtro["conjuncion"];
+
+            if ($condicion == "LIKE") {
+                $valor = "%{$valor}%";
+            }
+
+            if ($conjuncion == "AND") {
+                $query->where($campo, $condicion, $valor);
+            } else {
+                $query->orWhere($campo, $condicion, $valor);
+            }
+        }
+
+        return $query;
     }
 
     public function scopeFiltro($query, $key)

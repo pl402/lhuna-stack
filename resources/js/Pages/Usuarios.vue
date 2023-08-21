@@ -23,6 +23,7 @@ const props = defineProps({
     filtro: String,
     orderBy: Object,
     auth: Object,
+    filtros: Array,
 });
 
 const form = useForm({
@@ -42,6 +43,7 @@ const error = reactive({
 
 const usuarios = toRefs(props).usuarios;
 const buscar = ref(props.filtro ? props.filtro : "");
+const filtros = ref(props.filtros ? props.filtros : []);
 const estadoModalUsuario = ref(false);
 const estadoModalEliminaUsuario = ref(false);
 const accion = ref("new");
@@ -98,44 +100,23 @@ let roles = [
     },
 ];
 
-const filtros = ref({
+const campos = {
     id: {
-        value: "",
-        activo: false,
-        type: "number",
         label: "ID",
-        placeholder: "ID",
     },
     name: {
-        value: "",
-        activo: false,
-        type: "text",
         label: "Nombre",
-        placeholder: "Nombre",
     },
     titulo: {
-        value: "",
-        activo: false,
-        type: "text",
         label: "Título",
-        placeholder: "Título",
     },
     email: {
-        value: "",
-        activo: false,
-        type: "email",
         label: "Email",
-        placeholder: "Email",
     },
     rol: {
-        value: "",
-        activo: false,
-        type: "select",
         label: "Rol",
-        placeholder: "Rol",
-        options: roles,
     },
-});
+};
 
 const bg_color = {
     Administrador: "bg-red-600",
@@ -284,6 +265,7 @@ const borraUsuarioDo = () => {
                     :orderByObject="orderByObject"
                     ruta="usuarios"
                     :filtros="filtros"
+                    :campos="campos"
                     autofocus
                 />
                 <Tabla v-if="usuarios.data.length > 0">
@@ -293,6 +275,7 @@ const borraUsuarioDo = () => {
                                 v-model="orderByObject"
                                 ruta="usuarios"
                                 :buscar="buscar"
+                                :filtros="filtros"
                                 titulo="ID"
                                 campo="id"
                             />
@@ -302,6 +285,7 @@ const borraUsuarioDo = () => {
                                 v-model="orderByObject"
                                 ruta="usuarios"
                                 :buscar="buscar"
+                                :filtros="filtros"
                                 titulo="Nombre"
                                 campo="name"
                             />
@@ -311,6 +295,7 @@ const borraUsuarioDo = () => {
                                 v-model="orderByObject"
                                 ruta="usuarios"
                                 :buscar="buscar"
+                                :filtros="filtros"
                                 titulo="Titulo"
                                 campo="titulo"
                             />
@@ -320,6 +305,7 @@ const borraUsuarioDo = () => {
                                 v-model="orderByObject"
                                 ruta="usuarios"
                                 :buscar="buscar"
+                                :filtros="filtros"
                                 titulo="Email"
                                 campo="email"
                             />

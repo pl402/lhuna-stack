@@ -78,6 +78,37 @@ class UsuariosController extends Controller
         }
     }
 
+    public function filter(Request $request)
+    {
+        $user = \Auth::user();
+        if ($user->can("usuarios.index")) {
+            $filtros = $request->filtros;
+
+            $orderBy = ["field" => "id", "sort" => "asc"];
+            if ($request->has("orderBy")) {
+                $orderBy = $request->orderBy;
+            }
+            //dd($filtros, $orderBy);
+            $usuarios = User::filtros($filtros)
+                ->orderBy($orderBy["field"], $orderBy["sort"])
+                ->paginate(10)
+                ->onEachSide(1)
+                ->appends(request()->query());
+
+            return Inertia::render(
+                "Usuarios",
+                compact("usuarios", "filtros", "orderBy")
+            );
+        } else {
+            return redirect()
+                ->back()
+                ->with(
+                    "error",
+                    "No cuenta con los permisos necesarios para realizar esta acción."
+                );
+        }
+    }
+
     public function store(Request $request)
     {
         $user = \Auth::user();
