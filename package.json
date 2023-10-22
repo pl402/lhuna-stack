@@ -36,6 +36,8 @@
         "@inertiajs/vue3": "^1.0.6",
         "moment": "^2.29.3",
         "notiwind": "^1.2.5",
+        "ping.js": "^0.3.0",
+        "v-offline": "^3.4.0",
         "vue-currency-input": "^2.5.1"
     }
 }

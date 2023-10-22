@@ -11,10 +11,17 @@ import JetResponsiveNavLink from "@/Jetstream/ResponsiveNavLink.vue";
 import ActionMessage from "@/Jetstream/ActionMessage.vue";
 import Toast from "@/Components/Toast.vue";
 import { notify } from "notiwind";
+import { VOffline } from "v-offline";
 
 defineProps({
     title: String,
 });
+
+const online = ref(false);
+
+const onConnectionChange = (isOnline) => {
+    online.value = isOnline;
+};
 
 const showDropNav = ref(
     localStorage.showDropNav ? localStorage.showDropNav === "true" : true
@@ -73,6 +80,7 @@ const menu = [
         active:
             route().current("usuarios.index") ||
             route().current("usuarios.search") ||
+            route().current("usuarios.filter") ||
             route().current("usuarios"),
         show: true,
     },
@@ -137,6 +145,24 @@ const menu = [
                         <h2
                             class="text-lg font-bold text-slate-900 flex my-auto truncate"
                         >
+                            <VOffline @detected-condition="onConnectionChange">
+                                <template v-if="online">
+                                    <span class="text-green-500">
+                                        <font-awesome-icon
+                                            icon="circle"
+                                            class="w-3 mr-2"
+                                        />
+                                    </span>
+                                </template>
+                                <template v-else>
+                                    <span class="text-red-500">
+                                        <font-awesome-icon
+                                            icon="circle"
+                                            class="w-3 mr-2"
+                                        />
+                                    </span>
+                                </template>
+                            </VOffline>
                             <!-- Titulo menu celular -->
                             Lhuna-Stack<span
                                 class="font-light text-slate-500 mx-2"
