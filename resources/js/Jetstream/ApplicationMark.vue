@@ -2,5 +2,5 @@
 
 <template>
     <!-- imagen desde public -->
-    <img :src="$inertia.page.props.logoNav" />
+    <img :src="$page.props.logoNav" />
 </template>

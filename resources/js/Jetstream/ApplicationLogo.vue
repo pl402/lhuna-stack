@@ -1,4 +1,4 @@
 <script setup></script>
 <template>
-    <img :src="$inertia.page.props.logoNav" />
+    <img :src="$page.props.logoNav" />
 </template>
