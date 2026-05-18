@@ -55,6 +55,15 @@ class HandleInertiaRequests extends Middleware
                     'permissions' => $user->getAllPermissions()->pluck('name'),
                 ] : null;
             },
+            'themeColor' => function () {
+                try {
+                    if (\Illuminate\Support\Facades\Schema::hasTable('configuraciones')) {
+                        $tema = \App\Models\Configuracion::where('clave', 'Color del Tema')->first();
+                        return $tema ? strtolower($tema->valor) : 'green';
+                    }
+                } catch (\Exception $e) {}
+                return 'green';
+            },
         ]);
     }
 }

@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import JetButton from '@/Jetstream/Button.vue';
 import JetSecondaryButton from '@/Jetstream/SecondaryButton.vue';
 import JetDangerButton from '@/Jetstream/DangerButton.vue';
@@ -15,6 +15,9 @@ import Progress from '@/Components/Progress.vue';
 import Toggle from '@/Components/Toggle.vue';
 import FileDropzone from '@/Components/FileDropzone.vue';
 import DatePicker from '@/Components/DatePicker.vue';
+import Tabla from '@/Components/Tabla.vue';
+import Tabs from '@/Components/Tabs.vue';
+import DialogModal from '@/Jetstream/DialogModal.vue';
 import { notify } from "notiwind";
 
 const textValue = ref('');
@@ -28,6 +31,91 @@ const toggleValue = ref(false);
 const fileValue = ref([]);
 const dateValue = ref('');
 const activeTab = ref('basicos');
+const formTabs = [
+    { id: 'basicos', label: 'Básicos', icon: ['fas', 'list-check'] },
+    { id: 'avanzados', label: 'Avanzados', icon: ['fas', 'gears'] },
+    { id: 'media', label: 'Adicionales', icon: ['fas', 'plus-circle'] }
+];
+const showModal = ref(false);
+
+const tableData = ref([
+    { id: 1, name: 'Elias pl402', email: 'elias@lhuna.dev', role: 'Administrador', status: 'Activo', statusType: 'success' },
+    { id: 2, name: 'María Gómez', email: 'maria@lhuna.dev', role: 'Editor', status: 'Pendiente', statusType: 'warning' },
+    { id: 3, name: 'Carlos Ruíz', email: 'carlos@lhuna.dev', role: 'Espectador', status: 'Suspendido', statusType: 'danger' },
+    { id: 4, name: 'Ana Beltrán', email: 'ana@lhuna.dev', role: 'Administrador', status: 'Activo', statusType: 'success' },
+    { id: 5, name: 'Javier Ortega', email: 'javier@lhuna.dev', role: 'Usuario', status: 'Activo', statusType: 'success' },
+    { id: 6, name: 'Sofía Méndez', email: 'sofia@lhuna.dev', role: 'Editor', status: 'Pendiente', statusType: 'warning' },
+]);
+
+const searchQuery = ref('');
+const filteredTableData = computed(() => {
+    if (!searchQuery.value) return tableData.value;
+    const query = searchQuery.value.toLowerCase().trim();
+    return tableData.value.filter(user => 
+        user.name.toLowerCase().includes(query) || 
+        user.email.toLowerCase().includes(query) || 
+        user.role.toLowerCase().includes(query)
+    );
+});
+
+const openCreateUserModal = () => {
+    const randomNames = ['Diego Flores', 'Valeria Rojas', 'Juan Castro', 'Gabriela Solis', 'Esteban Marín'];
+    const randomName = randomNames[Math.floor(Math.random() * randomNames.length)] + ' (Demo)';
+    const emailName = randomName.toLowerCase().replace(/\s+/g, '').replace('(demo)', '');
+    const roles = ['Administrador', 'Editor', 'Usuario', 'Espectador'];
+    const randomRole = roles[Math.floor(Math.random() * roles.length)];
+    const statuses = ['Activo', 'Pendiente', 'Suspendido'];
+    const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+    const statusType = randomStatus === 'Activo' ? 'success' : (randomStatus === 'Pendiente' ? 'warning' : 'danger');
+    
+    const nextId = tableData.value.length ? Math.max(...tableData.value.map(u => u.id)) + 1 : 1;
+    tableData.value.push({
+        id: nextId,
+        name: randomName,
+        email: `${emailName}@lhuna.dev`,
+        role: randomRole,
+        status: randomStatus,
+        statusType
+    });
+    
+    notify({
+        group: 'main',
+        title: 'Usuario Añadido (Demo)',
+        text: `Se ha auto-creado a ${randomName} con rol ${randomRole}.`,
+    }, 3500);
+};
+
+const openEditUserModal = (user) => {
+    const roles = ['Administrador', 'Editor', 'Usuario', 'Espectador'];
+    const currentRoleIndex = roles.indexOf(user.role);
+    const nextRole = roles[(currentRoleIndex + 1) % roles.length];
+    user.role = nextRole;
+    
+    notify({
+        group: 'info',
+        title: 'Rol Cambiado (Demo)',
+        text: `Se editó a ${user.name}: nuevo rol ${nextRole}`,
+    }, 3500);
+};
+
+const deleteUser = (userId) => {
+    const user = tableData.value.find(u => u.id === userId);
+    tableData.value = tableData.value.filter(u => u.id !== userId);
+    notify({
+        group: 'error',
+        title: 'Usuario Eliminado',
+        text: `${user ? user.name : 'El usuario'} ha sido removido de la tabla de demo.`,
+    }, 3500);
+};
+
+const confirmModalDemo = () => {
+    notify({
+        group: 'main',
+        title: 'Acción Completada',
+        text: 'Has interactuado correctamente con el diálogo modal de demostración.',
+    }, 3500);
+    showModal.value = false;
+};
 
 const demoOptions = ref([
     { name: 'Vue.js', value: 'vue' },
@@ -81,7 +169,7 @@ const showNotification = (type) => {
             <div class="absolute -right-20 -top-20 w-64 h-64 bg-brand-500 rounded-full blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
             
             <div class="relative z-10">
-                <span class="inline-block py-1 px-3 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-500 text-xs font-bold tracking-wider uppercase mb-4">
+                <span class="inline-block py-1 px-3 rounded-full bg-brand-950 border border-brand-900 text-brand-500 text-xs font-bold tracking-wider uppercase mb-4">
                     Lhuna Stack V2
                 </span>
                 <h1 class="text-4xl md:text-5xl font-extrabold text-slate-100 mb-4 tracking-tight">
@@ -128,29 +216,7 @@ const showNotification = (type) => {
                 </div>
 
                 <!-- Tabs Navigation -->
-                <div class="flex border-b border-slate-700/50 dark:border-dark-border mb-5">
-                    <button 
-                        @click="activeTab = 'basicos'"
-                        :class="activeTab === 'basicos' ? 'border-brand-500 text-brand-500 font-semibold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-                        class="flex-1 pb-2.5 text-center text-xs font-medium border-b-2 transition duration-200 focus:outline-none"
-                    >
-                        Básicos
-                    </button>
-                    <button 
-                        @click="activeTab = 'avanzados'"
-                        :class="activeTab === 'avanzados' ? 'border-brand-500 text-brand-500 font-semibold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-                        class="flex-1 pb-2.5 text-center text-xs font-medium border-b-2 transition duration-200 focus:outline-none"
-                    >
-                        Avanzados
-                    </button>
-                    <button 
-                        @click="activeTab = 'media'"
-                        :class="activeTab === 'media' ? 'border-brand-500 text-brand-500 font-semibold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-                        class="flex-1 pb-2.5 text-center text-xs font-medium border-b-2 transition duration-200 focus:outline-none"
-                    >
-                        Adicionales
-                    </button>
-                </div>
+                <Tabs v-model="activeTab" :tabs="formTabs" />
 
                 <!-- Tab Contents -->
                 <div class="space-y-4 min-h-[300px]">
@@ -173,7 +239,7 @@ const showNotification = (type) => {
                             <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Selector de Fecha</label>
                             <DatePicker v-model="dateValue" />
                         </div>
-                        <div class="flex items-center justify-between pt-2 border-t border-slate-700/50 dark:border-dark-border">
+                        <div class="flex items-center justify-between pt-2 border-t border-dark-border">
                             <label class="block text-sm font-medium text-slate-600 dark:text-slate-300">Activar Notificaciones</label>
                             <Toggle v-model="toggleValue" />
                         </div>
@@ -209,7 +275,7 @@ const showNotification = (type) => {
                             <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">Subida de Archivos</label>
                             <FileDropzone v-model="fileValue" accept="image/*,application/pdf" />
                         </div>
-                        <div class="pt-3 border-t border-slate-700/50 dark:border-dark-border">
+                        <div class="pt-3 border-t border-dark-border">
                             <label class="flex items-center">
                                 <JetCheckbox v-model="checkboxValue" />
                                 <span class="ml-2 text-sm text-slate-600 dark:text-slate-300">Acepto los términos y condiciones</span>
@@ -229,7 +295,7 @@ const showNotification = (type) => {
                 </div>
                 
                 <div class="space-y-4">
-                    <div class="p-4 rounded-lg bg-dark-elevated border border-slate-700/50 flex items-center justify-between">
+                    <div class="p-4 rounded-lg bg-dark-elevated border border-dark-border flex items-center justify-between">
                         <div>
                             <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Ingresos Mensuales</p>
                             <p class="text-2xl font-bold text-slate-100 mt-1">$45,231.00</p>
@@ -253,7 +319,7 @@ const showNotification = (type) => {
             </div>
 
             <!-- Alertas / Feedback -->
-            <div class="bg-dark-surface border border-dark-border rounded-xl p-6 shadow-lg shadow-black/20 hover:border-brand-500/50 transition-colors duration-300 md:col-span-2 lg:col-span-3">
+            <div class="bg-dark-surface border border-dark-border rounded-xl p-6 shadow-lg shadow-black/20 hover:border-brand-500/50 transition-colors duration-300 md:col-span-1 lg:col-span-2">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-500">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -296,7 +362,7 @@ const showNotification = (type) => {
                     <div class="flex-1 border-t md:border-t-0 md:border-l border-dark-border pt-6 md:pt-0 md:pl-6 flex flex-col justify-center gap-4">
                         <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Estados de Badges</p>
                         <div class="flex flex-wrap gap-2">
-                            <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-brand-500/10 text-brand-700 dark:text-brand-500 border border-brand-500/20">Brand Default</span>
+                            <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-brand-950 text-brand-700 dark:text-brand-500 border border-brand-900">Brand Default</span>
                             <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20">Completado</span>
                             <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">En Progreso</span>
                             <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20">Rechazado</span>
@@ -306,6 +372,299 @@ const showNotification = (type) => {
                 </div>
             </div>
 
+            <!-- Animaciones Tailwind CSS -->
+            <div class="bg-dark-surface border border-dark-border rounded-xl p-6 shadow-lg shadow-black/20 hover:border-brand-500/50 transition-colors duration-300">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-slate-200">Animaciones Nativas</h3>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Spin Animation -->
+                    <div class="flex items-center gap-4 p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                        <div class="w-8 h-8 rounded-full border-4 border-slate-700 border-t-brand-500 animate-spin"></div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-200">Giro Infinito</p>
+                            <code class="text-[10px] text-brand-400 font-mono">animate-spin</code>
+                        </div>
+                    </div>
+
+                    <!-- Ping Animation -->
+                    <div class="flex items-center gap-4 p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                        <div class="relative flex h-3 w-3 ml-2.5 my-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-200">Señal de Radar</p>
+                            <code class="text-[10px] text-brand-400 font-mono">animate-ping</code>
+                        </div>
+                    </div>
+
+                    <!-- Pulse Animation -->
+                    <div class="flex items-center gap-4 p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                        <div class="flex-1 space-y-2 py-1 max-w-[80px] animate-pulse">
+                            <div class="h-2 bg-slate-700 rounded"></div>
+                            <div class="space-y-1">
+                                <div class="h-2 bg-slate-700 rounded w-5/6"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-200">Carga Gradual (Esqueleto)</p>
+                            <code class="text-[10px] text-brand-400 font-mono">animate-pulse</code>
+                        </div>
+                    </div>
+
+                    <!-- Bounce Animation -->
+                    <div class="flex items-center gap-4 p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-500 animate-bounce">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.07 6.07 0 00-1-3.59M9 17v1a3 3 0 006 0v-1m-6 0H9"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-200">Rebote de Atención</p>
+                            <code class="text-[10px] text-brand-400 font-mono">animate-bounce</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
+
+        <!-- Secciones Complejas: Tablas y Diálogos Modales -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
+            
+            <!-- Tabla Completa de Demostración -->
+            <div class="bg-dark-surface border border-dark-border rounded-xl shadow-lg shadow-black/20 hover:border-brand-500/50 transition-colors duration-300 lg:col-span-2 overflow-hidden flex flex-col justify-between">
+                <div>
+                    <!-- Buscador de Usuarios Mock -->
+                    <div class="flex flex-wrap border-b border-dark-border bg-dark-surface/50 bg-glass-gradient backdrop-blur-md relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                        <input 
+                            type="text" 
+                            placeholder="Buscar usuarios..." 
+                            v-model="searchQuery" 
+                            class="block w-full pl-10 pr-4 py-3 bg-transparent border-0 text-slate-200 placeholder-slate-500 focus:ring-0 focus:outline-none text-sm rounded-t-xl"
+                        />
+                    </div>
+
+                    <div class="overflow-hidden">
+                        <Tabla v-if="filteredTableData.length > 0">
+                            <template #col>
+                                <th class="px-4 py-3 text-left">Nombre</th>
+                                <th class="px-4 py-3 text-left">Rol</th>
+                                <th class="px-4 py-3 text-left">Estado</th>
+                                <th class="px-4 py-3 w-5 text-center sticky right-0 bg-dark-surface/50 border-l border-dark-border">
+                                    <button 
+                                        @click="openCreateUserModal" 
+                                        class="inline-flex items-center justify-center p-1.5 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white rounded font-bold transition duration-200 shadow-md shadow-brand-500/20"
+                                        title="Agregar Usuario"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                    </button>
+                                </th>
+                            </template>
+                            <template #row>
+                                <tr v-for="user in filteredTableData" :key="user.id" class="border-t border-dark-border hover:bg-dark-elevated/40 transition-colors">
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-brand-500/20 flex items-center justify-center text-xs font-bold text-brand-500 uppercase">
+                                                {{ user.name.slice(0, 2) }}
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-slate-200 text-left">{{ user.name }}</p>
+                                                <p class="text-xs text-slate-500 dark:text-slate-400 text-left">{{ user.email }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-slate-300 text-left">{{ user.role }}</td>
+                                    <td class="px-4 py-3 text-left">
+                                        <span v-if="user.statusType === 'success'" class="px-2 py-0.5 rounded text-xs bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20">
+                                            {{ user.status }}
+                                        </span>
+                                        <span v-else-if="user.statusType === 'warning'" class="px-2 py-0.5 rounded text-xs bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                                            {{ user.status }}
+                                        </span>
+                                        <span v-else class="px-2 py-0.5 rounded text-xs bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20">
+                                            {{ user.status }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 text-center sticky right-0 bg-dark-surface/50 border-l border-dark-border">
+                                        <div class="flex justify-center gap-1.5">
+                                            <button 
+                                                @click="openEditUserModal(user)" 
+                                                class="inline-flex items-center justify-center p-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded transition duration-200"
+                                                title="Editar"
+                                            >
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                            </button>
+                                            <button 
+                                                @click="deleteUser(user.id)" 
+                                                class="inline-flex items-center justify-center p-1.5 bg-red-500 hover:bg-red-600 text-white rounded transition duration-200"
+                                                title="Eliminar"
+                                            >
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </Tabla>
+                        <div v-else class="text-center p-8 text-slate-400 text-sm">
+                            No se encontraron usuarios
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diálogos y Modales Showcase -->
+            <div class="bg-dark-surface border border-dark-border rounded-xl p-6 shadow-lg shadow-black/20 hover:border-brand-500/50 transition-colors duration-300 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-slate-200">Modales Interactivos</h3>
+                    </div>
+                    <p class="text-sm text-slate-400 leading-relaxed mb-6">
+                        Los diálogos de Lhuna Stack están diseñados para enfocar al usuario de manera limpia. Cuentan con un fondo traslúcido estilizado, transiciones fluidas de entrada/salida y total compatibilidad con dispositivos móviles.
+                    </p>
+                    
+                    <div class="p-4 rounded-lg bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-900/60 text-slate-700 dark:text-slate-300 text-xs mb-4">
+                        <p class="font-semibold text-brand-600 dark:text-brand-400 mb-1">Prueba Interactiva</p>
+                        <p class="opacity-90">
+                            Haz clic en el botón de abajo para abrir una ventana modal interactiva de ejemplo. Observa cómo mantiene el esquema de colores, el desenfoque de fondo y la alineación perfecta de los controles.
+                        </p>
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-dark-border">
+                    <button 
+                        @click="showModal = true"
+                        class="w-full inline-flex items-center justify-center px-4 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-bold text-sm transition duration-300 shadow-lg shadow-brand-500/20 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 focus:ring-offset-dark-base"
+                    >
+                        Abrir Modal de Ejemplo
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sistema de Diseño y Tokens de Colores -->
+        <div class="bg-dark-surface border border-dark-border rounded-xl p-8 shadow-lg shadow-black/20 hover:border-brand-500/50 transition-colors duration-300 mt-12 relative overflow-hidden group">
+            <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-slate-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+            
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-200">Sistema de Diseño y Tokens</h3>
+                </div>
+
+                <p class="text-sm text-slate-400 max-w-3xl mb-8 leading-relaxed">
+                    Lhuna Stack utiliza variables CSS nativas vinculadas en la base del layout. Esto permite cambiar paletas cromáticas al instante y mantener un control riguroso del contraste y la legibilidad en entornos tanto claros como oscuros.
+                </p>
+
+                <!-- Color Palette Showcase -->
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                    
+                    <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                        <div class="w-12 h-12 rounded-lg bg-brand-500 shadow-md shadow-brand-500/30 mb-2"></div>
+                        <span class="text-xs font-semibold text-slate-200">Brand Primary</span>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">var(--color-brand-500)</span>
+                    </div>
+
+                    <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                        <div class="w-12 h-12 rounded-lg bg-[#0F172A] border border-dark-border mb-2"></div>
+                        <span class="text-xs font-semibold text-slate-200">Dark Base</span>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-dark-base</span>
+                    </div>
+
+                    <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                        <div class="w-12 h-12 rounded-lg bg-[#1E293B] border border-dark-border mb-2"></div>
+                        <span class="text-xs font-semibold text-slate-200">Dark Surface</span>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-dark-surface</span>
+                    </div>
+
+                    <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                        <div class="w-12 h-12 rounded-lg bg-[#334155] border border-dark-border mb-2"></div>
+                        <span class="text-xs font-semibold text-slate-200">Dark Elevated</span>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-dark-elevated</span>
+                    </div>
+
+                    <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                        <div class="w-12 h-12 rounded-lg bg-green-500/20 border border-green-500/30 flex items-center justify-center text-green-500 font-bold mb-2">✓</div>
+                        <span class="text-xs font-semibold text-slate-200">Success Accent</span>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-green-500</span>
+                    </div>
+
+                    <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                        <div class="w-12 h-12 rounded-lg bg-red-500/20 border border-red-500/30 flex items-center justify-center text-red-500 font-bold mb-2">✗</div>
+                        <span class="text-xs font-semibold text-slate-200">Danger Accent</span>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-red-500</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Jetstream Dialog Modal Instance -->
+        <DialogModal :show="showModal" @close="showModal = false" max-width="md">
+            <template #title>
+                Ventana Modal Interactiva
+            </template>
+            <template #content>
+                <div class="space-y-4 text-left">
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        ¡Hola! Esto es una <strong>ventana modal interactiva</strong> de demostración.
+                    </p>
+                    
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Los diálogos modales son excelentes para captar la atención de forma limpia y enfocada, bloqueando la interacción con el resto de la interfaz hasta que se toma una decisión.
+                    </p>
+                    
+                    <div class="p-4 rounded-lg bg-brand-950 border border-brand-900 text-slate-300 text-xs">
+                        <h4 class="text-xs font-semibold text-brand-500 mb-1.5">Características Destacadas</h4>
+                        <ul class="space-y-1.5 opacity-90 leading-relaxed list-none pl-0">
+                            <li class="flex items-center gap-2">
+                                <span class="text-brand-500 font-bold">✓</span>
+                                <span>Efecto de cristal traslúcido de fondo (backdrop-blur)</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-brand-500 font-bold">✓</span>
+                                <span>Alineación semántica perfecta de controles</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-brand-500 font-bold">✓</span>
+                                <span>Transiciones animadas suaves al abrir y cerrar</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-brand-500 font-bold">✓</span>
+                                <span>Totalmente adaptable a móviles y tablets</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </template>
+            <template #footer>
+                <div class="w-1/2 flex justify-start">
+                    <JetSecondaryButton @click="showModal = false">
+                        Cerrar
+                    </JetSecondaryButton>
+                </div>
+                <div class="w-1/2 flex justify-end">
+                    <button 
+                        @click="confirmModalDemo"
+                        class="inline-flex items-center px-4 py-2 bg-brand-500 hover:bg-brand-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest active:bg-brand-700 focus:outline-none focus:border-brand-500 focus:ring focus:ring-brand-500 transition shadow-lg shadow-brand-500/20"
+                    >
+                        Entendido
+                    </button>
+                </div>
+            </template>
+        </DialogModal>
+
     </div>
 </template>

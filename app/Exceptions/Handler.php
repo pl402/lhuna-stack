@@ -27,15 +27,22 @@ class Handler extends ExceptionHandler
         'password_confirmation',
     ];
 
-    /**
-     * Register the exception handling callbacks for the application.
-     *
-     * @return void
-     */
     public function register()
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        $this->renderable(function (Throwable $e, $request) {
+            if ($this->isHttpException($e)) {
+                $status = $e->getStatusCode();
+                
+                if (in_array($status, [400, 401, 403, 404, 405, 408, 419, 429, 500, 502, 503, 504])) {
+                    return \Inertia\Inertia::render('Error', [
+                        'status' => $status,
+                    ])->toResponse($request)->setStatusCode($status);
+                }
+            }
         });
     }
 }

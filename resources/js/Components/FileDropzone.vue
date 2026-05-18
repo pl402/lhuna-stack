@@ -80,7 +80,7 @@ const triggerInput = () => {
         @click="triggerInput"
         :class="[
             'relative flex flex-col items-center justify-center w-full h-40 px-4 py-6 border-2 border-dashed rounded-lg transition-colors cursor-pointer',
-            isDragging ? 'border-brand-500 bg-brand-500/10' : 'border-slate-300 dark:border-dark-border bg-slate-50 dark:bg-dark-surface hover:bg-slate-100 dark:hover:bg-dark-elevated',
+            isDragging ? 'border-brand-500 bg-brand-500/10' : 'border-dark-border bg-dark-surface hover:bg-dark-elevated/40',
             disabled ? 'opacity-50 cursor-not-allowed' : ''
         ]"
     >

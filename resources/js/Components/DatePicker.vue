@@ -34,7 +34,7 @@ defineExpose({ focus });
             :min="min"
             :max="max"
             @input="$emit('update:modelValue', $event.target.value)"
-            class="w-full bg-slate-50 dark:bg-dark-surface border-slate-300 dark:border-dark-border text-slate-800 dark:text-slate-100 focus:ring-brand-500 focus:ring-opacity-30 focus:border-brand-500 focus:ring rounded-md shadow-sm shadow-black/5 dark:shadow-black/20 disabled:text-slate-400 dark:disabled:text-slate-500 disabled:bg-slate-100 dark:disabled:bg-dark-elevated disabled:cursor-not-allowed appearance-none"
+            class="w-full bg-dark-surface border-dark-border text-slate-800 dark:text-slate-100 focus:ring-brand-500 focus:ring-opacity-30 focus:border-brand-500 focus:ring rounded-md shadow-sm shadow-black/5 dark:shadow-black/20 disabled:text-slate-400 dark:disabled:text-slate-500 disabled:bg-slate-100 dark:disabled:bg-dark-elevated disabled:cursor-not-allowed appearance-none"
         />
         <!-- Custom calendar icon can be positioned absolute here if needed, but native input handles it well usually -->
     </div>
