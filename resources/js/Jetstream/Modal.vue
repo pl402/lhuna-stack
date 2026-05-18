@@ -115,7 +115,7 @@ const maxWidthClass = computed(() => {
                 </div>
 
                 <div
-                    class="mb-6 bg-white rounded-lg shadow-xl transform transition-all sm:w-full sm:mx-auto inner"
+                    class="mb-6 bg-dark-surface border border-dark-border rounded-lg shadow-2xl shadow-black/20 ring-1 ring-white/5 transform transition-all sm:w-full sm:mx-auto inner"
                     :class="maxWidthClass"
                 >
                     <slot />

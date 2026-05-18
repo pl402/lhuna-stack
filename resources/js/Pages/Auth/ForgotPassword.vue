@@ -28,7 +28,7 @@ const submit = () => {
             <JetAuthenticationCardLogo />
         </template>
 
-        <div class="mb-4 text-sm text-gray-600">
+        <div class="mb-4 text-sm text-slate-400">
             ¿Olvidaste tu contraseña? No hay problema. Simplemente háganos saber
             su dirección de correo electrónico y le enviaremos un enlace de
             restablecimiento de contraseña que le permitirá elegir una nueva.

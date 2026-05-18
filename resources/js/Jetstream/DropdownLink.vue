@@ -13,7 +13,7 @@ defineProps({
         <button
             v-if="as === 'button'"
             type="submit"
-            class="block w-full px-4 py-2 text-sm leading-5 text-left text-slate-700 hover:bg-slate-300 focus:outline-none focus:bg-slate-500 transition"
+            class="block w-full px-4 py-2 text-sm leading-5 text-left text-slate-300 hover:text-brand-700 dark:hover:text-brand-400 hover:bg-dark-elevated focus:outline-none focus:bg-dark-elevated transition-all duration-300"
         >
             <slot />
         </button>
@@ -22,7 +22,7 @@ defineProps({
             v-else-if="as === 'a'"
             :href="href"
             :target="target"
-            class="block px-4 py-2 text-sm leading-5 text-slate-700 hover:bg-slate-300 focus:outline-none focus:bg-slate-500 transition"
+            class="block px-4 py-2 text-sm leading-5 text-slate-300 hover:text-brand-700 dark:hover:text-brand-400 hover:bg-dark-elevated focus:outline-none focus:bg-dark-elevated transition-all duration-300"
         >
             <slot />
         </a>
@@ -30,7 +30,7 @@ defineProps({
         <Link
             v-else
             :href="href"
-            class="block px-4 py-2 text-sm leading-5 text-slate-700 hover:bg-slate-300 focus:outline-none focus:bg-slate-500 transition"
+            class="block px-4 py-2 text-sm leading-5 text-slate-300 hover:text-brand-700 dark:hover:text-brand-400 hover:bg-dark-elevated focus:outline-none focus:bg-dark-elevated transition-all duration-300"
         >
             <slot />
         </Link>

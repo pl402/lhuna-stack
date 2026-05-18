@@ -33,7 +33,7 @@ const submit = () => {
             <JetAuthenticationCardLogo />
         </template>
 
-        <div class="mb-4 text-sm text-gray-600">
+        <div class="mb-4 text-sm text-slate-400">
             Esta es un área segura de la aplicación. Por favor confirme su
             contraseña antes de continuar.
         </div>

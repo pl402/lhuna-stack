@@ -102,14 +102,14 @@ const submit = () => {
                             <a
                                 target="_blank"
                                 :href="route('terms.show')"
-                                class="underline text-sm text-gray-600 hover:text-gray-900"
+                                class="underline text-sm text-slate-400 hover:text-slate-100"
                                 >Términos de Servicio</a
                             >
                             y la
                             <a
                                 target="_blank"
                                 :href="route('policy.show')"
-                                class="underline text-sm text-gray-600 hover:text-gray-900"
+                                class="underline text-sm text-slate-400 hover:text-slate-100"
                                 >Política de Privacidad</a
                             >
                         </div>
@@ -120,7 +120,7 @@ const submit = () => {
             <div class="flex items-center justify-end mt-4">
                 <Link
                     :href="route('login')"
-                    class="underline text-sm text-gray-600 hover:text-gray-900"
+                    class="underline text-sm text-slate-400 hover:text-slate-100"
                 >
                     ¿Ya esta registrado?
                 </Link>

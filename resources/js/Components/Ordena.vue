@@ -79,7 +79,7 @@ export default {};
     <span
         @click="ordena(campo)"
         class="hover:underline cursor-pointer"
-        :class="orderByObject.field === campo ? 'text-gray-900' : ''"
+        :class="orderByObject.field === campo ? 'text-slate-100' : ''"
         >{{ titulo }}
         <font-awesome-icon
             v-if="orderByObject.field === campo"

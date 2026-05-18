@@ -28,7 +28,7 @@ const verificationLinkSent = computed(
             <JetAuthenticationCardLogo />
         </template>
 
-        <div class="mb-4 text-sm text-gray-600">
+        <div class="mb-4 text-sm text-slate-400">
             Antes de continuar, ¿podría verificar su dirección de correo
             electrónico haciendo clic en el enlace que le acabamos de enviar? Si
             no recibiste el correo electrónico, con gusto te enviaremos otro.
@@ -54,7 +54,7 @@ const verificationLinkSent = computed(
                 <div>
                     <Link
                         :href="route('profile.show')"
-                        class="underline text-sm text-gray-600 hover:text-gray-900"
+                        class="underline text-sm text-slate-400 hover:text-slate-100"
                     >
                         Editar perfil</Link
                     >
@@ -63,7 +63,7 @@ const verificationLinkSent = computed(
                         :href="route('logout')"
                         method="post"
                         as="button"
-                        class="underline text-sm text-gray-600 hover:text-gray-900 ml-2"
+                        class="underline text-sm text-slate-400 hover:text-slate-100 ml-2"
                     >
                         Cerrar sesión
                     </Link>

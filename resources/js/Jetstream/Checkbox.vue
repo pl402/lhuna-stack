@@ -33,12 +33,12 @@ const proxyChecked = computed({
     :value="value"
     class="
       rounded
-      border-gray-300
-      text-slate-600
-      shadow-sm
-      focus:border-slate-300
-      focus:ring
-      focus:ring-slate-200
+      border-dark-border
+      text-brand-500 bg-dark-surface
+      shadow-sm shadow-black/20
+      focus:border-dark-border
+      focus:ring-[1.5px]
+      focus:ring-brand-500
       focus:ring-opacity-50
     "
   />

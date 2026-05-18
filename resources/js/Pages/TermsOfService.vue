@@ -10,15 +10,15 @@ defineProps({
 <template>
     <Head title="Términos de servicio" />
 
-    <div class="font-sans text-gray-900 antialiased">
-        <div class="pt-4 bg-gray-100">
+    <div class="font-sans text-slate-100 antialiased">
+        <div class="pt-4 bg-dark-elevated">
             <div class="min-h-screen flex flex-col items-center pt-6 sm:pt-0">
                 <div>
                     <JetAuthenticationCardLogo />
                 </div>
 
                 <div
-                    class="w-full sm:max-w-2xl mt-6 p-6 bg-white shadow-md overflow-hidden sm:rounded-lg prose"
+                    class="w-full sm:max-w-2xl mt-6 p-6 bg-dark-surface shadow-md shadow-black/30 overflow-hidden sm:rounded-lg prose"
                     v-html="terms"
                 />
             </div>

@@ -30,7 +30,7 @@ const close = () => {
         :closeable="closeable"
         @close="close"
     >
-        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 rounded-t-lg">
+        <div class="bg-dark-surface px-4 pt-5 pb-4 sm:p-6 sm:pb-4 rounded-t-lg">
             <div class="sm:flex sm:items-start">
                 <div
                     class="mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-20 sm:w-20"
@@ -63,7 +63,7 @@ const close = () => {
         </div>
 
         <div
-            class="flex flex-row justify-end px-4 py-2 border-b-2 border-slate-200/95 border-t-2 border-t-solid bg-slate-100 rounded-b-lg"
+            class="flex flex-row justify-end px-4 py-2 border-b-2 border-dark-border border-t-2 border-t-solid bg-dark-elevated/50 rounded-b-lg"
         >
             <slot name="footer" />
         </div>

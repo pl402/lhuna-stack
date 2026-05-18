@@ -45,7 +45,7 @@ const submit = () => {
             <JetAuthenticationCardLogo />
         </template>
 
-        <div class="mb-4 text-sm text-gray-600">
+        <div class="mb-4 text-sm text-slate-400">
             <template v-if="!recovery">
                 Confirme el acceso a su cuenta ingresando el código de
                 autenticación proporcionado por su aplicación de autenticación.
@@ -89,7 +89,7 @@ const submit = () => {
             <div class="flex items-center justify-end mt-4">
                 <button
                     type="button"
-                    class="text-sm text-gray-600 hover:text-gray-900 underline cursor-pointer"
+                    class="text-sm text-slate-400 hover:text-slate-100 underline cursor-pointer"
                     @click.prevent="toggleRecovery"
                 >
                     <template v-if="!recovery">

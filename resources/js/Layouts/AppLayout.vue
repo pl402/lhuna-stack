@@ -95,6 +95,19 @@ const menu = [
         show: true,
     },
 ];
+
+const isDark = ref(localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches));
+
+const toggleTheme = () => {
+    isDark.value = !isDark.value;
+    if (isDark.value) {
+        document.documentElement.classList.add('dark');
+        localStorage.theme = 'dark';
+    } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.theme = 'light';
+    }
+};
 </script>
 <style>
 .slide-fade-enter-active {
@@ -123,13 +136,14 @@ const menu = [
 <template>
     <div>
         <Head :title="title" />
-        <div class="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+        <div class="min-h-screen bg-dark-base text-slate-200 relative selection:bg-brand-500/30 selection:text-brand-200">
+            <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-500/10 blur-[120px] rounded-full pointer-events-none z-0"></div>
             <nav
-                class="sm:hidden bg-white/80 border-b border-slate-100 fixed top-0 z-50 w-full backdrop-blur-sm shadow"
+                class="sm:hidden bg-dark-surface/80 border-b border-dark-border fixed top-0 z-50 w-full backdrop-blur-md shadow-lg shadow-black/20"
             >
                 <!-- Primary Navigation Menu -->
                 <div
-                    class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-100 shadow"
+                    class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 bg-dark-surface/90 border-b border-dark-border shadow-sm backdrop-blur-lg"
                 >
                     <div class="flex justify-between h-12">
                         <div class="flex items-center p-3">
@@ -143,7 +157,7 @@ const menu = [
                             </div>
                         </div>
                         <h2
-                            class="text-lg font-bold text-slate-900 flex my-auto truncate"
+                            class="text-lg font-bold text-slate-100 flex my-auto truncate tracking-tight"
                         >
                             <VOffline @detected-condition="onConnectionChange">
                                 <template v-if="online">
@@ -165,10 +179,10 @@ const menu = [
                             </VOffline>
                             <!-- Titulo menu celular -->
                             Lhuna-Stack<span
-                                class="font-light text-slate-500 mx-2"
+                                class="font-light text-slate-500 mx-2 opacity-50"
                                 >/</span
                             ><span
-                                class="font-medium text-slate-800 truncate"
+                                class="font-medium text-brand-700 dark:text-brand-400 truncate"
                                 >{{ title }}</span
                             >
                         </h2>
@@ -176,7 +190,7 @@ const menu = [
                         <!-- Hamburger -->
                         <div class="-mr-2 flex items-center sm:hidden">
                             <button
-                                class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-slate-500 hover:bg-slate-100 focus:outline-none focus:bg-slate-100 focus:text-slate-500 transition"
+                                class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-brand-700 dark:hover:text-brand-400 hover:bg-brand-500/10 focus:outline-none focus:bg-brand-500/20 focus:text-brand-700 dark:focus:text-brand-400 transition-all duration-300"
                                 @click="changeShowDropNav"
                             >
                                 <svg
@@ -230,7 +244,7 @@ const menu = [
                             />{{ item.name }}
                         </JetResponsiveNavLink>
                     </div>
-                    <div class="border-t border-slate-200 my-[1px]"></div>
+                    <div class="border-t border-dark-border my-[1px]"></div>
                     <!-- Responsive Settings Options -->
                     <div>
                         <div class="space-y-1">
@@ -242,7 +256,7 @@ const menu = [
                                     icon="user-gear"
                                     class="w-5 mr-2"
                                 />{{ $page.props.user.name }}
-                                <div class="font-medium text-sm text-slate-800">
+                                <div class="font-medium text-sm text-brand-700 dark:text-brand-400">
                                     Usuario
                                     {{ $page.props.auth.roles[0] }}
                                 </div>
@@ -264,7 +278,7 @@ const menu = [
 
             <div class="flex">
                 <div
-                    class="flex-col h-screen bg-white border-r border-slate-200 shadow fixed transition-all duration-300 ease-in-out z-50"
+                    class="flex-col h-screen bg-dark-surface/95 backdrop-blur-xl border-r border-dark-border shadow-2xl fixed transition-all duration-300 ease-in-out z-50"
                     :class="
                         isOpen
                             ? 'hidden sm:block md:block sm:w-60 md:w-60 opacity-100 ml-0'
@@ -278,14 +292,14 @@ const menu = [
                                 <JetApplicationMark class="block h-7 w-auto" />
                             </Link>
                             <h2
-                                class="text-xl font-bold text-slate-900 flex-1 text-center"
+                                class="text-xl font-bold text-slate-100 flex-1 text-center tracking-tight"
                             >
                                 <!-- Titulo menu lateral oculto -->
                                 Lhuna-Stack
                             </h2>
                             <div class="ml-auto">
                                 <button
-                                    class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-slate-500 hover:bg-slate-100 focus:outline-none focus:bg-slate-100 focus:text-slate-500 transition"
+                                    class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-brand-700 dark:hover:text-brand-400 hover:bg-brand-500/10 focus:outline-none focus:bg-brand-500/20 focus:text-brand-700 dark:focus:text-brand-400 transition-all duration-300"
                                     @click="cierraMenu()"
                                 >
                                     <svg
@@ -325,17 +339,17 @@ const menu = [
                                 </JetResponsiveNavLink>
                             </div>
                             <div
-                                class="border-t border-slate-200 my-[1px]"
+                                class="border-t border-dark-border my-[1px]"
                             ></div>
                             <!-- Responsive Settings Options -->
                             <div>
                                 <!-- Page Footer -->
                                 <footer
-                                    class="bg-white shadow-2xl absolute bottom-0 w-full border-t border-slate-100"
+                                    class="bg-dark-surface/80 backdrop-blur-md absolute bottom-0 w-full border-t border-dark-border"
                                 >
                                     <div class="py-1 px-4 text-center">
                                         <!-- copyrigth  -->
-                                        <div class="text-xs text-slate-400">
+                                        <div class="text-xs text-slate-500">
                                             <div>
                                                 <a
                                                     href="https://lhuna.dev"
@@ -361,7 +375,7 @@ const menu = [
                 >
                     <!-- Page Heading -->
                     <header
-                        class="bg-white/80 border-b border-slate-300/90 sticky sm:top-0 top-12 z-10 backdrop-blur-sm shadow hidden sm:flex"
+                        class="bg-dark-surface/80 border-b border-dark-border sticky sm:top-0 top-12 z-40 backdrop-blur-xl shadow-lg shadow-black/10 hidden sm:flex"
                     >
                         <div
                             class="items-center hidden sm:flex md:flex transition-all duration-300 ease-in-out w-60"
@@ -373,13 +387,13 @@ const menu = [
                                 <JetApplicationMark class="block h-7 w-auto" />
                             </Link>
                             <h2
-                                class="text-xl font-bold text-slate-900 flex-1 text-center"
+                                class="text-xl font-bold text-slate-100 flex-1 text-center tracking-tight"
                             >
                                 <!-- Titulo menu lateral oculto -->
                                 Lhuna-Stack
                             </h2>
                             <button
-                                class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-slate-500 hover:bg-slate-100 focus:outline-none focus:bg-slate-100 focus:text-slate-500 transition"
+                                class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-brand-700 dark:hover:text-brand-400 hover:bg-brand-500/10 focus:outline-none focus:bg-brand-500/20 focus:text-brand-700 dark:focus:text-brand-400 transition-all duration-300"
                                 @click="abreMenu()"
                             >
                                 <svg
@@ -402,9 +416,13 @@ const menu = [
                             <slot v-if="$slots.header" name="header" />
                             <h2
                                 v-else
-                                class="font-semibold text-xl text-slate-800 leading-tight"
+                                class="font-semibold text-xl text-slate-100 leading-tight flex items-center gap-2"
                             >
-                                {{ title }}
+                                <div class="relative w-2 h-6 flex items-center justify-center">
+                                    <div class="absolute inset-0 bg-brand-500 blur-[4px] opacity-70 rounded-full"></div>
+                                    <div class="absolute inset-0 bg-brand-500 rounded-full"></div>
+                                </div>
+                                <span>{{ title }}</span>
                             </h2>
                         </div>
                         <!-- Settings Dropdown -->
@@ -414,7 +432,7 @@ const menu = [
                                     <span class="inline-flex rounded-md m-3">
                                         <button
                                             type="button"
-                                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-slate-500 bg-slate-100 hover:text-slate-700 focus:outline-none transition"
+                                            class="inline-flex items-center px-3 py-2 border border-dark-border text-sm leading-4 font-medium rounded-xl text-slate-300 bg-dark-elevated/50 hover:text-brand-700 dark:hover:text-brand-400 hover:bg-brand-500/10 hover:border-brand-500/30 focus:outline-none transition-all duration-300 shadow-sm"
                                         >
                                             <font-awesome-icon
                                                 icon="user"
@@ -440,7 +458,7 @@ const menu = [
                                 <template #content>
                                     <!-- Account Management -->
                                     <div
-                                        class="block px-4 py-2 text-xs text-slate-400"
+                                        class="block px-4 py-2 text-xs text-slate-500"
                                     >
                                         Usuario
                                         {{ $page.props.auth.roles[0] }}
@@ -455,7 +473,21 @@ const menu = [
                                         />Perfil
                                     </JetDropdownLink>
 
-                                    <div class="border-t border-slate-300" />
+                                    <div class="border-t border-dark-border" />
+
+                                    <button
+                                        @click="toggleTheme"
+                                        type="button"
+                                        class="block w-full px-4 py-2 text-sm leading-5 text-left text-slate-300 hover:text-brand-700 dark:hover:text-brand-400 hover:bg-dark-elevated focus:outline-none transition-all duration-300"
+                                    >
+                                        <font-awesome-icon
+                                            :icon="isDark ? 'sun' : 'moon'"
+                                            class="w-5 mr-2"
+                                        />
+                                        {{ isDark ? 'Modo Claro' : 'Modo Oscuro' }}
+                                    </button>
+
+                                    <div class="border-t border-dark-border" />
 
                                     <!-- Authentication -->
                                     <form @submit.prevent="logout">

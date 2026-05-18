@@ -74,7 +74,7 @@ const submit = () => {
                         v-model:checked="form.remember"
                         name="remember"
                     />
-                    <span class="ml-2 text-sm text-gray-600">Recordarme</span>
+                    <span class="ml-2 text-sm text-slate-400">Recordarme</span>
                 </label>
             </div>
 
@@ -82,7 +82,7 @@ const submit = () => {
                 <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
-                    class="underline text-sm text-gray-600 hover:text-gray-900"
+                    class="underline text-sm text-slate-400 hover:text-slate-100"
                 >
                     ¿Olvido su contraseña?
                 </Link>

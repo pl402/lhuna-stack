@@ -7,21 +7,21 @@
                     items-center
                     px-2
                     py-1
-                    bg-gray-800
+                    bg-brand-500
                     border border-transparent
                     rounded-md
                     font-semibold
                     text-xs text-white
                     uppercase
                     tracking-widest
-                    hover:bg-gray-700
-                    active:bg-gray-900
-                    focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300
+                    hover:bg-brand-400
+                    active:bg-brand-600
+                    focus:outline-none focus:border-brand-500 focus:ring focus:ring-brand-500
                     disabled:opacity-25
-                    shadow-sm
-                    hover:shadow-md
-                    focus:shadow-lg
-                    active:shadow-outline
+                    shadow-sm shadow-black/20
+                    hover:shadow-md shadow-black/30
+                    focus:shadow-lg shadow-black/40
+                    active:ring-2 active:ring-brand-500
                     transition">
                     Options
                     <ChevronUpIcon class="ml-2 -mr-1 h-5 w-5 text-slate-200 hover:text-slate-100" aria-hidden="true" />
@@ -33,11 +33,11 @@
                 leave-active-class="transition duration-75 ease-in" leave-from-class="transform scale-100 opacity-100"
                 leave-to-class="transform scale-95 opacity-0">
                 <MenuItems
-                    class="-top-2 transform -translate-y-full absolute left-0 w-fit origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    class="-top-2 transform -translate-y-full absolute left-0 w-fit origin-top-right bg-dark-surface divide-y divide-gray-100 rounded-md shadow-lg shadow-black/40 ring-1 ring-black ring-opacity-5 focus:outline-none">
                     <div class="px-1 py-1">
                         <MenuItem v-slot="{ active }">
                         <button :class="[
-                            active ? 'bg-slate-500 text-white' : 'text-gray-900',
+                            active ? 'bg-dark-elevated/300 text-white' : 'text-slate-100',
                             'group flex w-full items-center rounded-md px-2 py-2 text-sm',
                         ]">
                             <EditIcon :active="active" class="mr-2 h-5 w-5 text-slate-400" aria-hidden="true" />
@@ -46,7 +46,7 @@
                         </MenuItem>
                         <MenuItem v-slot="{ active }">
                         <button :class="[
-                            active ? 'bg-slate-500 text-white' : 'text-gray-900',
+                            active ? 'bg-dark-elevated/300 text-white' : 'text-slate-100',
                             'group flex w-full items-center rounded-md px-2 py-2 text-sm',
                         ]">
                             <DuplicateIcon :active="active" class="mr-2 h-5 w-5 text-slate-400" aria-hidden="true" />
@@ -57,7 +57,7 @@
                     <div class="px-1 py-1">
                         <MenuItem v-slot="{ active }">
                         <button :class="[
-                            active ? 'bg-slate-500 text-white' : 'text-gray-900',
+                            active ? 'bg-dark-elevated/300 text-white' : 'text-slate-100',
                             'group flex w-full items-center rounded-md px-2 py-2 text-sm',
                         ]">
                             <ArchiveIcon :active="active" class="mr-2 h-5 w-5 text-slate-400" aria-hidden="true" />
@@ -66,7 +66,7 @@
                         </MenuItem>
                         <MenuItem v-slot="{ active }">
                         <button :class="[
-                            active ? 'bg-slate-500 text-white' : 'text-gray-900',
+                            active ? 'bg-dark-elevated/300 text-white' : 'text-slate-100',
                             'group flex w-full items-center rounded-md px-2 py-2 text-sm',
                         ]">
                             <MoveIcon :active="active" class="mr-2 h-5 w-5 text-slate-400" aria-hidden="true" />
@@ -78,7 +78,7 @@
                     <div class="px-1 py-1">
                         <MenuItem v-slot="{ active }">
                         <button :class="[
-                            active ? 'bg-slate-500 text-white' : 'text-gray-900',
+                            active ? 'bg-dark-elevated/300 text-white' : 'text-slate-100',
                             'group flex w-full items-center rounded-md px-2 py-2 text-sm',
                         ]">
                             <DeleteIcon :active="active" class="mr-2 h-5 w-5 text-slate-400" aria-hidden="true" />

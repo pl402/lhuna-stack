@@ -2,6 +2,7 @@
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { toRefs, computed } from "vue";
 import Tabla from "@/Components/Tabla.vue";
+import Demo from "@/Components/Demo.vue";
 
 const props = defineProps({});
 </script>
@@ -24,10 +25,6 @@ const props = defineProps({});
 
 <template>
     <AppLayout title="Escritorio">
-        <div class="py-4">
-            <div class="flex flex-col items-center justify-center mt-10">
-                <p class="text-xl font-medium text-gray-500">Escritorio</p>
-            </div>
-        </div>
+        <Demo />
     </AppLayout>
 </template>

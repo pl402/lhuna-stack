@@ -44,7 +44,7 @@ const closeModal = () => {
         <template #description> Elimine permanentemente su cuenta. </template>
 
         <template #content>
-            <div class="max-w-xl text-sm text-gray-600">
+            <div class="max-w-xl text-sm text-slate-400">
                 Una vez que se elimine su cuenta, todos sus recursos y datos se
                 eliminarán de forma permanente. Antes de eliminar su cuenta,
                 descargue cualquier dato o información que desee conservar.

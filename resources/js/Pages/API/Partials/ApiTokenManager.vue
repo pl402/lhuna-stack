@@ -122,7 +122,7 @@ const deleteApiToken = () => {
                                     "
                                     :value="permission"
                                 />
-                                <span class="ml-2 text-sm text-gray-600">{{
+                                <span class="ml-2 text-sm text-slate-400">{{
                                     permission
                                 }}</span>
                             </label>
@@ -220,7 +220,7 @@ const deleteApiToken = () => {
 
                 <div
                     v-if="$page.props.jetstream.flash.token"
-                    class="mt-4 bg-gray-100 px-4 py-2 rounded font-mono text-sm text-gray-500"
+                    class="mt-4 bg-dark-elevated px-4 py-2 rounded font-mono text-sm text-slate-400"
                 >
                     {{ $page.props.jetstream.flash.token }}
                 </div>
@@ -251,7 +251,7 @@ const deleteApiToken = () => {
                                 v-model:checked="updateApiTokenForm.permissions"
                                 :value="permission"
                             />
-                            <span class="ml-2 text-sm text-gray-600">{{
+                            <span class="ml-2 text-sm text-slate-400">{{
                                 permission
                             }}</span>
                         </label>

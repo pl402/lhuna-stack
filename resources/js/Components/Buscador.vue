@@ -241,7 +241,7 @@ export default {};
 
 <template>
     <div
-        class="flex flex-wrap border-b border-slate-300 bg-slate-200 bg-gradient-to-b from-slate-100 to-slate-200 relative rounded-md shadow-sm rounded-b-none"
+        class="flex flex-wrap border-b border-dark-border bg-dark-surface/50 bg-glass-gradient backdrop-blur-md relative rounded-md shadow-sm shadow-black/20 rounded-b-none"
     >
         <div
             class="absolute inset-y-0 left-0 pl-4 p-3 items-center pointer-events-none"
@@ -250,7 +250,7 @@ export default {};
                 <font-awesome-icon
                     v-if="muestraFiltros"
                     icon="filter"
-                    class="text-slate-500"
+                    class="text-slate-400"
                 />
                 <font-awesome-icon
                     v-else-if="!buscando"
@@ -270,7 +270,7 @@ export default {};
                 v-if="muestraFiltros"
                 class="m-1 block w-full pl-10 pr-10 pb-2"
             >
-                <h4 class="text-slate-500 font-bold text-lg pt-[5px]">
+                <h4 class="text-slate-400 font-bold text-lg pt-[5px]">
                     Filtros
                 </h4>
 
@@ -327,20 +327,20 @@ export default {};
                             </div>
 
                             <div
-                                class="max-w-sm flex mx-auto overflow-hidden rounded-lg shadow-sm bg-slate-50 transition-transform duration-500 transform"
+                                class="max-w-sm flex mx-auto overflow-hidden rounded-lg shadow-sm shadow-black/20 bg-dark-elevated/30 transition-transform duration-500 transform"
                             >
                                 <div
-                                    class="flex items-center justify-center w-10 min-w-max p-2 bg-white font-mono"
+                                    class="flex items-center justify-center w-10 min-w-max p-2 bg-dark-surface font-mono"
                                 >
                                     {{ filtro.nombre_campo }}
                                 </div>
                                 <div
-                                    class="flex items-center justify-center w-10 min-w-max p-2 bg-gray-100 font-mono"
+                                    class="flex items-center justify-center w-10 min-w-max p-2 bg-dark-elevated font-mono"
                                 >
                                     {{ filtro.condicion }}
                                 </div>
                                 <div
-                                    class="flex items-center justify-center w-10 min-w-max p-2 bg-white font-mono"
+                                    class="flex items-center justify-center w-10 min-w-max p-2 bg-dark-surface font-mono"
                                 >
                                     {{ filtro.valor }}
                                 </div>
@@ -357,7 +357,7 @@ export default {};
                                         )
                                     "
                                     title="Editar filtro"
-                                    class="cursor-pointer flex items-center justify-center w-10 min-w-max p-2 bg-slate-300 hover:bg-slate-700 active:bg-slate-900 transition-all duration-200 ease-in-out"
+                                    class="cursor-pointer flex items-center justify-center w-10 min-w-max p-2 bg-dark-elevated hover:bg-slate-700 active:bg-slate-900 transition-all duration-200 ease-in-out"
                                 >
                                     <font-awesome-icon
                                         icon="edit"
@@ -383,7 +383,7 @@ export default {};
                 <!-- Division -->
                 <div
                     v-if="filtros.length > 0"
-                    class="border-b border-slate-300 my-2"
+                    class="border-b border-dark-border my-2"
                 ></div>
 
                 <!-- Sección para seleccionar, el campo, condición y valor -->
@@ -492,16 +492,16 @@ export default {};
         <button
             v-if="campos"
             @click="abreFiltros"
-            class="absolute w-10 inset-y-1 right-1 flex items-center rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-opacity-50 border-slate-400 border h-10 transition-all duration-200 ease-in-out"
+            class="absolute w-10 inset-y-1 right-1 flex items-center rounded-md hover:bg-dark-elevated focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-opacity-50 border-dark-border border h-10 transition-all duration-200 ease-in-out"
             :class="{
-                'bg-slate-200 rounded-l-none': !muestraFiltros,
-                'bg-slate-300 shadow-inner': muestraFiltros,
+                'bg-dark-surface/50 rounded-l-none': !muestraFiltros,
+                'bg-dark-elevated shadow-inner shadow-black/50': muestraFiltros,
             }"
             title="Mostrar campos"
         >
             <font-awesome-icon
                 icon="gear"
-                class="text-slate-500 m-auto"
+                class="text-slate-400 m-auto"
                 :class="{
                     'animate-spin': rotaIcono,
                 }"

@@ -66,6 +66,8 @@ import {
     faFilter,
     faEdit,
     faWifi,
+    faSun,
+    faMoon,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { faSquarePlus as farSquarePlus, faSquareMinus as farSquareMinus } from "@fortawesome/free-regular-svg-icons";
@@ -140,6 +142,8 @@ library.add(
     faFilter,
     faEdit,
     faWifi,
+    faSun,
+    faMoon,
 );
 
 export default FontAwesomeIcon;

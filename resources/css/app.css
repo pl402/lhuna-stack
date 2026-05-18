@@ -1,3 +1,34 @@
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
+
+
+@layer base {
+  :root {
+    /* LIGHT THEME (default) - raw RGB values */
+    --color-bg-base: 248 250 252;
+    --color-bg-surface: 255 255 255;
+    --color-bg-elevated: 241 245 249;
+    --color-border: 0 0 0;
+    
+    --color-text-100: 15 23 42;
+    --color-text-200: 30 41 59;
+    --color-text-300: 51 65 85;
+    --color-text-400: 71 85 105;
+    --color-text-500: 100 116 139;
+  }
+
+  .dark {
+    /* DARK THEME - raw RGB values */
+    --color-bg-base: 2 6 23;
+    --color-bg-surface: 15 23 42;
+    --color-bg-elevated: 30 41 59;
+    --color-border: 255 255 255;
+    
+    --color-text-100: 248 250 252;
+    --color-text-200: 226 232 240;
+    --color-text-300: 203 213 225;
+    --color-text-400: 148 163 184;
+    --color-text-500: 100 116 139;
+  }
+}

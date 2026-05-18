@@ -10,8 +10,8 @@ const props = defineProps({
 
 const classes = computed(() => {
     return props.active
-        ? "block pl-3 pr-4 py-2 border-l-4 border-slate-400 text-base font-medium text-slate-700 bg-slate-50 focus:outline-none focus:text-slate-800 focus:bg-slate-100 focus:border-slate-700 transition"
-        : "block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition";
+        ? "block pl-3 pr-4 py-2 border-l-4 border-brand-500 text-base font-medium text-brand-700 dark:text-brand-400 bg-brand-500/10 focus:outline-none focus:text-brand-800 dark:focus:text-brand-300 focus:bg-brand-500/20 focus:border-brand-400 transition-all duration-300"
+        : "block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-slate-400 hover:text-brand-700 dark:hover:text-brand-400 hover:bg-dark-elevated hover:border-dark-border focus:outline-none focus:text-brand-700 dark:focus:text-brand-400 focus:bg-dark-elevated focus:border-dark-border transition-all duration-300";
 });
 </script>
 

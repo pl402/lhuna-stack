@@ -14,7 +14,7 @@ export default {
 </script>
 <template>
     <div
-        class="grid px-2 text-xs font-semibold tracking-wide text-gray-700 uppercase bg-slate-200 bg-gradient-to-b from-slate-100 to-slate-200 border-t border-slate-300 sm:grid-cols-9"
+        class="grid px-2 text-xs font-semibold tracking-wide text-slate-300 uppercase bg-dark-surface/50 bg-glass-gradient backdrop-blur-md border-t border-dark-border sm:grid-cols-9"
     >
         <span class="flex items-center col-span-3">
             <slot name="controles" />
@@ -27,7 +27,7 @@ export default {
                     <li v-for="(link, k) in links" :key="k">
                         <div
                             v-if="link.url === null"
-                            class="px-3 py-1 mx-1 rounded-md rounded-l-lg focus:outline-none focus:shadow-outline-slate text-gray-400"
+                            class="px-3 py-1 mx-1 rounded-md rounded-l-lg focus:outline-none focus:ring-2 ring-slate-400 text-gray-400"
                         >
                             <span v-if="link.label === 'Anterior'">
                                 <font-awesome-icon icon="angle-left" />
@@ -39,7 +39,7 @@ export default {
                         </div>
                         <Link
                             v-else
-                            class="inline-flex items-center px-4 py-2 m-1 border border-transparent rounded-md font-semibold text-xs text-grey-700 uppercase tracking-widest hover:bg-gray-700 hover:text-white active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25 transition"
+                            class="inline-flex items-center px-4 py-2 m-1 border border-transparent rounded-md font-semibold text-xs text-grey-700 uppercase tracking-widest hover:bg-brand-400 hover:text-white active:bg-brand-600 focus:outline-none focus:border-brand-500 focus:ring focus:ring-brand-500 disabled:opacity-25 transition"
                             :class="{
                                 'bg-gray-900 text-white': link.active,
                             }"

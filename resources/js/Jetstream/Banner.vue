@@ -18,7 +18,7 @@ watch(message, async () => {
         <div
             v-if="show && message"
             :class="{
-                'bg-slate-500': style === 'success',
+                'bg-dark-elevated/300': style === 'success',
                 'bg-red-700': style === 'danger',
             }"
         >

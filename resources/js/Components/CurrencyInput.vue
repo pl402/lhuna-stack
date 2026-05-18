@@ -1,26 +1,26 @@
 <template>
-    <input ref="inputRef" type="text" class="border-gray-400
-      focus:border-slate-400
-      focus:ring
-      focus:ring-slate-400
-      focus:ring-opacity-50
-      rounded-md
-      shadow-sm" :placeholder="placeholder" />
+  <input ref="inputRef" type="text" class=" bg-dark-surface border-dark-border text-slate-100 focus:ring-brand-500 focus:ring-opacity-30 
+   focus:border-brand-500
+   focus:ring
+   focus:ring-brand-500 focus:ring-opacity-30
+   
+   rounded-md
+   shadow-sm shadow-black/20" :placeholder="placeholder" />
 </template>
 
 <script>
 import { useCurrencyInput } from "vue-currency-input";
 
 export default {
-    name: "CurrencyInput",
-    props: {
-        modelValue: Number,
-        placeholder: String,
-    },
-    setup(props) {
-        const { inputRef } = useCurrencyInput({ currency: 'MXN', "precision": 2, });
+  name: "CurrencyInput",
+  props: {
+    modelValue: Number,
+    placeholder: String,
+  },
+  setup(props) {
+    const { inputRef } = useCurrencyInput({ currency: 'MXN', "precision": 2, });
 
-        return { inputRef };
-    },
+    return { inputRef };
+  },
 };
 </script>
