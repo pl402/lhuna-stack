@@ -20,6 +20,31 @@ import Tabs from '@/Components/Tabs.vue';
 import DialogModal from '@/Jetstream/DialogModal.vue';
 import { notify } from "notiwind";
 import GlowCard from '@/Components/GlowCard.vue';
+const colorThemes = [
+  { value: 'slate', name: 'Pizarra', colorClass: 'bg-slate-500', bgClass: 'bg-slate-500', borderClass: 'border-slate-500', textClass: 'text-slate-500' },
+  { value: 'gray', name: 'Gris', colorClass: 'bg-gray-500', bgClass: 'bg-gray-500', borderClass: 'border-gray-500', textClass: 'text-gray-500' },
+  { value: 'zinc', name: 'Zinc', colorClass: 'bg-zinc-500', bgClass: 'bg-zinc-500', borderClass: 'border-zinc-500', textClass: 'text-zinc-500' },
+  { value: 'neutral', name: 'Neutral', colorClass: 'bg-neutral-500', bgClass: 'bg-neutral-500', borderClass: 'border-neutral-500', textClass: 'text-neutral-500' },
+  { value: 'stone', name: 'Piedra', colorClass: 'bg-stone-500', bgClass: 'bg-stone-500', borderClass: 'border-stone-500', textClass: 'text-stone-500' },
+  { value: 'red', name: 'Rojo', colorClass: 'bg-red-500', bgClass: 'bg-red-500', borderClass: 'border-red-500', textClass: 'text-red-500' },
+  { value: 'orange', name: 'Naranja', colorClass: 'bg-orange-500', bgClass: 'bg-orange-500', borderClass: 'border-orange-500', textClass: 'text-orange-500' },
+  { value: 'amber', name: 'Ámbar', colorClass: 'bg-amber-500', bgClass: 'bg-amber-500', borderClass: 'border-amber-500', textClass: 'text-amber-500' },
+  { value: 'yellow', name: 'Amarillo', colorClass: 'bg-yellow-500', bgClass: 'bg-yellow-500', borderClass: 'border-yellow-500', textClass: 'text-yellow-500' },
+  { value: 'lime', name: 'Lima', colorClass: 'bg-lime-500', bgClass: 'bg-lime-500', borderClass: 'border-lime-500', textClass: 'text-lime-500' },
+  { value: 'green', name: 'Verde', colorClass: 'bg-green-500', bgClass: 'bg-green-500', borderClass: 'border-green-500', textClass: 'text-green-500' },
+  { value: 'emerald', name: 'Esmeralda', colorClass: 'bg-emerald-500', bgClass: 'bg-emerald-500', borderClass: 'border-emerald-500', textClass: 'text-emerald-500' },
+  { value: 'teal', name: 'Verde Azulado', colorClass: 'bg-teal-500', bgClass: 'bg-teal-500', borderClass: 'border-teal-500', textClass: 'text-teal-500' },
+  { value: 'cyan', name: 'Cian', colorClass: 'bg-cyan-500', bgClass: 'bg-cyan-500', borderClass: 'border-cyan-500', textClass: 'text-cyan-500' },
+  { value: 'sky', name: 'Celeste', colorClass: 'bg-sky-500', bgClass: 'bg-sky-500', borderClass: 'border-sky-500', textClass: 'text-sky-500' },
+  { value: 'blue', name: 'Azul', colorClass: 'bg-blue-500', bgClass: 'bg-blue-500', borderClass: 'border-blue-500', textClass: 'text-blue-500' },
+  { value: 'indigo', name: 'Índigo', colorClass: 'bg-indigo-500', bgClass: 'bg-indigo-500', borderClass: 'border-indigo-500', textClass: 'text-indigo-500' },
+  { value: 'violet', name: 'Violeta', colorClass: 'bg-violet-500', bgClass: 'bg-violet-500', borderClass: 'border-violet-500', textClass: 'text-violet-500' },
+  { value: 'purple', name: 'Púrpura', colorClass: 'bg-purple-500', bgClass: 'bg-purple-500', borderClass: 'border-purple-500', textClass: 'text-purple-500' },
+  { value: 'fuchsia', name: 'Fucsia', colorClass: 'bg-fuchsia-500', bgClass: 'bg-fuchsia-500', borderClass: 'border-fuchsia-500', textClass: 'text-fuchsia-500' },
+  { value: 'pink', name: 'Rosa', colorClass: 'bg-pink-500', bgClass: 'bg-pink-500', borderClass: 'border-pink-500', textClass: 'text-pink-500' },
+  { value: 'rose', name: 'Rosado', colorClass: 'bg-rose-500', bgClass: 'bg-rose-500', borderClass: 'border-rose-500', textClass: 'text-rose-500' },
+  { value: 'black', name: 'Negro y Blanco', colorClass: 'bg-black dark:bg-white', bgClass: 'bg-black dark:bg-white', borderClass: 'border-black dark:border-white', textClass: 'text-black dark:text-white' }
+];
 
 const textValue = ref('');
 const checkboxValue = ref(true);
@@ -167,16 +192,30 @@ const showNotification = (type) => {
         
         <!-- Hero Section -->
         <GlowCard class="bg-gradient-to-br from-dark-surface to-dark-elevated p-10 mb-12" orb-size="w-96 h-96" orb-opacity="group-hover:opacity-20">
-            
-            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-100 mb-4 tracking-tight">
-                Lhuna Stack<span class="align-super text-[10px] md:text-xs font-bold tracking-wider uppercase text-brand-700 dark:text-brand-400 bg-brand-500/10 border border-brand-500/20 px-1.5 py-0.5 rounded-full ml-1">v2</span>
-            </h1>
-            <p class="text-lg text-slate-400 max-w-2xl mb-8 leading-relaxed">
-                Experimenta una paleta de componentes diseñados meticulosamente con obsesión por los detalles. Soporta personalización total de colores (23 temas curados), redondez de esquinas (5 estilos), nivel de sombras, modo claro/oscuro y orbes interactivos de seguimiento.
-            </p>
-            <div class="flex flex-wrap gap-4">
-                <ButtonA href="https://github.com/pl402/lhuna-stack/blob/main/README.md" target="_blank" class="justify-center">Explorar Documentación</ButtonA>
-                <a href="https://github.com/pl402/lhuna-stack" target="_blank" class="inline-flex items-center justify-center px-4 py-2 bg-dark-surface border border-dark-border rounded-md font-semibold text-xs text-slate-300 uppercase tracking-widest shadow-sm shadow-black/20 hover:text-slate-400 focus:outline-none focus:border-brand-500 focus:ring focus:ring-brand-500 active:text-slate-200 active:bg-dark-elevated/30 disabled:opacity-25 transition">Ver Repositorio</a>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                <div class="md:col-span-2">
+                    <h1 class="text-4xl md:text-5xl font-extrabold text-slate-100 mb-4 tracking-tight">
+                        Lhuna Stack<span class="align-super text-[10px] md:text-xs font-bold tracking-wider uppercase text-brand-700 dark:text-brand-400 bg-brand-500/10 border border-brand-500/20 px-1.5 py-0.5 rounded-full ml-1">v2</span>
+                    </h1>
+                    <p class="text-lg text-slate-400 mb-8 leading-relaxed">
+                        Experimenta una paleta de componentes diseñados meticulosamente con obsesión por los detalles. Soporta personalización total de colores (23 temas curados), redondez de esquinas (5 estilos), nivel de sombras, modo claro/oscuro y orbes interactivos de seguimiento.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <ButtonA href="https://github.com/pl402/lhuna-stack/blob/main/README.md" target="_blank" class="justify-center">Explorar Documentación</ButtonA>
+                        <a href="https://github.com/pl402/lhuna-stack" target="_blank" class="inline-flex items-center justify-center px-4 py-2 bg-dark-surface border border-dark-border rounded-md font-semibold text-xs text-slate-300 uppercase tracking-widest shadow-sm shadow-black/20 hover:text-slate-400 focus:outline-none focus:border-brand-500 focus:ring focus:ring-brand-500 active:text-slate-200 active:bg-dark-elevated/30 disabled:opacity-25 transition">Ver Repositorio</a>
+                    </div>
+                </div>
+                <div class="flex justify-center md:col-span-1">
+                    <div class="relative flex items-center justify-center w-48 h-48">
+                        <!-- Concentric pulsing rings (Subtle 25% opacity borders) -->
+                        <div class="absolute inset-0 rounded-full border border-dark-border/25 animate-ripple-1"></div>
+                        <div class="absolute inset-5 rounded-full border border-dark-border/25 animate-ripple-2"></div>
+                        <div class="absolute inset-10 rounded-full border border-dark-border/25 animate-ripple-3"></div>
+
+                        <!-- Logo Image -->
+                        <img :src="$page.props.logo" class="w-[120px] h-[120px] relative z-10 select-none pointer-events-none" />
+                    </div>
+                </div>
             </div>
         </GlowCard>
 
@@ -551,96 +590,161 @@ const showNotification = (type) => {
 
         <!-- Sistema de Diseño y Tokens de Colores -->
         <GlowCard class="p-8 mt-12">
-            
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-500">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-slate-200">Sistema de Diseño y Tokens</h3>
-            </div>
-
-            <p class="text-sm text-slate-400 max-w-3xl mb-8 leading-relaxed">
-                Lhuna Stack utiliza variables CSS nativas vinculadas en la base del layout. Esto permite cambiar paletas cromáticas al instante y mantener un control riguroso del contraste y la legibilidad en entornos tanto claros como oscuros.
-            </p>
-
-            <!-- Color Palette Showcase -->
-            <div class="space-y-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
-                <!-- Brand & Status -->
-                <div>
-                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Marca y Estados</h4>
-                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        <!-- Brand Primary -->
-                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
-                            <div class="w-12 h-12 rounded-lg bg-brand-500 shadow-md shadow-brand-500/30 mb-2"></div>
-                            <span class="text-xs font-semibold text-slate-200">Brand Primary</span>
-                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">var(--color-brand-500)</span>
+                <!-- Left Side: Tokens Showcase (col-span-2) -->
+                <div class="lg:col-span-2">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
                         </div>
-                        <!-- Success Accent -->
-                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
-                            <div class="w-12 h-12 rounded-lg bg-green-500/20 border border-green-500/30 flex items-center justify-center text-green-500 font-bold mb-2">✓</div>
-                            <span class="text-xs font-semibold text-slate-200">Success Accent</span>
-                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-green-500</span>
+                        <h3 class="text-xl font-bold text-slate-200">Sistema de Diseño y Tokens</h3>
+                    </div>
+
+                    <p class="text-sm text-slate-400 mb-8 leading-relaxed">
+                        Lhuna Stack utiliza variables CSS nativas vinculadas en la base del layout. Esto permite cambiar paletas cromáticas al instante y mantener un control riguroso del contraste y la legibilidad en entornos tanto claros como oscuros.
+                    </p>
+
+                    <!-- Color Palette Showcase -->
+                    <div class="space-y-8">
+                        
+                        <!-- Brand & Status -->
+                        <div>
+                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Marca y Estados</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <!-- Brand Primary -->
+                                <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                                    <div class="w-12 h-12 rounded-lg bg-brand-500 shadow-md shadow-brand-500/30 mb-2"></div>
+                                    <span class="text-xs font-semibold text-slate-200">Brand Primary</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">var(--color-brand-500)</span>
+                                </div>
+                                <!-- Success Accent -->
+                                <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                                    <div class="w-12 h-12 rounded-lg bg-green-500/20 border border-green-500/30 flex items-center justify-center text-green-500 font-bold mb-2">✓</div>
+                                    <span class="text-xs font-semibold text-slate-200">Success Accent</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-green-500</span>
+                                </div>
+                                <!-- Danger Accent -->
+                                <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                                    <div class="w-12 h-12 rounded-lg bg-red-500/20 border border-red-500/30 flex items-center justify-center text-red-500 font-bold mb-2">✗</div>
+                                    <span class="text-xs font-semibold text-slate-200">Danger Accent</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-red-500</span>
+                                </div>
+                            </div>
                         </div>
-                        <!-- Danger Accent -->
-                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
-                            <div class="w-12 h-12 rounded-lg bg-red-500/20 border border-red-500/30 flex items-center justify-center text-red-500 font-bold mb-2">✗</div>
-                            <span class="text-xs font-semibold text-slate-200">Danger Accent</span>
-                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-red-500</span>
+
+                        <!-- Light Mode System -->
+                        <div>
+                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Modo Claro (Fondos y Superficies)</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <!-- Light Base -->
+                                <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                                    <div class="w-12 h-12 rounded-lg bg-[#F8FAFC] border border-slate-300 mb-2"></div>
+                                    <span class="text-xs font-semibold text-slate-200">Light Base</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#F8FAFC]</span>
+                                </div>
+                                <!-- Light Surface -->
+                                <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                                    <div class="w-12 h-12 rounded-lg bg-[#FFFFFF] border border-slate-300 mb-2 shadow-sm"></div>
+                                    <span class="text-xs font-semibold text-slate-200">Light Surface</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#FFFFFF]</span>
+                                </div>
+                                <!-- Light Elevated -->
+                                <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                                    <div class="w-12 h-12 rounded-lg bg-[#F1F5F9] border border-slate-300 mb-2"></div>
+                                    <span class="text-xs font-semibold text-slate-200">Light Elevated</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#F1F5F9]</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dark Mode System -->
+                        <div>
+                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Modo Oscuro (Fondos y Superficies)</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <!-- Dark Base -->
+                                <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                                    <div class="w-12 h-12 rounded-lg bg-[#020617] border border-dark-border mb-2"></div>
+                                    <span class="text-xs font-semibold text-slate-200">Dark Base</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#020617]</span>
+                                </div>
+                                <!-- Dark Surface -->
+                                <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                                    <div class="w-12 h-12 rounded-lg bg-[#0F172A] border border-dark-border mb-2"></div>
+                                    <span class="text-xs font-semibold text-slate-200">Dark Surface</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#0F172A]</span>
+                                </div>
+                                <!-- Dark Elevated -->
+                                <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                                    <div class="w-12 h-12 rounded-lg bg-[#1E293B] border border-dark-border mb-2"></div>
+                                    <span class="text-xs font-semibold text-slate-200">Dark Elevated</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#1E293B]</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Light Mode System -->
-                <div>
-                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Modo Claro (Fondos y Superficies)</h4>
-                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        <!-- Light Base -->
-                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
-                            <div class="w-12 h-12 rounded-lg bg-[#F8FAFC] border border-slate-300 mb-2"></div>
-                            <span class="text-xs font-semibold text-slate-200">Light Base</span>
-                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#F8FAFC]</span>
-                        </div>
-                        <!-- Light Surface -->
-                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
-                            <div class="w-12 h-12 rounded-lg bg-[#FFFFFF] border border-slate-300 mb-2 shadow-sm"></div>
-                            <span class="text-xs font-semibold text-slate-200">Light Surface</span>
-                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#FFFFFF]</span>
-                        </div>
-                        <!-- Light Elevated -->
-                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
-                            <div class="w-12 h-12 rounded-lg bg-[#F1F5F9] border border-slate-300 mb-2"></div>
-                            <span class="text-xs font-semibold text-slate-200">Light Elevated</span>
-                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#F1F5F9]</span>
+                <!-- Right Side: Color Themes List Mockup (col-span-1) -->
+                <div class="lg:col-span-1 border-t lg:border-t-0 lg:border-l border-dark-border pt-6 lg:pt-0 lg:pl-8 flex flex-col">
+                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Paletas de Colores Curadas</h4>
+                    <p class="text-xs text-slate-500 mb-4 leading-relaxed">
+                        Previsualización estática de los 23 temas de color integrados en el selector.
+                    </p>
+
+                    <div class="relative mt-2">
+                        <!-- Top scroll fade indicator -->
+                        <div class="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-dark-surface to-transparent pointer-events-none z-10"></div>
+                        <!-- Bottom scroll fade indicator -->
+                        <div class="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-dark-surface to-transparent pointer-events-none z-10"></div>
+
+                        <!-- Scroll container of color preview cards -->
+                        <div class="max-h-[640px] overflow-y-auto p-1 pt-4 pb-6 custom-scrollbar space-y-4">
+                            <div 
+                                v-for="theme in colorThemes" 
+                                :key="theme.value"
+                                class="relative rounded-xl border border-dark-border bg-dark-surface/60 hover:border-slate-500 transition-all duration-200 p-4"
+                            >
+                                <!-- Name and Color Dot -->
+                                <div class="flex justify-between items-center mb-3">
+                                  <span class="font-bold text-xs text-slate-300">
+                                    {{ theme.name }}
+                                  </span>
+                                  <div class="w-3.5 h-3.5 rounded-full shadow-sm" :class="theme.colorClass"></div>
+                                </div>
+                                
+                                <!-- Mockup Preview UI -->
+                                <div class="rounded-lg bg-dark-base p-2.5 border border-dark-border shadow-inner flex flex-col gap-2.5 pointer-events-none">
+                                  
+                                  <!-- Mock Input (Focused) -->
+                                  <div>
+                                    <div class="h-1.5 w-8 bg-slate-500 rounded mb-1"></div>
+                                    <div class="h-5 w-full rounded border bg-dark-surface flex items-center px-1.5 relative overflow-hidden" :class="theme.borderClass">
+                                      <div class="absolute inset-0 opacity-10" :class="theme.bgClass"></div>
+                                      <div class="w-px h-3.5 animate-pulse" :class="theme.bgClass"></div>
+                                    </div>
+                                  </div>
+
+                                  <div class="flex items-center justify-between">
+                                    <!-- Mock Checkbox (Checked) -->
+                                    <div class="flex items-center gap-1.5">
+                                      <div class="w-3.5 h-3.5 rounded flex items-center justify-center" :class="[theme.bgClass, theme.value === 'black' ? 'text-white dark:text-slate-900' : 'text-white']">
+                                         <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path></svg>
+                                      </div>
+                                      <div class="h-1 w-6 bg-slate-500 rounded"></div>
+                                    </div>
+
+                                    <!-- Mock Button -->
+                                    <div class="px-1.5 py-0.5 rounded text-[8px] font-bold shadow-sm" :class="[theme.bgClass, theme.value === 'black' ? 'text-white dark:text-slate-900' : 'text-white']">
+                                      Guardar
+                                    </div>
+                                  </div>
+                                  
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Dark Mode System -->
-                <div>
-                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Modo Oscuro (Fondos y Superficies)</h4>
-                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        <!-- Dark Base -->
-                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
-                            <div class="w-12 h-12 rounded-lg bg-[#020617] border border-dark-border mb-2"></div>
-                            <span class="text-xs font-semibold text-slate-200">Dark Base</span>
-                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#020617]</span>
-                        </div>
-                        <!-- Dark Surface -->
-                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
-                            <div class="w-12 h-12 rounded-lg bg-[#0F172A] border border-dark-border mb-2"></div>
-                            <span class="text-xs font-semibold text-slate-200">Dark Surface</span>
-                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#0F172A]</span>
-                        </div>
-                        <!-- Dark Elevated -->
-                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
-                            <div class="w-12 h-12 rounded-lg bg-[#1E293B] border border-dark-border mb-2"></div>
-                            <span class="text-xs font-semibold text-slate-200">Dark Elevated</span>
-                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#1E293B]</span>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </GlowCard>
 
@@ -701,3 +805,33 @@ const showNotification = (type) => {
 
     </div>
 </template>
+
+<style scoped>
+@keyframes ripple {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.25;
+  }
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+
+.animate-ripple-1 {
+  animation: ripple 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+}
+
+.animate-ripple-2 {
+  animation: ripple 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+  animation-delay: 1.3s;
+}
+
+.animate-ripple-3 {
+  animation: ripple 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+  animation-delay: 2.6s;
+}
+</style>

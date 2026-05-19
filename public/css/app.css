@@ -724,6 +724,39 @@ input:where([type='file']):focus {
     --color-text-400: 148 163 184;
     --color-text-500: 100 116 139;
   }
+.container {
+  width: 100%;
+}
+@media (min-width: 640px) {
+
+  .container {
+    max-width: 640px;
+  }
+}
+@media (min-width: 768px) {
+
+  .container {
+    max-width: 768px;
+  }
+}
+@media (min-width: 1024px) {
+
+  .container {
+    max-width: 1024px;
+  }
+}
+@media (min-width: 1280px) {
+
+  .container {
+    max-width: 1280px;
+  }
+}
+@media (min-width: 1536px) {
+
+  .container {
+    max-width: 1536px;
+  }
+}
 .prose {
   color: var(--tw-prose-body);
   max-width: 65ch;
@@ -1238,6 +1271,9 @@ input:where([type='file']):focus {
 .z-\[99\] {
   z-index: 99;
 }
+.col-span-1 {
+  grid-column: span 1 / span 1;
+}
 .col-span-2 {
   grid-column: span 2 / span 2;
 }
@@ -1555,6 +1591,9 @@ input:where([type='file']):focus {
 .max-h-96 {
   max-height: 24rem;
 }
+.max-h-\[640px\] {
+  max-height: 640px;
+}
 .min-h-\[300px\] {
   min-height: 300px;
 }
@@ -1670,9 +1709,6 @@ input:where([type='file']):focus {
 }
 .max-w-2xl {
   max-width: 42rem;
-}
-.max-w-3xl {
-  max-width: 48rem;
 }
 .max-w-6xl {
   max-width: 72rem;
@@ -2797,6 +2833,9 @@ input:where([type='file']):focus {
 .p-2 {
   padding: 0.5rem;
 }
+.p-2\.5 {
+  padding: 0.625rem;
+}
 .p-3 {
   padding: 0.75rem;
 }
@@ -2914,6 +2953,9 @@ input:where([type='file']):focus {
 }
 .pb-4 {
   padding-bottom: 1rem;
+}
+.pb-6 {
+  padding-bottom: 1.5rem;
 }
 .pl-0 {
   padding-left: 0px;
@@ -4794,10 +4836,6 @@ input:where([type='file']):focus {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .md\:grid-cols-4 {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
   .md\:flex-row {
     flex-direction: row;
   }
@@ -4857,6 +4895,10 @@ input:where([type='file']):focus {
 }
 @media (min-width: 1024px) {
 
+  .lg\:col-span-1 {
+    grid-column: span 1 / span 1;
+  }
+
   .lg\:col-span-2 {
     grid-column: span 2 / span 2;
   }
@@ -4869,13 +4911,25 @@ input:where([type='file']):focus {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .lg\:grid-cols-6 {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+  .lg\:border-l {
+    border-left-width: 1px;
+  }
+
+  .lg\:border-t-0 {
+    border-top-width: 0px;
   }
 
   .lg\:px-8 {
     padding-left: 2rem;
     padding-right: 2rem;
+  }
+
+  .lg\:pl-8 {
+    padding-left: 2rem;
+  }
+
+  .lg\:pt-0 {
+    padding-top: 0px;
   }
 }
 .rtl\:flex-row-reverse:where([dir="rtl"], [dir="rtl"] *) {
