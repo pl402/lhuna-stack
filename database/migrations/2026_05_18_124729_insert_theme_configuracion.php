@@ -16,7 +16,7 @@ return new class extends Migration
     {
         DB::table('configuraciones')->insert([
             'clave' => 'Color del Tema',
-            'valor' => 'green',
+            'valor' => 'indigo',
             'tipo' => 'Tema',
             'created_at' => now(),
             'updated_at' => now(),

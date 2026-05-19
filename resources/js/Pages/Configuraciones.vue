@@ -17,6 +17,8 @@ import Select from "@/Components/Select.vue";
 import Buscador from "@/Components/Buscador.vue";
 import Ordena from "@/Components/Ordena.vue";
 import Progress from "@/Components/Progress.vue";
+import GlowCard from "@/Components/GlowCard.vue";
+
 
 const props = defineProps({
   configuraciones: Object,
@@ -79,7 +81,24 @@ const colorThemes = [
   { value: 'purple', name: 'Púrpura', colorClass: 'bg-purple-500', bgClass: 'bg-purple-500', borderClass: 'border-purple-500', textClass: 'text-purple-500' },
   { value: 'fuchsia', name: 'Fucsia', colorClass: 'bg-fuchsia-500', bgClass: 'bg-fuchsia-500', borderClass: 'border-fuchsia-500', textClass: 'text-fuchsia-500' },
   { value: 'pink', name: 'Rosa', colorClass: 'bg-pink-500', bgClass: 'bg-pink-500', borderClass: 'border-pink-500', textClass: 'text-pink-500' },
-  { value: 'rose', name: 'Rosado', colorClass: 'bg-rose-500', bgClass: 'bg-rose-500', borderClass: 'border-rose-500', textClass: 'text-rose-500' }
+  { value: 'rose', name: 'Rosado', colorClass: 'bg-rose-500', bgClass: 'bg-rose-500', borderClass: 'border-rose-500', textClass: 'text-rose-500' },
+  { value: 'black', name: 'Negro y Blanco', colorClass: 'bg-black dark:bg-white', bgClass: 'bg-black dark:bg-white', borderClass: 'border-black dark:border-white', textClass: 'text-black dark:text-white' }
+];
+
+const radiusOptions = [
+  { value: 'none', name: 'Ninguno (Cuadrado)', description: 'Esquinas totalmente rectas a 90 grados.', radiusClass: 'rounded-none', style: 'border-radius: 0px;' },
+  { value: 'sm', name: 'Sutil', description: 'Redondez mínima para un estilo más limpio y rígido.', radiusClass: 'rounded-sm', style: 'border-radius: 2px;' },
+  { value: 'md', name: 'Estándar', description: 'El estilo estándar balanceado de la interfaz.', radiusClass: 'rounded-md', style: 'border-radius: 6px;' },
+  { value: 'lg', name: 'Muy Redondeado', description: 'Redondeado elegante y moderno.', radiusClass: 'rounded-xl', style: 'border-radius: 12px;' },
+  { value: 'xl', name: 'Extremo / Píldora', description: 'Curvatura muy de tendencia y amigable.', radiusClass: 'rounded-2xl', style: 'border-radius: 24px;' }
+];
+
+const shadowOptions = [
+  { value: 'none', name: 'Ninguno (Plano)', description: 'Sin sombras en los elementos, estilo totalmente plano.', shadowClass: 'shadow-none', style: 'box-shadow: none;' },
+  { value: 'sm', name: 'Sutil', description: 'Sombras extremadamente discretas y minimalistas.', shadowClass: 'shadow-sm', style: 'box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);' },
+  { value: 'md', name: 'Medio', description: 'Sombras estándar con elevación media.', shadowClass: 'shadow-md', style: 'box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);' },
+  { value: 'lg', name: 'Elevado / Grande', description: 'Sombras marcadas con profundidad elegante.', shadowClass: 'shadow-lg', style: 'box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);' },
+  { value: 'xl', name: 'Flotante / Extra Grande', description: 'Profundidad máxima para elementos flotantes.', shadowClass: 'shadow-xl', style: 'box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);' }
 ];
 
 const nuevoConfiguracion = () => {
@@ -204,14 +223,14 @@ const clearPhotoFileInput = () => {
     photoInput.value.value = null;
   }
 };
+
+
 </script>
 
 <template>
   <AppLayout title="Configuraciones">
     <div class="max-w-full mx-auto px-0 sm:px-8 py-4 pt-0 sm:pt-4">
-      <div
-        class="bg-dark-surface overflow-hidden sm:rounded-lg border border-dark-border"
-      >
+      <GlowCard rounded="sm:rounded-lg">
         <Buscador
           v-model="buscar"
           :orderByObject="orderByObject"
@@ -220,7 +239,7 @@ const clearPhotoFileInput = () => {
         />
         <Tabla v-if="configuraciones.data.length > 0">
           <template #col>
-            <th class="px-4 py-1 w-32">
+            <th class="px-4 py-3 w-32">
               <Ordena
                 v-model="orderByObject"
                 ruta="configuraciones"
@@ -229,7 +248,7 @@ const clearPhotoFileInput = () => {
                 campo="id"
               />
             </th>
-            <th class="px-4 py-1">
+            <th class="px-4 py-3">
               <Ordena
                 v-model="orderByObject"
                 ruta="configuraciones"
@@ -238,7 +257,7 @@ const clearPhotoFileInput = () => {
                 campo="clave"
               />
             </th>
-            <th class="px-4 py-1">
+            <th class="px-4 py-3">
               <Ordena
                 v-model="orderByObject"
                 ruta="configuraciones"
@@ -248,7 +267,7 @@ const clearPhotoFileInput = () => {
               />
             </th>
             <th
-              class="px-4 py-1 w-5 text-center sticky right-0 bg-dark-surface/50 border-l border-dark-border"
+              class="px-4 py-3 w-5 text-center sticky right-0 bg-dark-surface/50 border-l border-dark-border"
             >
               Acciones
             </th>
@@ -259,24 +278,51 @@ const clearPhotoFileInput = () => {
               v-for="configuracion in configuraciones.data"
               :key="configuracion.id"
             >
-              <td class="px-4 py-1">
+              <td class="px-4 py-3 text-sm text-slate-300">
                 {{ configuracion.id }}
               </td>
-              <td class="px-4 py-1">
+              <td class="px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 text-left">
                 {{ configuracion.clave }}
               </td>
-              <td class="px-4 py-1">
-                {{ configuracion.valor }}
+              <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 text-left">
+                <div v-if="configuracion.tipo === 'Tema'" class="flex items-center gap-2">
+                  <div class="w-3.5 h-3.5 rounded-full shadow-sm" :class="colorThemes.find(t => t.value === configuracion.valor)?.colorClass || 'bg-brand-500'"></div>
+                  <span class="text-sm text-slate-600 dark:text-slate-300">{{ colorThemes.find(t => t.value === configuracion.valor)?.name || configuracion.valor }}</span>
+                </div>
+                <div v-else-if="configuracion.tipo === 'Redondez'" class="flex items-center gap-2">
+                  <div class="w-4 h-4 bg-brand-500 shadow-sm border border-slate-500/30" :class="radiusOptions.find(r => r.value === configuracion.valor)?.radiusClass || 'rounded-md'"></div>
+                  <span class="text-sm text-slate-600 dark:text-slate-300">{{ radiusOptions.find(r => r.value === configuracion.valor)?.name || configuracion.valor }}</span>
+                </div>
+                <div v-else-if="configuracion.tipo === 'Sombra'" class="flex items-center gap-2">
+                  <div class="w-4 h-4 bg-brand-500 border border-slate-500/30" :class="[radiusOptions.find(r => r.value === $page.props.themeRadius)?.radiusClass || 'rounded-md', shadowOptions.find(s => s.value === configuracion.valor)?.shadowClass || 'shadow-lg']"></div>
+                  <span class="text-sm text-slate-600 dark:text-slate-300">{{ shadowOptions.find(s => s.value === configuracion.valor)?.name || configuracion.valor }}</span>
+                </div>
+                <div v-else-if="configuracion.tipo === 'Interruptor'" class="flex items-center gap-2">
+                  <span 
+                    class="px-2 py-0.5 rounded text-xs font-semibold border"
+                    :class="configuracion.valor === 'si'
+                      ? 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20'
+                      : 'bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/20'"
+                  >
+                    {{ configuracion.valor === 'si' ? 'Activado' : 'Desactivado' }}
+                  </span>
+                </div>
+                <div v-else-if="configuracion.tipo === 'Imagen'" class="flex items-center gap-2">
+                  <img v-if="configuracion.valor" :src="configuracion.valor" class="w-8 h-8 rounded border border-slate-500/60" />
+                  <span class="text-xs text-slate-500 dark:text-slate-400">Ver imagen</span>
+                </div>
+                <span v-else>{{ configuracion.valor }}</span>
               </td>
               <td
-                class="px-4 py-1 text-center sticky right-0 bg-dark-surface/50 border-l border-dark-border"
+                class="px-4 py-3 text-center sticky right-0 bg-dark-surface/50 border-l border-dark-border"
               >
-                <JetButton
-                  class="bg-blue-500 hover:bg-blue-700 text-white"
+                <button
                   @click="editaConfiguracion(configuracion)"
+                  class="inline-flex items-center justify-center px-3 py-2 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded transition duration-200 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30"
+                  title="Editar"
                 >
-                  <font-awesome-icon icon="pen" />
-                </JetButton>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                </button>
               </td>
             </tr>
           </template>
@@ -293,7 +339,7 @@ const clearPhotoFileInput = () => {
           Sin resultados
           <br />
         </div>
-      </div>
+      </GlowCard>
     </div>
 
     <form
@@ -410,7 +456,14 @@ const clearPhotoFileInput = () => {
               value="Color Principal del Tema"
               class="float-left w-full mb-2"
             />
-            <div class="grid grid-cols-2 gap-4 mt-2 max-h-96 overflow-y-auto p-1">
+            <div class="relative mt-2 clear-both">
+              <!-- Top scroll fade indicator -->
+              <div class="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-dark-surface to-transparent pointer-events-none z-10"></div>
+              
+              <!-- Bottom scroll fade indicator -->
+              <div class="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-dark-surface to-transparent pointer-events-none z-10"></div>
+
+              <div class="grid grid-cols-2 gap-4 max-h-96 overflow-y-auto p-1 pt-4 pb-4 custom-scrollbar">
               <div
                 v-for="theme in colorThemes"
                 :key="theme.value"
@@ -443,19 +496,152 @@ const clearPhotoFileInput = () => {
                   <div class="flex items-center justify-between">
                     <!-- Mock Checkbox (Checked) -->
                     <div class="flex items-center gap-1.5">
-                      <div class="w-3.5 h-3.5 rounded flex items-center justify-center text-white" :class="theme.bgClass">
+                      <div class="w-3.5 h-3.5 rounded flex items-center justify-center" :class="[theme.bgClass, theme.value === 'black' ? 'text-white dark:text-slate-900' : 'text-white']">
                          <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path></svg>
                       </div>
                       <div class="h-1.5 w-10 bg-slate-500 rounded"></div>
                     </div>
 
                     <!-- Mock Button -->
-                    <div class="px-2 py-0.5 rounded text-[9px] font-bold text-white shadow-sm" :class="theme.bgClass">
+                    <div class="px-2 py-0.5 rounded text-[9px] font-bold shadow-sm" :class="[theme.bgClass, theme.value === 'black' ? 'text-white dark:text-slate-900' : 'text-white']">
                       Guardar
                     </div>
                   </div>
                   
                 </div>
+              </div>
+            </div>
+            </div>
+            <JetInputError :message="error.valor" class="mt-2" />
+          </div>
+
+          <div v-if="form.tipo === 'Redondez'" class="block mb-1">
+            <JetLabel
+              for="valor"
+              value="Redondez de las Esquinas"
+              class="float-left w-full mb-2"
+            />
+            <div class="grid grid-cols-1 gap-3 mt-2 clear-both">
+              <div
+                v-for="radius in radiusOptions"
+                :key="radius.value"
+                @click="form.valor = radius.value"
+                class="cursor-pointer border-2 p-3 transition-all duration-200 flex items-center justify-between"
+                :style="radius.style"
+                :class="[
+                  form.valor === radius.value 
+                    ? 'border-brand-500 bg-dark-elevated shadow-lg shadow-brand-500/10' 
+                    : 'border-dark-border bg-dark-surface hover:border-slate-500'
+                ]"
+              >
+                <!-- Name and Description -->
+                <div class="text-left">
+                  <span class="font-bold text-sm block" :class="form.valor === radius.value ? 'text-brand-400' : 'text-slate-300'">
+                    {{ radius.name }}
+                  </span>
+                  <span class="text-xs text-slate-500 dark:text-slate-400">
+                    {{ radius.description }}
+                  </span>
+                </div>
+
+                <!-- Preview Box -->
+                <div class="flex items-center gap-2">
+                  <div 
+                    class="w-12 h-12 bg-brand-500 flex items-center justify-center text-white text-[10px] font-bold shadow-md transition-all duration-300"
+                    :style="radius.style"
+                    :class="[
+                      form.valor === radius.value ? 'shadow-brand-500/30' : 'opacity-70'
+                    ]"
+                  >
+                    Card
+                  </div>
+                </div>
+              </div>
+            </div>
+            <JetInputError :message="error.valor" class="mt-2" />
+          </div>
+
+          <div v-if="form.tipo === 'Sombra'" class="block mb-1">
+            <JetLabel
+              for="valor"
+              value="Tamaño de Sombra"
+              class="float-left w-full mb-2"
+            />
+            <div class="grid grid-cols-1 gap-3 mt-2 clear-both">
+              <div
+                v-for="shadow in shadowOptions"
+                :key="shadow.value"
+                @click="form.valor = shadow.value"
+                class="cursor-pointer border-2 p-3 transition-all duration-200 flex items-center justify-between"
+                :style="[
+                  radiusOptions.find(r => r.value === $page.props.themeRadius)?.style || 'border-radius: 6px;',
+                  shadow.style
+                ]"
+                :class="form.valor === shadow.value 
+                  ? 'border-brand-500 bg-dark-elevated shadow-lg shadow-brand-500/10' 
+                  : 'border-dark-border bg-dark-surface hover:border-slate-500'"
+              >
+                <!-- Name and Description -->
+                <div class="text-left">
+                  <span class="font-bold text-sm block" :class="form.valor === shadow.value ? 'text-brand-400' : 'text-slate-300'">
+                    {{ shadow.name }}
+                  </span>
+                  <span class="text-xs text-slate-500 dark:text-slate-400">
+                    {{ shadow.description }}
+                  </span>
+                </div>
+
+                <!-- Preview Box -->
+                <div class="flex items-center gap-2">
+                  <div 
+                    class="w-12 h-12 bg-brand-500 flex items-center justify-center text-white text-[10px] font-bold transition-all duration-300"
+                    :style="[
+                      radiusOptions.find(r => r.value === $page.props.themeRadius)?.style || 'border-radius: 6px;',
+                      shadow.style
+                    ]"
+                    :class="[
+                      form.valor === shadow.value ? 'shadow-brand-500/30' : 'opacity-70'
+                    ]"
+                  >
+                    Sombra
+                  </div>
+                </div>
+              </div>
+            </div>
+            <JetInputError :message="error.valor" class="mt-2" />
+          </div>
+
+          <div v-if="form.tipo === 'Interruptor'" class="block mb-1">
+            <JetLabel
+              for="valor"
+              value="Estado"
+              class="float-left w-full mb-2"
+            />
+            <div class="grid grid-cols-2 gap-4 mt-2 clear-both">
+              <div
+                @click="form.valor = 'si'"
+                class="cursor-pointer border-2 p-4 rounded-xl transition-all duration-200 flex flex-col items-center gap-2"
+                :class="form.valor === 'si'
+                  ? 'border-brand-500 bg-dark-elevated shadow-lg shadow-brand-500/10'
+                  : 'border-dark-border bg-dark-surface hover:border-slate-500'"
+              >
+                <div class="w-8 h-8 rounded-full bg-brand-500/20 flex items-center justify-center text-brand-500">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <span class="font-bold text-sm" :class="form.valor === 'si' ? 'text-brand-400' : 'text-slate-300'">Activado</span>
+              </div>
+
+              <div
+                @click="form.valor = 'no'"
+                class="cursor-pointer border-2 p-4 rounded-xl transition-all duration-200 flex flex-col items-center gap-2"
+                :class="form.valor === 'no'
+                  ? 'border-brand-500 bg-dark-elevated shadow-lg shadow-brand-500/10'
+                  : 'border-dark-border bg-dark-surface hover:border-slate-500'"
+              >
+                <div class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-red-500">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </div>
+                <span class="font-bold text-sm" :class="form.valor === 'no' ? 'text-brand-400' : 'text-slate-300'">Desactivado</span>
               </div>
             </div>
             <JetInputError :message="error.valor" class="mt-2" />

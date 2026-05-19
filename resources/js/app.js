@@ -34,6 +34,55 @@ const colors = {
 };
 
 let currentThemeColor = null;
+let currentThemeRadius = null;
+
+const radiusStyles = {
+    none: {
+        sm: '0px',
+        default: '0px',
+        md: '0px',
+        lg: '0px',
+        xl: '0px',
+        '2xl': '0px',
+        '3xl': '0px',
+    },
+    sm: {
+        sm: '2px',
+        default: '4px',
+        md: '4px',
+        lg: '6px',
+        xl: '8px',
+        '2xl': '12px',
+        '3xl': '16px',
+    },
+    md: {
+        sm: '0.125rem',
+        default: '0.25rem',
+        md: '0.375rem',
+        lg: '0.5rem',
+        xl: '0.75rem',
+        '2xl': '1rem',
+        '3xl': '1.5rem',
+    },
+    lg: {
+        sm: '4px',
+        default: '8px',
+        md: '10px',
+        lg: '12px',
+        xl: '16px',
+        '2xl': '24px',
+        '3xl': '32px',
+    },
+    xl: {
+        sm: '6px',
+        default: '12px',
+        md: '16px',
+        lg: '20px',
+        xl: '28px',
+        '2xl': '36px',
+        '3xl': '48px',
+    },
+};
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -65,6 +114,21 @@ createInertiaApp({
                                     const g = parseInt(hex.slice(3, 5), 16);
                                     const b = parseInt(hex.slice(5, 7), 16);
                                     root.style.setProperty(`--color-brand-${key}-rgb`, `${r} ${g} ${b}`);
+                                });
+                            }
+                        },
+                        { immediate: true }
+                    );
+
+                    this.$watch(
+                        () => this.$page.props.themeRadius,
+                        (newRadius) => {
+                            if (newRadius && newRadius !== currentThemeRadius && radiusStyles[newRadius]) {
+                                currentThemeRadius = newRadius;
+                                const selectedRadius = radiusStyles[newRadius];
+                                const root = document.documentElement;
+                                Object.keys(selectedRadius).forEach(key => {
+                                    root.style.setProperty(`--border-radius-${key}`, selectedRadius[key]);
                                 });
                             }
                         },

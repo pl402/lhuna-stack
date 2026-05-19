@@ -25,9 +25,9 @@ const props = defineProps({
       active:bg-brand-600
       focus:outline-none focus:border-brand-500 focus:ring focus:ring-brand-500
       disabled:opacity-25
-      shadow-sm shadow-black/20
-      hover:shadow-md shadow-black/30
-      focus:shadow-lg shadow-black/40
+      shadow-md shadow-brand-500/20
+      hover:shadow-lg shadow-brand-500/30
+      focus:shadow-xl shadow-brand-500/40
       active:ring-2 active:ring-brand-500
       transition
     ">

@@ -1,5 +1,6 @@
 <script setup>
-import { computed, onMounted, onUnmounted, watch } from "vue";
+import { computed, onMounted, onUnmounted, watch, ref } from "vue";
+import GlowCard from "@/Components/GlowCard.vue";
 
 const props = defineProps({
     show: {
@@ -61,6 +62,7 @@ const maxWidthClass = computed(() => {
         "6xl": "sm:max-w-6xl",
     }[props.maxWidth];
 });
+
 </script>
 
 <style>
@@ -114,12 +116,14 @@ const maxWidthClass = computed(() => {
                     />
                 </div>
 
-                <div
-                    class="mb-6 bg-dark-surface border border-dark-border rounded-lg shadow-2xl shadow-black/20 ring-1 ring-white/5 transform transition-all sm:w-full sm:mx-auto inner"
+                <GlowCard
+                    orb-size="w-56 h-56"
+                    orb-blur="blur-[80px]"
+                    class="mb-6 ring-1 ring-white/5 transform transition-all sm:w-full sm:mx-auto inner"
                     :class="maxWidthClass"
                 >
                     <slot />
-                </div>
+                </GlowCard>
             </div>
         </Transition>
     </teleport>

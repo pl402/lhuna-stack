@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { router } from "@inertiajs/vue3";
 import { Head, Link, usePage } from "@inertiajs/vue3";
 import JetApplicationMark from "@/Jetstream/ApplicationMark.vue";
@@ -11,6 +11,7 @@ import JetResponsiveNavLink from "@/Jetstream/ResponsiveNavLink.vue";
 import ActionMessage from "@/Jetstream/ActionMessage.vue";
 import Toast from "@/Components/Toast.vue";
 import { notify } from "notiwind";
+import GridBackground from "@/Components/GridBackground.vue";
 import { VOffline } from "v-offline";
 
 defineProps({
@@ -18,10 +19,6 @@ defineProps({
 });
 
 const online = ref(false);
-
-const onConnectionChange = (isOnline) => {
-    online.value = isOnline;
-};
 
 const showDropNav = ref(
     localStorage.showDropNav ? localStorage.showDropNav === "true" : true
@@ -136,8 +133,12 @@ const toggleTheme = () => {
 <template>
     <div>
         <Head :title="title" />
-        <div class="min-h-screen bg-dark-base text-slate-200 relative selection:bg-brand-500/30 selection:text-brand-200">
-            <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-500/10 blur-[120px] rounded-full pointer-events-none z-0"></div>
+        <div 
+            class="min-h-screen bg-dark-base text-slate-200 relative selection:bg-brand-500/30 selection:text-brand-200 overflow-x-hidden"
+        >
+            <!-- Reusable Grid Background -->
+            <GridBackground v-if="$page.props.themeGrid !== false" :fixed="true" />
+
             <nav
                 class="sm:hidden bg-dark-surface/80 border-b border-dark-border fixed top-0 z-50 w-full backdrop-blur-md shadow-lg shadow-black/20"
             >
@@ -159,24 +160,6 @@ const toggleTheme = () => {
                         <h2
                             class="text-lg font-bold text-slate-100 flex my-auto truncate tracking-tight"
                         >
-                            <VOffline @detected-condition="onConnectionChange">
-                                <template v-if="online">
-                                    <span class="text-green-500">
-                                        <font-awesome-icon
-                                            icon="circle"
-                                            class="w-3 mr-2"
-                                        />
-                                    </span>
-                                </template>
-                                <template v-else>
-                                    <span class="text-red-500">
-                                        <font-awesome-icon
-                                            icon="circle"
-                                            class="w-3 mr-2"
-                                        />
-                                    </span>
-                                </template>
-                            </VOffline>
                             <!-- Titulo menu celular -->
                             Lhuna-Stack<span
                                 class="font-light text-slate-500 mx-2 opacity-50"
@@ -354,7 +337,7 @@ const toggleTheme = () => {
                                                 <a
                                                     href="https://lhuna.dev"
                                                     target="_blank"
-                                                    >© lhuna.dev - 2023</a
+                                                    >© lhuna.dev - 2026</a
                                                 >
                                             </div>
                                         </div>

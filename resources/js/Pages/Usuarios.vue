@@ -16,6 +16,8 @@ import JetDangerButton from "@/Jetstream/DangerButton.vue";
 import Select from "@/Components/Select.vue";
 import Buscador from "@/Components/Buscador.vue";
 import Ordena from "@/Components/Ordena.vue";
+import GlowCard from "@/Components/GlowCard.vue";
+
 
 const props = defineProps({
   usuarios: Object,
@@ -253,122 +255,135 @@ const borraUsuarioDo = () => {
     },
   });
 };
+
+
 </script>
 <template>
   <AppLayout title="Usuarios">
     <div class="max-w-full mx-auto px-0 sm:px-8 py-4 pt-0 sm:pt-4">
-      <div
-        class="bg-dark-surface overflow-hidden sm:rounded-lg border border-dark-border"
-      >
+      <GlowCard class="sm:rounded-lg">
         <Buscador
-          v-model="buscar"
-          :orderByObject="orderByObject"
-          ruta="usuarios"
-          :filtros="filtros"
-          :campos="campos"
-          autofocus
-        />
-        <Tabla v-if="usuarios.data.length > 0">
-          <template #col>
-            <th class="px-4 py-1 w-20">
-              <Ordena
-                v-model="orderByObject"
-                ruta="usuarios"
-                :buscar="buscar"
-                :filtros="filtros"
-                titulo="ID"
-                campo="id"
-              />
-            </th>
-            <th class="px-4 py-1">
-              <Ordena
-                v-model="orderByObject"
-                ruta="usuarios"
-                :buscar="buscar"
-                :filtros="filtros"
-                titulo="Nombre"
-                campo="name"
-              />
-            </th>
-            <th class="px-4 py-1">
-              <Ordena
-                v-model="orderByObject"
-                ruta="usuarios"
-                :buscar="buscar"
-                :filtros="filtros"
-                titulo="Titulo"
-                campo="titulo"
-              />
-            </th>
-            <th class="px-4 py-1 w-72">
-              <Ordena
-                v-model="orderByObject"
-                ruta="usuarios"
-                :buscar="buscar"
-                :filtros="filtros"
-                titulo="Email"
-                campo="email"
-              />
-            </th>
-            <th class="px-4 py-1 w-36">Rol</th>
-            <th
-              class="px-4 py-1 w-5 text-center sticky right-0 bg-dark-surface/50 border-l border-dark-border"
-            >
-              <JetButton @click="nuevoUsuario">
-                <font-awesome-icon icon="add" />
-              </JetButton>
-            </th>
-          </template>
-          <template #row>
-            <tr
-              class="text-slate-300 hover:bg-dark-elevated border-b border-dark-border"
-              v-for="usuario in usuarios.data"
-              :key="usuario.id"
-            >
-              <td class="px-4 py-1">{{ usuario.id }}</td>
-              <td class="px-4 py-1">{{ usuario.name }}</td>
-              <td class="px-4 py-1">{{ usuario.titulo }}</td>
-              <td class="px-4 py-1">{{ usuario.email }}</td>
-              <td class="px-4 py-1">
-                <div v-for="p in usuario.roles" :key="p.id">
-                  <span
-                    class="text-gray-200 mr-1 mb-1 px-1 rounded nowrap"
-                    :class="bg_color[p.name]"
-                  >
-                    {{ p.name }}
-                  </span>
-                </div>
-              </td>
-              <td
-                class="px-4 py-1 text-center sticky right-0 bg-dark-surface/50 border-l border-dark-border"
+            v-model="buscar"
+            :orderByObject="orderByObject"
+            ruta="usuarios"
+            :filtros="filtros"
+            :campos="campos"
+            autofocus
+          />
+          <Tabla v-if="usuarios.data.length > 0">
+            <template #col>
+              <th class="px-4 py-3 w-20">
+                <Ordena
+                  v-model="orderByObject"
+                  ruta="usuarios"
+                  :buscar="buscar"
+                  :filtros="filtros"
+                  titulo="ID"
+                  campo="id"
+                />
+              </th>
+              <th class="px-4 py-3">
+                <Ordena
+                  v-model="orderByObject"
+                  ruta="usuarios"
+                  :buscar="buscar"
+                  :filtros="filtros"
+                  titulo="Nombre"
+                  campo="name"
+                />
+              </th>
+              <th class="px-4 py-3">
+                <Ordena
+                  v-model="orderByObject"
+                  ruta="usuarios"
+                  :buscar="buscar"
+                  :filtros="filtros"
+                  titulo="Título"
+                  campo="titulo"
+                />
+              </th>
+              <th class="px-4 py-3 w-36">Rol</th>
+              <th
+                class="px-4 py-3 w-5 text-center sticky right-0 bg-dark-surface/50 border-l border-dark-border"
               >
-                <JetButton
-                  class="bg-blue-500 hover:bg-blue-700 text-white"
-                  @click="editaUsuario(usuario)"
+                <button 
+                    @click="nuevoUsuario" 
+                    class="inline-flex items-center justify-center px-3 py-2 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white rounded font-bold transition duration-200 shadow-md shadow-brand-500/20 hover:shadow-lg hover:shadow-brand-500/30"
+                    title="Agregar Usuario"
                 >
-                  <font-awesome-icon icon="user-edit" />
-                </JetButton>
-              </td>
-            </tr>
-          </template>
-          <template #pagination>
-            <Paginador
-              :links="usuarios.links"
-              :total="usuarios.total"
-              :to="usuarios.to"
-              :from="usuarios.from"
-            />
-          </template>
-        </Tabla>
-        <div v-else class="text-center p-5 text-slate-400 text-md">
-          Sin Usuarios
-          <br />
-          <JetButton @click="nuevoUsuario" class="mt-2">
-            <font-awesome-icon icon="add" class="mr-2" />Agregar
-            Nuevo Usuario
-          </JetButton>
-        </div>
-      </div>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                </button>
+              </th>
+            </template>
+            <template #row>
+              <tr
+                class="text-slate-300 hover:bg-dark-elevated border-b border-dark-border"
+                v-for="usuario in usuarios.data"
+                :key="usuario.id"
+              >
+                <td class="px-4 py-3 text-sm text-slate-500 dark:text-slate-300">{{ usuario.id }}</td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-brand-500/20 flex items-center justify-center text-xs font-bold text-brand-500 uppercase">
+                      {{ usuario.name.slice(0, 2) }}
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-slate-700 dark:text-slate-200 text-left">{{ usuario.name }}</p>
+                      <p class="text-xs text-slate-500 dark:text-slate-400 text-left">{{ usuario.email }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 text-left">{{ usuario.titulo }}</td>
+                <td class="px-4 py-3 text-left">
+                  <div v-for="p in usuario.roles" :key="p.id">
+                    <span
+                      v-if="p.name === 'Administrador'"
+                      class="px-2 py-0.5 rounded text-xs font-semibold bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20 nowrap"
+                    >
+                      {{ p.name }}
+                    </span>
+                    <span
+                      v-else
+                      class="px-2 py-0.5 rounded text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 nowrap"
+                    >
+                      {{ p.name }}
+                    </span>
+                  </div>
+                </td>
+                <td
+                  class="px-4 py-3 text-center sticky right-0 bg-dark-surface/50 border-l border-dark-border"
+                >
+                  <button
+                    @click="editaUsuario(usuario)"
+                    class="inline-flex items-center justify-center px-3 py-2 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded transition duration-200 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30"
+                    title="Editar"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                  </button>
+                </td>
+              </tr>
+            </template>
+            <template #pagination>
+              <Paginador
+                :links="usuarios.links"
+                :total="usuarios.total"
+                :to="usuarios.to"
+                :from="usuarios.from"
+              />
+            </template>
+          </Tabla>
+          <div v-else class="text-center p-5 text-slate-400 text-md">
+            Sin Usuarios
+            <br />
+            <button 
+                @click="nuevoUsuario" 
+                class="mt-2 inline-flex items-center justify-center px-4 py-2 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white rounded-lg font-semibold text-xs uppercase tracking-widest transition duration-200 shadow-md shadow-brand-500/20"
+            >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Agregar Nuevo Usuario
+            </button>
+          </div>
+      </GlowCard>
     </div>
 
     <form

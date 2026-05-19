@@ -40,7 +40,7 @@ const close = () => {
     >
         <div>
             <div
-                class="font-semibold text-xl text-slate-200 leading-tight border-dark-border border-b-2 border-b-solid bg-dark-elevated/50 rounded-t-lg sticky -top-16 z-50"
+                class="font-semibold text-xl text-slate-200 leading-tight border-dark-border border-b-2 border-b-solid bg-dark-elevated/50 rounded-t-[inherit] sticky -top-16 z-50"
                 :class="padding"
             >
                 <slot name="title" />
@@ -52,7 +52,7 @@ const close = () => {
         </div>
 
         <div
-            class="flex flex-row justify-end px-4 py-2 border-b-2 border-dark-border border-t-2 border-t-solid bg-dark-elevated/50 rounded-b-lg"
+            class="flex flex-row justify-end px-4 py-2 border-dark-border border-t-2 border-t-solid bg-dark-elevated/50 rounded-b-[inherit]"
         >
             <slot name="footer" />
         </div>

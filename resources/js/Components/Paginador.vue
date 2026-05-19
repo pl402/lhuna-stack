@@ -14,9 +14,9 @@ export default {
 </script>
 <template>
     <div
-        class="grid px-2 text-xs font-semibold tracking-wide text-slate-300 uppercase bg-dark-surface/50 bg-glass-gradient backdrop-blur-md border-t border-dark-border sm:grid-cols-9"
+        class="grid px-4 py-2 text-xs font-semibold tracking-wide text-slate-400 uppercase bg-dark-surface/50 bg-glass-gradient backdrop-blur-md border-t border-dark-border sm:grid-cols-9 items-center"
     >
-        <span class="flex items-center col-span-3">
+        <span class="flex items-center col-span-3 text-slate-500 dark:text-slate-400">
             <slot name="controles" />
             Mostrando {{ from }}-{{ to }} de {{ total }}
         </span>
@@ -27,28 +27,28 @@ export default {
                     <li v-for="(link, k) in links" :key="k">
                         <div
                             v-if="link.url === null"
-                            class="px-3 py-1 mx-1 rounded-md rounded-l-lg focus:outline-none focus:ring-2 ring-slate-400 text-gray-400"
+                            class="inline-flex items-center px-3 py-1.5 mx-1 border border-dark-border/20 rounded-md font-semibold text-xs text-slate-500/40 dark:text-slate-600 uppercase tracking-widest bg-dark-elevated/10 select-none cursor-not-allowed"
                         >
-                            <span v-if="link.label === 'Anterior'">
+                            <span v-if="link.label === 'Anterior' || link.label.includes('Anterior')">
                                 <font-awesome-icon icon="angle-left" />
                             </span>
-                            <span v-else-if="link.label === 'Siguiente'">
+                            <span v-else-if="link.label === 'Siguiente' || link.label.includes('Siguiente')">
                                 <font-awesome-icon icon="angle-right" />
                             </span>
                             <span v-else> {{ link.label }} </span>
                         </div>
                         <Link
                             v-else
-                            class="inline-flex items-center px-4 py-2 m-1 border border-transparent rounded-md font-semibold text-xs text-grey-700 uppercase tracking-widest hover:bg-brand-400 hover:text-white active:bg-brand-600 focus:outline-none focus:border-brand-500 focus:ring focus:ring-brand-500 disabled:opacity-25 transition"
-                            :class="{
-                                'bg-gray-900 text-white': link.active,
-                            }"
+                            class="inline-flex items-center px-3 py-1.5 mx-1 border rounded-md font-semibold text-xs uppercase tracking-widest focus:outline-none focus:ring focus:ring-brand-500/30 transition-all duration-200"
+                            :class="link.active
+                                ? 'bg-brand-500 border-brand-500 text-white shadow-md shadow-brand-500/20'
+                                : 'bg-dark-elevated/40 border-dark-border/50 text-slate-600 dark:text-slate-300 hover:bg-brand-500 hover:text-white hover:border-brand-500'"
                             :href="link.url"
                         >
-                            <span v-if="link.label === 'Anterior'">
+                            <span v-if="link.label === 'Anterior' || link.label.includes('Anterior')">
                                 <font-awesome-icon icon="angle-left" />
                             </span>
-                            <span v-else-if="link.label === 'Siguiente'">
+                            <span v-else-if="link.label === 'Siguiente' || link.label.includes('Siguiente')">
                                 <font-awesome-icon icon="angle-right" />
                             </span>
                             <span v-else> {{ link.label }} </span>

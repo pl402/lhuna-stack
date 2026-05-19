@@ -19,6 +19,7 @@ import Tabla from '@/Components/Tabla.vue';
 import Tabs from '@/Components/Tabs.vue';
 import DialogModal from '@/Jetstream/DialogModal.vue';
 import { notify } from "notiwind";
+import GlowCard from '@/Components/GlowCard.vue';
 
 const textValue = ref('');
 const checkboxValue = ref(true);
@@ -165,31 +166,25 @@ const showNotification = (type) => {
     <div class="w-full max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 animate-fade-in">
         
         <!-- Hero Section -->
-        <div class="relative rounded-2xl overflow-hidden bg-gradient-to-br from-dark-surface to-dark-elevated border border-dark-border p-10 mb-12 shadow-2xl shadow-black/50 group">
-            <div class="absolute -right-20 -top-20 w-64 h-64 bg-brand-500 rounded-full blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
+        <GlowCard class="bg-gradient-to-br from-dark-surface to-dark-elevated p-10 mb-12" orb-size="w-96 h-96" orb-opacity="group-hover:opacity-20">
             
-            <div class="relative z-10">
-                <span class="inline-block py-1 px-3 rounded-full bg-brand-950 border border-brand-900 text-brand-500 text-xs font-bold tracking-wider uppercase mb-4">
-                    Lhuna Stack V2
-                </span>
-                <h1 class="text-4xl md:text-5xl font-extrabold text-slate-100 mb-4 tracking-tight">
-                    El Motor UI Definitivo
-                </h1>
-                <p class="text-lg text-slate-400 max-w-2xl mb-8 leading-relaxed">
-                    Experimenta una paleta de componentes diseñados meticulosamente con obsesión por los detalles. Tipografía nítida, transiciones fluidas y un sistema de temas dinámico totalmente integrado.
-                </p>
-                <div class="flex flex-wrap gap-4">
-                    <ButtonA href="https://github.com/pl402/lhuna-stack/blob/main/README.md" target="_blank" class="justify-center">Explorar Documentación</ButtonA>
-                    <a href="https://github.com/pl402/lhuna-stack" target="_blank" class="inline-flex items-center justify-center px-4 py-2 bg-dark-surface border border-dark-border rounded-md font-semibold text-xs text-slate-300 uppercase tracking-widest shadow-sm shadow-black/20 hover:text-slate-400 focus:outline-none focus:border-brand-500 focus:ring focus:ring-brand-500 active:text-slate-200 active:bg-dark-elevated/30 disabled:opacity-25 transition">Ver Repositorio</a>
-                </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-100 mb-4 tracking-tight">
+                Lhuna Stack<span class="align-super text-[10px] md:text-xs font-bold tracking-wider uppercase text-brand-700 dark:text-brand-400 bg-brand-500/10 border border-brand-500/20 px-1.5 py-0.5 rounded-full ml-1">v2</span>
+            </h1>
+            <p class="text-lg text-slate-400 max-w-2xl mb-8 leading-relaxed">
+                Experimenta una paleta de componentes diseñados meticulosamente con obsesión por los detalles. Soporta personalización total de colores (23 temas curados), redondez de esquinas (5 estilos), nivel de sombras, modo claro/oscuro y orbes interactivos de seguimiento.
+            </p>
+            <div class="flex flex-wrap gap-4">
+                <ButtonA href="https://github.com/pl402/lhuna-stack/blob/main/README.md" target="_blank" class="justify-center">Explorar Documentación</ButtonA>
+                <a href="https://github.com/pl402/lhuna-stack" target="_blank" class="inline-flex items-center justify-center px-4 py-2 bg-dark-surface border border-dark-border rounded-md font-semibold text-xs text-slate-300 uppercase tracking-widest shadow-sm shadow-black/20 hover:text-slate-400 focus:outline-none focus:border-brand-500 focus:ring focus:ring-brand-500 active:text-slate-200 active:bg-dark-elevated/30 disabled:opacity-25 transition">Ver Repositorio</a>
             </div>
-        </div>
+        </GlowCard>
 
         <!-- Components Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             
             <!-- Botones -->
-            <div class="bg-dark-surface border border-dark-border rounded-xl p-6 shadow-lg shadow-black/20 hover:border-brand-500/50 transition-colors duration-300">
+            <GlowCard class="p-6">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-500">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
@@ -204,10 +199,10 @@ const showNotification = (type) => {
                     </div>
                     <p class="text-xs text-slate-500 mt-4 text-center">Estados hover, active y focus nativos.</p>
                 </div>
-            </div>
+            </GlowCard>
 
             <!-- Formularios con Pestañas -->
-            <div class="bg-dark-surface border border-dark-border rounded-xl p-6 shadow-lg shadow-black/20 hover:border-brand-500/50 transition-colors duration-300">
+            <GlowCard class="p-6">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-500">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -283,10 +278,10 @@ const showNotification = (type) => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </GlowCard>
 
             <!-- Tarjetas de Estadísticas -->
-            <div class="bg-dark-surface border border-dark-border rounded-xl p-6 shadow-lg shadow-black/20 hover:border-brand-500/50 transition-colors duration-300">
+            <GlowCard class="p-6">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-500">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
@@ -316,10 +311,10 @@ const showNotification = (type) => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </GlowCard>
 
             <!-- Alertas / Feedback -->
-            <div class="bg-dark-surface border border-dark-border rounded-xl p-6 shadow-lg shadow-black/20 hover:border-brand-500/50 transition-colors duration-300 md:col-span-1 lg:col-span-2">
+            <GlowCard class="p-6 md:col-span-1 lg:col-span-2">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-500">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -362,7 +357,7 @@ const showNotification = (type) => {
                     <div class="flex-1 border-t md:border-t-0 md:border-l border-dark-border pt-6 md:pt-0 md:pl-6 flex flex-col justify-center gap-4">
                         <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Estados de Badges</p>
                         <div class="flex flex-wrap gap-2">
-                            <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-brand-950 text-brand-700 dark:text-brand-500 border border-brand-900">Brand Default</span>
+                            <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-brand-500/10 text-brand-700 dark:text-brand-400 border border-brand-500/20">Brand Default</span>
                             <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20">Completado</span>
                             <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">En Progreso</span>
                             <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20">Rechazado</span>
@@ -370,10 +365,10 @@ const showNotification = (type) => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </GlowCard>
 
             <!-- Animaciones Tailwind CSS -->
-            <div class="bg-dark-surface border border-dark-border rounded-xl p-6 shadow-lg shadow-black/20 hover:border-brand-500/50 transition-colors duration-300">
+            <GlowCard class="p-6">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-500">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -428,7 +423,7 @@ const showNotification = (type) => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </GlowCard>
 
         </div>
 
@@ -436,7 +431,7 @@ const showNotification = (type) => {
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
             
             <!-- Tabla Completa de Demostración -->
-            <div class="bg-dark-surface border border-dark-border rounded-xl shadow-lg shadow-black/20 hover:border-brand-500/50 transition-colors duration-300 lg:col-span-2 overflow-hidden flex flex-col justify-between">
+            <GlowCard class="lg:col-span-2">
                 <div>
                     <!-- Buscador de Usuarios Mock -->
                     <div class="flex flex-wrap border-b border-dark-border bg-dark-surface/50 bg-glass-gradient backdrop-blur-md relative">
@@ -460,10 +455,10 @@ const showNotification = (type) => {
                                 <th class="px-4 py-3 w-5 text-center sticky right-0 bg-dark-surface/50 border-l border-dark-border">
                                     <button 
                                         @click="openCreateUserModal" 
-                                        class="inline-flex items-center justify-center p-1.5 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white rounded font-bold transition duration-200 shadow-md shadow-brand-500/20"
+                                        class="inline-flex items-center justify-center px-3 py-2 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white rounded font-bold transition duration-200 shadow-md shadow-brand-500/20 hover:shadow-lg hover:shadow-brand-500/30"
                                         title="Agregar Usuario"
                                     >
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                     </button>
                                 </th>
                             </template>
@@ -493,20 +488,20 @@ const showNotification = (type) => {
                                         </span>
                                     </td>
                                     <td class="px-4 py-3 text-center sticky right-0 bg-dark-surface/50 border-l border-dark-border">
-                                        <div class="flex justify-center gap-1.5">
+                                        <div class="inline-flex rounded shadow-sm">
                                             <button 
                                                 @click="openEditUserModal(user)" 
-                                                class="inline-flex items-center justify-center p-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded transition duration-200"
+                                                class="inline-flex items-center justify-center px-3 py-2 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded-l border-r border-blue-600/50 transition duration-200 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30"
                                                 title="Editar"
                                             >
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                             </button>
                                             <button 
                                                 @click="deleteUser(user.id)" 
-                                                class="inline-flex items-center justify-center p-1.5 bg-red-500 hover:bg-red-600 text-white rounded transition duration-200"
+                                                class="inline-flex items-center justify-center px-3 py-2 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white rounded-r transition duration-200 shadow-md shadow-red-500/20 hover:shadow-lg hover:shadow-red-500/30"
                                                 title="Eliminar"
                                             >
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                             </button>
                                         </div>
                                     </td>
@@ -518,98 +513,136 @@ const showNotification = (type) => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </GlowCard>
 
             <!-- Diálogos y Modales Showcase -->
-            <div class="bg-dark-surface border border-dark-border rounded-xl p-6 shadow-lg shadow-black/20 hover:border-brand-500/50 transition-colors duration-300 flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-500">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+            <GlowCard class="p-6">
+                <div class="flex flex-col justify-between h-full">
+                    <div>
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-500">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-slate-200">Modales Interactivos</h3>
                         </div>
-                        <h3 class="text-lg font-semibold text-slate-200">Modales Interactivos</h3>
-                    </div>
-                    <p class="text-sm text-slate-400 leading-relaxed mb-6">
-                        Los diálogos de Lhuna Stack están diseñados para enfocar al usuario de manera limpia. Cuentan con un fondo traslúcido estilizado, transiciones fluidas de entrada/salida y total compatibilidad con dispositivos móviles.
-                    </p>
-                    
-                    <div class="p-4 rounded-lg bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-900/60 text-slate-700 dark:text-slate-300 text-xs mb-4">
-                        <p class="font-semibold text-brand-600 dark:text-brand-400 mb-1">Prueba Interactiva</p>
-                        <p class="opacity-90">
-                            Haz clic en el botón de abajo para abrir una ventana modal interactiva de ejemplo. Observa cómo mantiene el esquema de colores, el desenfoque de fondo y la alineación perfecta de los controles.
+                        <p class="text-sm text-slate-400 leading-relaxed mb-6">
+                            Los diálogos de Lhuna Stack están diseñados para enfocar al usuario de manera limpia. Cuentan con un fondo traslúcido estilizado, transiciones fluidas de entrada/salida y total compatibilidad con dispositivos móviles.
                         </p>
+                        
+                        <div class="p-4 rounded-lg bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-900/60 text-slate-700 dark:text-slate-300 text-xs mb-4">
+                            <p class="font-semibold text-brand-600 dark:text-brand-400 mb-1">Prueba Interactiva</p>
+                            <p class="opacity-90">
+                                Haz clic en el botón de abajo para abrir una ventana modal interactiva de ejemplo. Observa cómo mantiene el esquema de colores, el desenfoque de fondo y la alineación perfecta de los controles.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="pt-4 border-t border-dark-border">
+                        <button 
+                            @click="showModal = true"
+                            class="w-full inline-flex items-center justify-center px-4 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-bold text-sm transition duration-300 shadow-lg shadow-brand-500/20 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 focus:ring-offset-dark-base"
+                        >
+                            Abrir Modal de Ejemplo
+                        </button>
                     </div>
                 </div>
-                <div class="pt-4 border-t border-dark-border">
-                    <button 
-                        @click="showModal = true"
-                        class="w-full inline-flex items-center justify-center px-4 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-bold text-sm transition duration-300 shadow-lg shadow-brand-500/20 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 focus:ring-offset-dark-base"
-                    >
-                        Abrir Modal de Ejemplo
-                    </button>
-                </div>
-            </div>
+            </GlowCard>
 
         </div>
 
         <!-- Sistema de Diseño y Tokens de Colores -->
-        <div class="bg-dark-surface border border-dark-border rounded-xl p-8 shadow-lg shadow-black/20 hover:border-brand-500/50 transition-colors duration-300 mt-12 relative overflow-hidden group">
-            <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-slate-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <GlowCard class="p-8 mt-12">
             
-            <div class="relative z-10">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-500">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-200">Sistema de Diseño y Tokens</h3>
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
                 </div>
-
-                <p class="text-sm text-slate-400 max-w-3xl mb-8 leading-relaxed">
-                    Lhuna Stack utiliza variables CSS nativas vinculadas en la base del layout. Esto permite cambiar paletas cromáticas al instante y mantener un control riguroso del contraste y la legibilidad en entornos tanto claros como oscuros.
-                </p>
-
-                <!-- Color Palette Showcase -->
-                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                    
-                    <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
-                        <div class="w-12 h-12 rounded-lg bg-brand-500 shadow-md shadow-brand-500/30 mb-2"></div>
-                        <span class="text-xs font-semibold text-slate-200">Brand Primary</span>
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">var(--color-brand-500)</span>
-                    </div>
-
-                    <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
-                        <div class="w-12 h-12 rounded-lg bg-[#0F172A] border border-dark-border mb-2"></div>
-                        <span class="text-xs font-semibold text-slate-200">Dark Base</span>
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-dark-base</span>
-                    </div>
-
-                    <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
-                        <div class="w-12 h-12 rounded-lg bg-[#1E293B] border border-dark-border mb-2"></div>
-                        <span class="text-xs font-semibold text-slate-200">Dark Surface</span>
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-dark-surface</span>
-                    </div>
-
-                    <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
-                        <div class="w-12 h-12 rounded-lg bg-[#334155] border border-dark-border mb-2"></div>
-                        <span class="text-xs font-semibold text-slate-200">Dark Elevated</span>
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-dark-elevated</span>
-                    </div>
-
-                    <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
-                        <div class="w-12 h-12 rounded-lg bg-green-500/20 border border-green-500/30 flex items-center justify-center text-green-500 font-bold mb-2">✓</div>
-                        <span class="text-xs font-semibold text-slate-200">Success Accent</span>
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-green-500</span>
-                    </div>
-
-                    <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
-                        <div class="w-12 h-12 rounded-lg bg-red-500/20 border border-red-500/30 flex items-center justify-center text-red-500 font-bold mb-2">✗</div>
-                        <span class="text-xs font-semibold text-slate-200">Danger Accent</span>
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-red-500</span>
-                    </div>
-
-                </div>
+                <h3 class="text-xl font-bold text-slate-200">Sistema de Diseño y Tokens</h3>
             </div>
-        </div>
+
+            <p class="text-sm text-slate-400 max-w-3xl mb-8 leading-relaxed">
+                Lhuna Stack utiliza variables CSS nativas vinculadas en la base del layout. Esto permite cambiar paletas cromáticas al instante y mantener un control riguroso del contraste y la legibilidad en entornos tanto claros como oscuros.
+            </p>
+
+            <!-- Color Palette Showcase -->
+            <div class="space-y-8">
+                
+                <!-- Brand & Status -->
+                <div>
+                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Marca y Estados</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <!-- Brand Primary -->
+                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                            <div class="w-12 h-12 rounded-lg bg-brand-500 shadow-md shadow-brand-500/30 mb-2"></div>
+                            <span class="text-xs font-semibold text-slate-200">Brand Primary</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">var(--color-brand-500)</span>
+                        </div>
+                        <!-- Success Accent -->
+                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                            <div class="w-12 h-12 rounded-lg bg-green-500/20 border border-green-500/30 flex items-center justify-center text-green-500 font-bold mb-2">✓</div>
+                            <span class="text-xs font-semibold text-slate-200">Success Accent</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-green-500</span>
+                        </div>
+                        <!-- Danger Accent -->
+                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                            <div class="w-12 h-12 rounded-lg bg-red-500/20 border border-red-500/30 flex items-center justify-center text-red-500 font-bold mb-2">✗</div>
+                            <span class="text-xs font-semibold text-slate-200">Danger Accent</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-red-500</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Light Mode System -->
+                <div>
+                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Modo Claro (Fondos y Superficies)</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <!-- Light Base -->
+                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                            <div class="w-12 h-12 rounded-lg bg-[#F8FAFC] border border-slate-300 mb-2"></div>
+                            <span class="text-xs font-semibold text-slate-200">Light Base</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#F8FAFC]</span>
+                        </div>
+                        <!-- Light Surface -->
+                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                            <div class="w-12 h-12 rounded-lg bg-[#FFFFFF] border border-slate-300 mb-2 shadow-sm"></div>
+                            <span class="text-xs font-semibold text-slate-200">Light Surface</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#FFFFFF]</span>
+                        </div>
+                        <!-- Light Elevated -->
+                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                            <div class="w-12 h-12 rounded-lg bg-[#F1F5F9] border border-slate-300 mb-2"></div>
+                            <span class="text-xs font-semibold text-slate-200">Light Elevated</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#F1F5F9]</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dark Mode System -->
+                <div>
+                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Modo Oscuro (Fondos y Superficies)</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <!-- Dark Base -->
+                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                            <div class="w-12 h-12 rounded-lg bg-[#020617] border border-dark-border mb-2"></div>
+                            <span class="text-xs font-semibold text-slate-200">Dark Base</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#020617]</span>
+                        </div>
+                        <!-- Dark Surface -->
+                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                            <div class="w-12 h-12 rounded-lg bg-[#0F172A] border border-dark-border mb-2"></div>
+                            <span class="text-xs font-semibold text-slate-200">Dark Surface</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#0F172A]</span>
+                        </div>
+                        <!-- Dark Elevated -->
+                        <div class="flex flex-col items-center p-3 rounded-lg bg-dark-elevated/40 border border-dark-border">
+                            <div class="w-12 h-12 rounded-lg bg-[#1E293B] border border-dark-border mb-2"></div>
+                            <span class="text-xs font-semibold text-slate-200">Dark Elevated</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">bg-[#1E293B]</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </GlowCard>
 
         <!-- Jetstream Dialog Modal Instance -->
         <DialogModal :show="showModal" @close="showModal = false" max-width="md">
@@ -626,23 +659,23 @@ const showNotification = (type) => {
                         Los diálogos modales son excelentes para captar la atención de forma limpia y enfocada, bloqueando la interacción con el resto de la interfaz hasta que se toma una decisión.
                     </p>
                     
-                    <div class="p-4 rounded-lg bg-brand-950 border border-brand-900 text-slate-300 text-xs">
-                        <h4 class="text-xs font-semibold text-brand-500 mb-1.5">Características Destacadas</h4>
+                    <div class="p-4 rounded-lg bg-brand-500/10 border border-brand-500/20 text-slate-600 dark:text-slate-300 text-xs">
+                        <h4 class="text-xs font-semibold text-brand-700 dark:text-brand-400 mb-1.5">Características Destacadas</h4>
                         <ul class="space-y-1.5 opacity-90 leading-relaxed list-none pl-0">
                             <li class="flex items-center gap-2">
-                                <span class="text-brand-500 font-bold">✓</span>
+                                <span class="text-brand-600 dark:text-brand-400 font-bold">✓</span>
                                 <span>Efecto de cristal traslúcido de fondo (backdrop-blur)</span>
                             </li>
                             <li class="flex items-center gap-2">
-                                <span class="text-brand-500 font-bold">✓</span>
+                                <span class="text-brand-600 dark:text-brand-400 font-bold">✓</span>
                                 <span>Alineación semántica perfecta de controles</span>
                             </li>
                             <li class="flex items-center gap-2">
-                                <span class="text-brand-500 font-bold">✓</span>
+                                <span class="text-brand-600 dark:text-brand-400 font-bold">✓</span>
                                 <span>Transiciones animadas suaves al abrir y cerrar</span>
                             </li>
                             <li class="flex items-center gap-2">
-                                <span class="text-brand-500 font-bold">✓</span>
+                                <span class="text-brand-600 dark:text-brand-400 font-bold">✓</span>
                                 <span>Totalmente adaptable a móviles y tablets</span>
                             </li>
                         </ul>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { router } from "@inertiajs/vue3";
 import JetInput from "@/Jetstream/Input.vue";
 import JetLabel from "@/Jetstream/Label.vue";
@@ -162,15 +162,39 @@ const editaFiltro = (campo_1, condicion_1, valor_1, conjuncion_1, index) => {
     conjuncion.value = conjuncion_1;
 };
 
+onMounted(() => {
+    setTimeout(() => {
+        if (input.value) {
+            input.value.focus();
+            const length = input.value.value.length;
+            input.value.setSelectionRange(length, length);
+        }
+    }, 50);
+});
+
 const realizarBusqueda = () => {
     buscando.value = true;
+    const options = {
+        preserveState: true,
+        onFinish: () => {
+            buscando.value = false;
+            setTimeout(() => {
+                if (input.value) {
+                    input.value.focus();
+                    const length = input.value.value.length;
+                    input.value.setSelectionRange(length, length);
+                }
+            }, 50);
+        }
+    };
     if (buscar.value.length > 0) {
         router.get(
             route(ruta.value + ".search", {
                 filtro: buscar.value,
                 orderBy: orderByObject.value,
                 ...params.value,
-            })
+            }),
+            options
         );
     } else {
         router.get(
@@ -178,7 +202,7 @@ const realizarBusqueda = () => {
                 orderBy: orderByObject.value,
                 ...params.value,
             }),
-            { preserveState: true }
+            options
         );
     }
 };
@@ -241,10 +265,10 @@ export default {};
 
 <template>
     <div
-        class="flex flex-wrap border-b border-dark-border bg-dark-surface/50 bg-glass-gradient backdrop-blur-md relative rounded-md shadow-sm shadow-black/20 rounded-b-none"
+        class="flex flex-wrap border-b border-dark-border bg-dark-surface/50 bg-glass-gradient backdrop-blur-md relative w-full"
     >
         <div
-            class="absolute inset-y-0 left-0 pl-4 p-3 items-center pointer-events-none"
+            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
         >
             <transition name="slide-up" mode="out-in">
                 <font-awesome-icon
@@ -314,7 +338,8 @@ export default {};
                                         filtro.conjuncion === 'AND',
                                     'bg-blue-600 hover:bg-blue-500 active:bg-blue-700':
                                         filtro.conjuncion === 'OR',
-                                }"
+                                }
+                                "
                             >
                                 <font-awesome-icon
                                     :icon="
@@ -473,35 +498,33 @@ export default {};
                     </div>
                 </div>
             </div>
-            <JetInput
+            <input
                 v-else
                 ref="input"
-                class="m-1 block w-full pl-10 h-10"
+                class="block w-full pl-10 bg-transparent border-0 text-slate-200 placeholder-slate-500 focus:ring-0 focus:outline-none text-sm py-3"
                 :class="{
-                    'rounded-r-md': !campos,
-                    'mr-1 pr-12': campos,
+                    'pr-12': campos,
+                    'pr-4': !campos,
                 }"
                 :placeholder="titulo"
                 v-model="buscar"
                 type="text"
                 autofocus
                 @keyup.enter="realizarBusqueda"
-                :disabled="buscando"
             />
         </transition>
         <button
             v-if="campos"
             @click="abreFiltros"
-            class="absolute w-10 inset-y-1 right-1 flex items-center rounded-md hover:bg-dark-elevated focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-opacity-50 border-dark-border border h-10 transition-all duration-200 ease-in-out"
+            class="absolute inset-y-0 right-0 w-12 flex items-center justify-center hover:bg-dark-elevated/50 focus:outline-none transition-colors duration-200"
             :class="{
-                'bg-dark-surface/50 rounded-l-none': !muestraFiltros,
-                'bg-dark-elevated shadow-inner shadow-black/50': muestraFiltros,
+                'text-slate-400': !muestraFiltros,
+                'text-brand-400 bg-dark-elevated/40': muestraFiltros,
             }"
             title="Mostrar campos"
         >
             <font-awesome-icon
                 icon="gear"
-                class="text-slate-400 m-auto"
                 :class="{
                     'animate-spin': rotaIcono,
                 }"

@@ -18,7 +18,7 @@ defineProps({
 <template>
     <button
         :type="type"
-        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest focus:outline-none focus:ring disabled:opacity-25 shadow-sm shadow-black/20 hover:shadow-md shadow-black/30 focus:shadow-lg shadow-black/40 active:ring-2 active:ring-brand-500 transition focus:border-brand-500 focus:ring-brand-500"
+        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest focus:outline-none focus:ring disabled:opacity-25 shadow-md shadow-brand-500/20 hover:shadow-lg hover:shadow-brand-500/30 focus:shadow-xl focus:shadow-brand-500/40 active:ring-2 active:ring-brand-500 transition focus:border-brand-500 focus:ring-brand-500"
         :class="`${colors.bg} ${colors.hover} ${colors.active}`"
     >
         <slot />

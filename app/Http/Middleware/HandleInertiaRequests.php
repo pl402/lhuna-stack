@@ -59,10 +59,46 @@ class HandleInertiaRequests extends Middleware
                 try {
                     if (\Illuminate\Support\Facades\Schema::hasTable('configuraciones')) {
                         $tema = \App\Models\Configuracion::where('clave', 'Color del Tema')->first();
-                        return $tema ? strtolower($tema->valor) : 'green';
+                        return $tema ? strtolower($tema->valor) : 'indigo';
                     }
                 } catch (\Exception $e) {}
-                return 'green';
+                return 'indigo';
+            },
+            'themeRadius' => function () {
+                try {
+                    if (\Illuminate\Support\Facades\Schema::hasTable('configuraciones')) {
+                        $radius = \App\Models\Configuracion::where('clave', 'Redondez de Esquinas')->first();
+                        return $radius ? strtolower($radius->valor) : 'md';
+                    }
+                } catch (\Exception $e) {}
+                return 'md';
+            },
+            'themeGrid' => function () {
+                try {
+                    if (\Illuminate\Support\Facades\Schema::hasTable('configuraciones')) {
+                        $grid = \App\Models\Configuracion::where('clave', 'Mostrar Cuadrícula')->first();
+                        return $grid ? ($grid->valor === 'si') : true;
+                    }
+                } catch (\Exception $e) {}
+                return true;
+            },
+            'themeOrbs' => function () {
+                try {
+                    if (\Illuminate\Support\Facades\Schema::hasTable('configuraciones')) {
+                        $orbs = \App\Models\Configuracion::where('clave', 'Mostrar Orbes del Cursor')->first();
+                        return $orbs ? ($orbs->valor === 'si') : true;
+                    }
+                } catch (\Exception $e) {}
+                return true;
+            },
+            'themeShadow' => function () {
+                try {
+                    if (\Illuminate\Support\Facades\Schema::hasTable('configuraciones')) {
+                        $shadow = \App\Models\Configuracion::where('clave', 'Tamaño de Sombra')->first();
+                        return $shadow ? strtolower($shadow->valor) : 'lg';
+                    }
+                } catch (\Exception $e) {}
+                return 'lg';
             },
         ]);
     }
