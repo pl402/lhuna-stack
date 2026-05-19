@@ -17,6 +17,23 @@
 
 ---
 
+## 📸 Vista Previa
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <strong>Modo Oscuro</strong><br/>
+      <img src="resources/img/lhuna-stack-v2-dark.png" alt="Lhuna Stack v2 - Modo Oscuro" style="border-radius: 8px; max-width: 100%;"/>
+    </td>
+    <td width="50%" align="center">
+      <strong>Modo Claro</strong><br/>
+      <img src="resources/img/lhuna-stack-v2-light.png" alt="Lhuna Stack v2 - Modo Claro" style="border-radius: 8px; max-width: 100%;"/>
+    </td>
+  </tr>
+</table>
+
+---
+
 ## 🌟 Características Destacadas
 
 Lhuna Stack es una plantilla base premium diseñada para optimizar los tiempos de desarrollo manteniendo los más altos estándares visuales y funcionales en interfaces modernas.
