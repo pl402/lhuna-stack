@@ -1,7 +1,8 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { usePage, Link, useForm } from "@inertiajs/vue3";
-import { reactive, ref, watch, toRefs } from "vue";
+import { reactive, ref, watch, toRefs, onMounted, onUnmounted, computed } from "vue";
+import axios from "axios";
 import JetDialogModal from "@/Jetstream/DialogModal";
 import JetInput from "@/Jetstream/Input.vue";
 import JetLabel from "@/Jetstream/Label.vue";
@@ -25,7 +26,42 @@ const props = defineProps({
   configuracion: Object,
   filtro: String,
   orderBy: Object,
+  filtros: Array,
 });
+
+const filtros = ref(props.filtros ? props.filtros : []);
+
+const campos = {
+  id: {
+    label: "ID",
+    type: "number",
+    defaultCondition: "="
+  },
+  clave: {
+    label: "Nombre",
+    type: "text",
+    defaultCondition: "LIKE"
+  },
+  valor: {
+    label: "Valor / Descripción",
+    type: "text",
+    defaultCondition: "LIKE"
+  },
+  tipo: {
+    label: "Tipo",
+    type: "select",
+    defaultCondition: "=",
+    options: [
+      { name: "Texto", value: "Texto" },
+      { name: "Imagen", value: "Imagen" },
+      { name: "Fecha", value: "Fecha" },
+      { name: "Tema", value: "Tema" },
+      { name: "Redondez", value: "Redondez" },
+      { name: "Sombra", value: "Sombra" },
+      { name: "Interruptor", value: "Interruptor" }
+    ]
+  }
+};
 
 const form = useForm({
   clave: "",
@@ -54,7 +90,7 @@ const orderByObject = ref(
   props.orderBy
     ? props.orderBy
     : {
-       field: "name",
+       field: "id",
        sort: "asc",
      }
 );
@@ -224,26 +260,114 @@ const clearPhotoFileInput = () => {
   }
 };
 
+// Lógica de Scroll Infinito
+const configuracionesLista = ref([...props.configuraciones.data]);
+const paginaActual = ref(props.configuraciones.current_page);
+const ultimaPagina = ref(props.configuraciones.last_page);
+const loadingMore = ref(false);
 
+const hasMore = computed(() => paginaActual.value < ultimaPagina.value);
+
+watch(
+  () => props.configuraciones,
+  (newConfiguraciones) => {
+    if (newConfiguraciones.current_page === 1) {
+      configuracionesLista.value = [...newConfiguraciones.data];
+      paginaActual.value = newConfiguraciones.current_page;
+      ultimaPagina.value = newConfiguraciones.last_page;
+    }
+  },
+  { deep: true }
+);
+
+const loadMore = async () => {
+  if (loadingMore.value || !hasMore.value) return;
+  loadingMore.value = true;
+
+  const nextPage = paginaActual.value + 1;
+  const currentParams = new URLSearchParams(window.location.search);
+  currentParams.set("page", nextPage);
+
+  try {
+    const response = await axios.get(
+      `${window.location.pathname}?${currentParams.toString()}`,
+      {
+        headers: {
+          Accept: "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      }
+    );
+
+    if (response.data && response.data.configuraciones) {
+      configuracionesLista.value.push(...response.data.configuraciones.data);
+      paginaActual.value = response.data.configuraciones.current_page;
+      ultimaPagina.value = response.data.configuraciones.last_page;
+    }
+  } catch (err) {
+    console.error("Error al cargar más configuraciones:", err);
+  } finally {
+    loadingMore.value = false;
+  }
+};
+
+const loadMoreTrigger = ref(null);
+let infiniteObserver = null;
+
+const setupObserver = () => {
+  if (infiniteObserver) {
+    infiniteObserver.disconnect();
+  }
+
+  infiniteObserver = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        loadMore();
+      }
+    },
+    {
+      root: null,
+      rootMargin: "150px",
+    }
+  );
+
+  if (loadMoreTrigger.value) {
+    infiniteObserver.observe(loadMoreTrigger.value);
+  }
+};
+
+onMounted(() => {
+  setupObserver();
+});
+
+onUnmounted(() => {
+  if (infiniteObserver) {
+    infiniteObserver.disconnect();
+  }
+});
 </script>
 
 <template>
-  <AppLayout title="Configuraciones">
-    <div class="max-w-full mx-auto px-0 sm:px-8 py-4 pt-0 sm:pt-4">
-      <GlowCard rounded="sm:rounded-lg">
-        <Buscador
-          v-model="buscar"
-          :orderByObject="orderByObject"
-          ruta="configuraciones"
-          autofocus
-        />
-        <Tabla v-if="configuraciones.data.length > 0">
+  <AppLayout title="Configuraciones" :mainScrollable="false">
+    <div class="w-full max-w-full mx-auto p-0 flex-1 min-h-0 flex flex-col">
+      <GlowCard rounded="rounded-none" class="flex-1 min-h-0 border-0">
+        <div class="flex flex-col h-full w-full">
+          <Buscador
+            v-model="buscar"
+            :orderByObject="orderByObject"
+            ruta="configuraciones"
+            :filtros="filtros"
+            :campos="campos"
+            autofocus
+          />
+          <Tabla v-if="configuracionesLista.length > 0" heightClass="flex-1 min-h-0">
           <template #col>
             <th class="px-4 py-3 w-32">
               <Ordena
                 v-model="orderByObject"
                 ruta="configuraciones"
                 :buscar="buscar"
+                :filtros="filtros"
                 titulo="ID"
                 campo="id"
               />
@@ -253,6 +377,7 @@ const clearPhotoFileInput = () => {
                 v-model="orderByObject"
                 ruta="configuraciones"
                 :buscar="buscar"
+                :filtros="filtros"
                 titulo="Nombre"
                 campo="clave"
               />
@@ -262,6 +387,7 @@ const clearPhotoFileInput = () => {
                 v-model="orderByObject"
                 ruta="configuraciones"
                 :buscar="buscar"
+                :filtros="filtros"
                 titulo="Descripción"
                 campo="valor"
               />
@@ -275,7 +401,7 @@ const clearPhotoFileInput = () => {
           <template #row>
             <tr
               class="text-slate-300 hover:bg-dark-elevated border-b border-dark-border"
-              v-for="configuracion in configuraciones.data"
+              v-for="configuracion in configuracionesLista"
               :key="configuracion.id"
             >
               <td class="px-4 py-3 text-sm text-slate-300">
@@ -325,19 +451,28 @@ const clearPhotoFileInput = () => {
                 </button>
               </td>
             </tr>
+            <!-- Trigger para Scroll Infinito -->
+            <tr ref="loadMoreTrigger" class="opacity-0 h-1">
+              <td colspan="4"></td>
+            </tr>
           </template>
           <template #pagination>
-            <Paginador
-              :links="configuraciones.links"
-              :total="configuraciones.total"
-              :to="configuraciones.to"
-              :from="configuraciones.from"
-            />
+            <div class="px-4 py-2.5 border-t border-dark-border text-xs font-semibold tracking-wide text-slate-500 uppercase bg-dark-surface/50 bg-glass-gradient backdrop-blur-md flex justify-between items-center select-none">
+              <span>Mostrando {{ configuracionesLista.length }} de {{ configuraciones.total }} configuraciones</span>
+              <span v-if="loadingMore" class="flex items-center gap-1.5 text-brand-400">
+                <font-awesome-icon icon="spinner" class="animate-spin" />
+                Cargando más...
+              </span>
+              <span v-else-if="!hasMore && configuracionesLista.length > 0" class="text-slate-600 dark:text-slate-500">
+                Fin de la lista
+              </span>
+            </div>
           </template>
         </Tabla>
         <div v-else class="text-center p-5 text-slate-400 text-md">
           Sin resultados
           <br />
+        </div>
         </div>
       </GlowCard>
     </div>

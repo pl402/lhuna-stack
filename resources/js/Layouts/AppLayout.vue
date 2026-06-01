@@ -16,6 +16,10 @@ import { VOffline } from "v-offline";
 
 defineProps({
     title: String,
+    mainScrollable: {
+        type: Boolean,
+        default: true
+    }
 });
 
 const online = ref(false);
@@ -330,7 +334,7 @@ const toggleTheme = () => {
                                 <footer
                                     class="bg-dark-surface/80 backdrop-blur-md absolute bottom-0 w-full border-t border-dark-border"
                                 >
-                                    <div class="py-1 px-4 text-center">
+                                    <div class="py-2.5 px-4 text-center flex items-center justify-center select-none">
                                         <!-- copyrigth  -->
                                         <div class="text-xs text-slate-500">
                                             <div>
@@ -349,7 +353,7 @@ const toggleTheme = () => {
                 </div>
 
                 <div
-                    class="w-full transition-all duration-300 ease-in-out"
+                    class="w-full h-screen flex flex-col overflow-hidden transition-all duration-300 ease-in-out"
                     :class="
                         isOpen
                             ? 'ml-0 sm:ml-60 md:ml-60'
@@ -487,7 +491,11 @@ const toggleTheme = () => {
                     </header>
                     <!-- Page Content -->
 
-                    <main :key="$page.url" class="mt-12 sm:mt-0">
+                    <main
+                        :key="$page.url"
+                        class="mt-12 sm:mt-0 flex-1 min-h-0 flex flex-col"
+                        :class="mainScrollable ? 'overflow-y-auto' : 'overflow-hidden'"
+                    >
                         <slot />
                     </main>
                 </div>

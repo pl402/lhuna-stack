@@ -48,3 +48,13 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgb(var(--color-brand-500-rgb, 99 102 241) / 0.6);
 }
+
+/* Backdrop blur for elevated backgrounds in both light and dark themes */
+[class*="bg-dark-elevated"] {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.bg-dark-elevated {
+  background-color: rgb(var(--color-bg-elevated) / 0.8) !important;
+}

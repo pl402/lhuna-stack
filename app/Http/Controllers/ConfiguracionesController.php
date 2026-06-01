@@ -30,6 +30,10 @@ class ConfiguracionesController extends Controller
                     ->appends(request()->query());
             }
 
+            if ($request->wantsJson() && !$request->header('X-Inertia')) {
+                return response()->json(compact("configuraciones", "filtro", "orderBy"));
+            }
+
             return Inertia::render(
                 "Configuraciones",
                 compact("configuraciones", "filtro", "orderBy")
@@ -69,9 +73,48 @@ class ConfiguracionesController extends Controller
                     ->appends(request()->query());
             }
 
+            if ($request->wantsJson() && !$request->header('X-Inertia')) {
+                return response()->json(compact("configuraciones", "filtro", "orderBy"));
+            }
+
             return Inertia::render(
                 "Configuraciones",
                 compact("configuraciones", "filtro", "orderBy")
+            );
+        } else {
+            return redirect()
+                ->back()
+                ->with(
+                    "error",
+                    "No cuenta con los permisos necesarios para realizar esta acción."
+                );
+        }
+    }
+
+    public function filter(Request $request)
+    {
+        $user = \Auth::user();
+        if ($user->can("configuraciones.index")) {
+            $filtros = $request->filtros;
+
+            $orderBy = ["field" => "id", "sort" => "asc"];
+            if ($request->has("orderBy")) {
+                $orderBy = $request->orderBy;
+            }
+
+            $configuraciones = Configuracion::filtros($filtros)
+                ->orderBy($orderBy["field"], $orderBy["sort"])
+                ->paginate(10)
+                ->onEachSide(1)
+                ->appends(request()->query());
+
+            if ($request->wantsJson() && !$request->header('X-Inertia')) {
+                return response()->json(compact("configuraciones", "filtros", "orderBy"));
+            }
+
+            return Inertia::render(
+                "Configuraciones",
+                compact("configuraciones", "filtros", "orderBy")
             );
         } else {
             return redirect()

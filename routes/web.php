@@ -69,5 +69,8 @@ Route::middleware([
             ConfiguracionesController::class,
             "search",
         ])->name("configuraciones.search");
+        Route::get("/filtro", [ConfiguracionesController::class, "filter"])->name(
+            "configuraciones.filter"
+        );
     });
 });

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import JetButton from '@/Jetstream/Button.vue';
 import JetSecondaryButton from '@/Jetstream/SecondaryButton.vue';
 import JetDangerButton from '@/Jetstream/DangerButton.vue';
@@ -73,6 +73,7 @@ const tableData = ref([
     { id: 6, name: 'Sofía Méndez', email: 'sofia@lhuna.dev', role: 'Editor', status: 'Pendiente', statusType: 'warning' },
 ]);
 
+const totalDemoUsers = ref(24);
 const searchQuery = ref('');
 const filteredTableData = computed(() => {
     if (!searchQuery.value) return tableData.value;
@@ -104,6 +105,8 @@ const openCreateUserModal = () => {
         statusType
     });
     
+    totalDemoUsers.value++;
+    
     notify({
         group: 'main',
         title: 'Usuario Añadido (Demo)',
@@ -127,6 +130,7 @@ const openEditUserModal = (user) => {
 const deleteUser = (userId) => {
     const user = tableData.value.find(u => u.id === userId);
     tableData.value = tableData.value.filter(u => u.id !== userId);
+    totalDemoUsers.value--;
     notify({
         group: 'error',
         title: 'Usuario Eliminado',
@@ -185,6 +189,83 @@ const showNotification = (type) => {
         text: text
     }, 4000);
 }
+
+// Lógica de Scroll Infinito Simulado
+const loadingMoreDemo = ref(false);
+const hasMoreDemo = computed(() => tableData.value.length < totalDemoUsers.value);
+
+const loadMoreDemo = () => {
+    if (loadingMoreDemo.value || !hasMoreDemo.value) return;
+    loadingMoreDemo.value = true;
+    
+    setTimeout(() => {
+        const roles = ['Administrador', 'Editor', 'Usuario', 'Espectador'];
+        const statuses = ['Activo', 'Pendiente', 'Suspendido'];
+        const names = [
+            'Andrés Mendoza', 'Lucía Peralta', 'Fernando Gómez', 'Camila Herrera', 
+            'Ricardo Silva', 'Daniela Vargas', 'Mauricio Castro', 'Elena Rojas',
+            'Gabriel Ortiz', 'Isabella Núñez', 'Hugo Romero', 'Natalia Méndez'
+        ];
+        
+        // Generar 4 usuarios mock
+        for (let i = 0; i < 4; i++) {
+            if (tableData.value.length >= totalDemoUsers.value) break;
+            
+            const randomName = names[Math.floor(Math.random() * names.length)] + ' (Demo)';
+            const emailName = randomName.toLowerCase().replace(/\s+/g, '').replace('(demo)', '');
+            const randomRole = roles[Math.floor(Math.random() * roles.length)];
+            const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+            const statusType = randomStatus === 'Activo' ? 'success' : (randomStatus === 'Pendiente' ? 'warning' : 'danger');
+            const nextId = tableData.value.length ? Math.max(...tableData.value.map(u => u.id)) + 1 : 1;
+            
+            tableData.value.push({
+                id: nextId,
+                name: randomName,
+                email: `${emailName}@lhuna.dev`,
+                role: randomRole,
+                status: randomStatus,
+                statusType
+            });
+        }
+        
+        loadingMoreDemo.value = false;
+    }, 1000);
+};
+
+const loadMoreDemoTrigger = ref(null);
+let demoObserver = null;
+
+const setupDemoObserver = () => {
+    if (demoObserver) {
+        demoObserver.disconnect();
+    }
+    
+    demoObserver = new IntersectionObserver(
+        (entries) => {
+            if (entries[0].isIntersecting) {
+                loadMoreDemo();
+            }
+        },
+        {
+            root: null,
+            rootMargin: "100px",
+        }
+    );
+    
+    if (loadMoreDemoTrigger.value) {
+        demoObserver.observe(loadMoreDemoTrigger.value);
+    }
+};
+
+onMounted(() => {
+    setupDemoObserver();
+});
+
+onUnmounted(() => {
+    if (demoObserver) {
+        demoObserver.disconnect();
+    }
+});
 </script>
 
 <template>
@@ -545,6 +626,22 @@ const showNotification = (type) => {
                                         </div>
                                     </td>
                                 </tr>
+                                <!-- Trigger para Scroll Infinito Demo -->
+                                <tr ref="loadMoreDemoTrigger" class="opacity-0 h-1">
+                                    <td colspan="4"></td>
+                                </tr>
+                            </template>
+                            <template #pagination>
+                              <div class="px-4 py-2.5 border-t border-dark-border text-xs font-semibold tracking-wide text-slate-500 uppercase bg-dark-surface/50 bg-glass-gradient backdrop-blur-md flex justify-between items-center select-none">
+                                <span>Mostrando {{ filteredTableData.length }} de {{ totalDemoUsers }} usuarios</span>
+                                <span v-if="loadingMoreDemo" class="flex items-center gap-1.5 text-brand-400">
+                                  <font-awesome-icon icon="spinner" class="animate-spin" />
+                                  Cargando más...
+                                </span>
+                                <span v-else-if="!hasMoreDemo && filteredTableData.length > 0" class="text-slate-600 dark:text-slate-500">
+                                  Fin de la lista
+                                </span>
+                              </div>
                             </template>
                         </Tabla>
                         <div v-else class="text-center p-8 text-slate-400 text-sm">

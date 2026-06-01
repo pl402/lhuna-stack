@@ -1,7 +1,8 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { useForm } from "@inertiajs/vue3";
-import { reactive, ref, toRefs } from "vue";
+import { reactive, ref, toRefs, onMounted, onUnmounted, watch, computed } from "vue";
+import axios from "axios";
 import JetDialogModal from "@/Jetstream/DialogModal";
 import JetConfirmationModal from "@/Jetstream/ConfirmationModal";
 import JetInput from "@/Jetstream/Input.vue";
@@ -26,6 +27,92 @@ const props = defineProps({
   orderBy: Object,
   auth: Object,
   filtros: Array,
+});
+
+// Lógica de Scroll Infinito
+const usuariosLista = ref([...props.usuarios.data]);
+const paginaActual = ref(props.usuarios.current_page);
+const ultimaPagina = ref(props.usuarios.last_page);
+const loadingMore = ref(false);
+
+const hasMore = computed(() => paginaActual.value < ultimaPagina.value);
+
+watch(
+  () => props.usuarios,
+  (newUsuarios) => {
+    if (newUsuarios.current_page === 1) {
+      usuariosLista.value = [...newUsuarios.data];
+      paginaActual.value = newUsuarios.current_page;
+      ultimaPagina.value = newUsuarios.last_page;
+    }
+  },
+  { deep: true }
+);
+
+const loadMore = async () => {
+  if (loadingMore.value || !hasMore.value) return;
+  loadingMore.value = true;
+
+  const nextPage = paginaActual.value + 1;
+  const currentParams = new URLSearchParams(window.location.search);
+  currentParams.set("page", nextPage);
+
+  try {
+    const response = await axios.get(
+      `${window.location.pathname}?${currentParams.toString()}`,
+      {
+        headers: {
+          Accept: "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      }
+    );
+
+    if (response.data && response.data.usuarios) {
+      usuariosLista.value.push(...response.data.usuarios.data);
+      paginaActual.value = response.data.usuarios.current_page;
+      ultimaPagina.value = response.data.usuarios.last_page;
+    }
+  } catch (err) {
+    console.error("Error al cargar más usuarios:", err);
+  } finally {
+    loadingMore.value = false;
+  }
+};
+
+const loadMoreTrigger = ref(null);
+let infiniteObserver = null;
+
+const setupObserver = () => {
+  if (infiniteObserver) {
+    infiniteObserver.disconnect();
+  }
+
+  infiniteObserver = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        loadMore();
+      }
+    },
+    {
+      root: null,
+      rootMargin: "150px",
+    }
+  );
+
+  if (loadMoreTrigger.value) {
+    infiniteObserver.observe(loadMoreTrigger.value);
+  }
+};
+
+onMounted(() => {
+  setupObserver();
+});
+
+onUnmounted(() => {
+  if (infiniteObserver) {
+    infiniteObserver.disconnect();
+  }
 });
 
 const form = useForm({
@@ -105,18 +192,32 @@ let roles = [
 const campos = {
   id: {
     label: "ID",
+    type: "number",
+    defaultCondition: "="
   },
   name: {
     label: "Nombre",
+    type: "text",
+    defaultCondition: "LIKE"
   },
   titulo: {
     label: "Título",
+    type: "text",
+    defaultCondition: "LIKE"
   },
   email: {
     label: "Email",
+    type: "text",
+    defaultCondition: "LIKE"
   },
   rol: {
     label: "Rol",
+    type: "select",
+    defaultCondition: "=",
+    options: [
+      { name: "Administrador", value: "Administrador" },
+      { name: "Usuario", value: "Usuario" }
+    ]
   },
 };
 
@@ -259,18 +360,19 @@ const borraUsuarioDo = () => {
 
 </script>
 <template>
-  <AppLayout title="Usuarios">
-    <div class="max-w-full mx-auto px-0 sm:px-8 py-4 pt-0 sm:pt-4">
-      <GlowCard class="sm:rounded-lg">
-        <Buscador
-            v-model="buscar"
-            :orderByObject="orderByObject"
-            ruta="usuarios"
-            :filtros="filtros"
-            :campos="campos"
-            autofocus
-          />
-          <Tabla v-if="usuarios.data.length > 0">
+  <AppLayout title="Usuarios" :mainScrollable="false">
+    <div class="w-full max-w-full mx-auto p-0 flex-1 min-h-0 flex flex-col">
+      <GlowCard rounded="rounded-none" class="flex-1 min-h-0 border-0">
+        <div class="flex flex-col h-full w-full">
+          <Buscador
+              v-model="buscar"
+              :orderByObject="orderByObject"
+              ruta="usuarios"
+              :filtros="filtros"
+              :campos="campos"
+              autofocus
+            />
+            <Tabla v-if="usuariosLista.length > 0" heightClass="flex-1 min-h-0">
             <template #col>
               <th class="px-4 py-3 w-20">
                 <Ordena
@@ -318,7 +420,7 @@ const borraUsuarioDo = () => {
             <template #row>
               <tr
                 class="text-slate-300 hover:bg-dark-elevated border-b border-dark-border"
-                v-for="usuario in usuarios.data"
+                v-for="usuario in usuariosLista"
                 :key="usuario.id"
               >
                 <td class="px-4 py-3 text-sm text-slate-500 dark:text-slate-300">{{ usuario.id }}</td>
@@ -362,14 +464,22 @@ const borraUsuarioDo = () => {
                   </button>
                 </td>
               </tr>
+              <!-- Trigger para Scroll Infinito -->
+              <tr ref="loadMoreTrigger" class="opacity-0 h-1">
+                <td colspan="5"></td>
+              </tr>
             </template>
             <template #pagination>
-              <Paginador
-                :links="usuarios.links"
-                :total="usuarios.total"
-                :to="usuarios.to"
-                :from="usuarios.from"
-              />
+              <div class="px-4 py-2.5 border-t border-dark-border text-xs font-semibold tracking-wide text-slate-500 uppercase bg-dark-surface/50 bg-glass-gradient backdrop-blur-md flex justify-between items-center select-none">
+                <span>Mostrando {{ usuariosLista.length }} de {{ usuarios.total }} usuarios</span>
+                <span v-if="loadingMore" class="flex items-center gap-1.5 text-brand-400">
+                  <font-awesome-icon icon="spinner" class="animate-spin" />
+                  Cargando más...
+                </span>
+                <span v-else-if="!hasMore && usuariosLista.length > 0" class="text-slate-600 dark:text-slate-500">
+                  Fin de la lista
+                </span>
+              </div>
             </template>
           </Tabla>
           <div v-else class="text-center p-5 text-slate-400 text-md">
@@ -383,6 +493,7 @@ const borraUsuarioDo = () => {
                 Agregar Nuevo Usuario
             </button>
           </div>
+        </div>
       </GlowCard>
     </div>
 

@@ -23,7 +23,7 @@ Estoy equipado con la skill **UI UX Pro Max**, lo que me permite:
 1. **Prioridad Estética:** Todo componente o vista que construya debe verse "Premium" y moderno, sin utilizar estilos crudos a menos que sea estrictamente solicitado.
 2. **Compatibilidad:** Respetaré el entorno actual (Laravel Mix + Vue 3 + Tailwind 3). No intentaré migraciones destructivas (ej. hacia Vite o Tailwind v4) a menos que tú lo autorices explícitamente.
 3. **Consistencia de BD:** Para desarrollo local, asumo el uso de SQLite según lo configurado en `.env`.
-4. **Iteración Rápida:** Puedo ejecutar comandos en el contenedor `dev-box` (ej. `npm run dev`, `php artisan...`) para compilar, generar archivos o probar cambios instantáneamente.
+4. **Iteración Rápida:** Puedo ejecutar comandos en el contenedor `dev-box` (ej. `pnpm dev`, `php artisan...`) para compilar, generar archivos o probar cambios instantáneamente.
 
 ---
 *Siempre que necesites crear una nueva vista, un dashboard o un componente, simplemente descríbelo y utilizaré mi motor de diseño para entregarte el código listo para usar.*

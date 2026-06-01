@@ -65,7 +65,7 @@ Lhuna Stack es una plantilla base premium diseñada para optimizar los tiempos d
 * PHP 8.0+ con extensiones requeridas por Laravel
 * MySQL 5.7+ o MariaDB
 * Composer (Gestor de dependencias de PHP)
-* Node.js 16.0+ y npm
+* Node.js 16.0+ y pnpm
 
 ---
 
@@ -80,7 +80,7 @@ $ cd lhuna-stack
 ### 2. Instalar dependencias
 ```bash
 $ composer install
-$ npm install
+$ pnpm install
 ```
 
 ### 3. Configuración de Base de Datos (MySQL)
@@ -120,7 +120,7 @@ Inicia el servidor local de desarrollo de PHP y compila los assets del frontend 
 $ php artisan serve
 
 # En otra terminal, compilar assets continuamente
-$ npm run dev
+$ pnpm dev
 ```
 
 ### 6. Credenciales de Acceso Base
@@ -134,7 +134,7 @@ Dirígete a `http://localhost:8000/` en tu navegador e ingresa con:
 
 Compila y optimiza todos los scripts y hojas de estilo del frontend para producción:
 ```bash
-$ npm run production
+$ pnpm prod
 ```
 
 ### Configuración del Trabajador de Colas (Queue Worker)

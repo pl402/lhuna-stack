@@ -24,13 +24,24 @@ class Configuracion extends Model
 
     public function scopeFiltros($query, array $filtros)
     {
-        $query->when($filtros['clave'] ?? null, function ($query, $clave) {
-            return $query->where('clave', $clave);
-        })->when($filtros['valor'] ?? null, function ($query, $valor) {
-            return $query->where('valor', $valor);
-        })->when($filtros['tipo'] ?? null, function ($query, $tipo) {
-            return $query->where('tipo', $tipo);
-        });
+        foreach ($filtros as $filtro) {
+            $campo = $filtro["campo"];
+            $condicion = $filtro["condicion"];
+            $valor = $filtro["valor"];
+            $conjuncion = $filtro["conjuncion"];
+
+            if ($condicion == "LIKE") {
+                $valor = "%{$valor}%";
+            }
+
+            if ($conjuncion == "AND") {
+                $query->where($campo, $condicion, $valor);
+            } else {
+                $query->orWhere($campo, $condicion, $valor);
+            }
+        }
+
+        return $query;
     }
 
     public function scopeFiltro($query, $key)

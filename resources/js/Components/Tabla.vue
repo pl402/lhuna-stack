@@ -1,5 +1,12 @@
 <script>
-export default {};
+export default {
+  props: {
+    heightClass: {
+      type: String,
+      default: "max-h-96"
+    }
+  }
+};
 </script>
 
 <style>
@@ -20,15 +27,15 @@ export default {};
 </style>
 
 <template>
- <div class="w-full overflow-hidden">
-  <div class="relative w-full">
+ <div class="w-full overflow-hidden" :class="heightClass.includes('flex-1') ? 'flex-1 min-h-0 flex flex-col' : ''">
+  <div class="relative w-full z-0" :class="heightClass.includes('flex-1') ? 'flex-1 min-h-0 flex flex-col' : ''">
     <!-- Top scroll fade indicator (placed below the sticky header) -->
     <div class="absolute top-[37px] left-0 right-0 h-6 bg-gradient-to-b from-dark-surface to-transparent pointer-events-none z-10"></div>
     
     <!-- Bottom scroll fade indicator -->
     <div class="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-dark-surface to-transparent pointer-events-none z-10"></div>
 
-    <div class="w-full max-h-96 overflow-y-auto overflow-x-auto custom-scrollbar">
+    <div :class="['w-full overflow-y-auto overflow-x-auto custom-scrollbar', heightClass]">
      <table class="w-full whitespace-no-wrap">
       <thead class="sticky top-0 z-20 bg-dark-surface backdrop-blur-md">
        <tr class="

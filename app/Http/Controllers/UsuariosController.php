@@ -29,6 +29,10 @@ class UsuariosController extends Controller
                     ->appends(request()->query());
             }
 
+            if ($request->wantsJson() && !$request->header('X-Inertia')) {
+                return response()->json(compact("usuarios", "filtro", "orderBy"));
+            }
+
             return Inertia::render(
                 "Usuarios",
                 compact("usuarios", "filtro", "orderBy")
@@ -64,6 +68,10 @@ class UsuariosController extends Controller
                     ->appends(request()->query());
             }
 
+            if ($request->wantsJson() && !$request->header('X-Inertia')) {
+                return response()->json(compact("usuarios", "filtro", "orderBy"));
+            }
+
             return Inertia::render(
                 "Usuarios",
                 compact("usuarios", "filtro", "orderBy")
@@ -94,6 +102,10 @@ class UsuariosController extends Controller
                 ->paginate(10)
                 ->onEachSide(1)
                 ->appends(request()->query());
+
+            if ($request->wantsJson() && !$request->header('X-Inertia')) {
+                return response()->json(compact("usuarios", "filtros", "orderBy"));
+            }
 
             return Inertia::render(
                 "Usuarios",
