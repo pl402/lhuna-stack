@@ -68,6 +68,17 @@ import {
     faWifi,
     faSun,
     faMoon,
+    faPlus,
+    faDatabase,
+    faArrowUp,
+    faArrowDown,
+    faBook,
+    faBox,
+    faCalendar,
+    faTags,
+    faRocket,
+    faCircleXmark,
+    faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { faSquarePlus as farSquarePlus, faSquareMinus as farSquareMinus } from "@fortawesome/free-regular-svg-icons";
@@ -144,6 +155,17 @@ library.add(
     faWifi,
     faSun,
     faMoon,
+    faPlus,
+    faDatabase,
+    faArrowUp,
+    faArrowDown,
+    faBook,
+    faBox,
+    faCalendar,
+    faTags,
+    faRocket,
+    faCircleXmark,
+    faXmark,
 );
 
 export default FontAwesomeIcon;

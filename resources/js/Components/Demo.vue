@@ -1,9 +1,10 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import JetButton from '@/Jetstream/Button.vue';
 import JetSecondaryButton from '@/Jetstream/SecondaryButton.vue';
 import JetDangerButton from '@/Jetstream/DangerButton.vue';
 import JetInput from '@/Jetstream/Input.vue';
+import JetLabel from '@/Jetstream/Label.vue';
 import JetCheckbox from '@/Jetstream/Checkbox.vue';
 import Select from '@/Components/Select.vue';
 import ButtonA from '@/Components/ButtonA.vue';
@@ -74,15 +75,274 @@ const tableData = ref([
 ]);
 
 const totalDemoUsers = ref(24);
+const buscarDemo = ref('');
 const searchQuery = ref('');
+const buscandoDemo = ref(false);
+
+// Advanced Filters Mock State
+const filtrosDemo = ref([]);
+const filtrosAplicadosDemo = ref([]);
+const muestraFiltrosDemo = ref(false);
+const campoDemo = ref("");
+const condicionDemo = ref("");
+const valorDemo = ref("");
+const conjuncionDemo = ref("AND");
+const editingIndexDemo = ref(-1);
+const isProgrammaticChangeDemo = ref(false);
+
+const camposDemo = {
+  id: { label: "ID", type: "number", defaultCondition: "=" },
+  name: { label: "Nombre", type: "text", defaultCondition: "LIKE" },
+  email: { label: "Email", type: "text", defaultCondition: "LIKE" },
+  role: { 
+    label: "Rol", 
+    type: "select", 
+    defaultCondition: "=", 
+    options: [
+      { name: "Administrador", value: "Administrador" },
+      { name: "Editor", value: "Editor" },
+      { name: "Usuario", value: "Usuario" },
+      { name: "Espectador", value: "Espectador" }
+    ]
+  },
+  status: {
+    label: "Estado",
+    type: "select",
+    defaultCondition: "=",
+    options: [
+      { name: "Activo", value: "Activo" },
+      { name: "Pendiente", value: "Pendiente" },
+      { name: "Suspendido", value: "Suspendido" }
+    ]
+  }
+};
+
+const selectCondicionesDemo = [
+    { name: "Igual", value: "=" },
+    { name: "Mayor", value: ">" },
+    { name: "Menor", value: "<" },
+    { name: "Mayor o igual", value: ">=" },
+    { name: "Menor o igual", value: "<=" },
+    { name: "Diferente", value: "!=" },
+    { name: "Como", value: "LIKE" },
+    { name: "No como", value: "NOT LIKE" },
+    { name: "Es nulo", value: "IS NULL" },
+    { name: "No es nulo", value: "IS NOT NULL" }
+];
+
+const isSelectFieldDemo = computed(() => {
+    if (!campoDemo.value) return false;
+    return camposDemo[campoDemo.value]?.type === 'select';
+});
+
+const getFieldOptionsDemo = computed(() => {
+    if (!campoDemo.value) return [];
+    return camposDemo[campoDemo.value]?.options || [];
+});
+
+watch(campoDemo, (newCampo) => {
+    if (isProgrammaticChangeDemo.value) return;
+    if (newCampo && camposDemo[newCampo]) {
+        condicionDemo.value = camposDemo[newCampo].defaultCondition || "=";
+    } else {
+        condicionDemo.value = "=";
+    }
+    valorDemo.value = "";
+}, { flush: 'sync' });
+
+const getFieldLabelDemo = (key) => {
+    return camposDemo[key]?.label || key;
+};
+
+const getDisplayValueDemo = (filtro) => {
+    if (filtro.condicion === 'IS NULL') return 'Es Nulo';
+    if (filtro.condicion === 'IS NOT NULL') return 'No es Nulo';
+    if (camposDemo[filtro.campo]) {
+        const fieldMeta = camposDemo[filtro.campo];
+        if (fieldMeta.type === 'select' && fieldMeta.options) {
+            const opt = fieldMeta.options.find(o => o.value == filtro.valor);
+            if (opt) return opt.name;
+        }
+    }
+    return filtro.valor;
+};
+
+const realizarBusquedaDemo = () => {
+    buscandoDemo.value = true;
+    setTimeout(() => {
+        searchQuery.value = buscarDemo.value;
+        buscandoDemo.value = false;
+    }, 450);
+};
+
+const filtrarDemo = () => {
+    buscandoDemo.value = true;
+    muestraFiltrosDemo.value = false;
+    setTimeout(() => {
+        filtrosAplicadosDemo.value = JSON.parse(JSON.stringify(filtrosDemo.value));
+        buscandoDemo.value = false;
+    }, 450);
+};
+
+const agregarFiltroDemo = () => {
+    if (campoDemo.value && condicionDemo.value && (valorDemo.value || condicionDemo.value === 'IS NULL' || condicionDemo.value === 'IS NOT NULL')) {
+        let finalValor = valorDemo.value;
+        if (condicionDemo.value === 'IS NULL' || condicionDemo.value === 'IS NOT NULL') {
+            finalValor = "NULO";
+        }
+        filtrosDemo.value.push({
+            campo: campoDemo.value,
+            condicion: condicionDemo.value,
+            valor: finalValor,
+            conjuncion: conjuncionDemo.value,
+            type: camposDemo[campoDemo.value]?.type || 'text'
+        });
+        campoDemo.value = "";
+        condicionDemo.value = "";
+        valorDemo.value = "";
+        conjuncionDemo.value = "AND";
+    } else {
+        notify({
+            group: "error",
+            title: "Error",
+            text: "Debe llenar todos los campos",
+        }, 3000);
+    }
+};
+
+const toggleConjuncionDemo = (index) => {
+    filtrosDemo.value[index].conjuncion = filtrosDemo.value[index].conjuncion === 'AND' ? 'OR' : 'AND';
+    filtrarDemo();
+};
+
+const eliminarFiltroDemo = (index) => {
+    if (editingIndexDemo.value === index) {
+        cancelarEdicionDemo();
+    } else if (editingIndexDemo.value > index) {
+        editingIndexDemo.value--;
+    }
+    filtrosDemo.value.splice(index, 1);
+    filtrarDemo();
+};
+
+const limpiarTodosFiltrosDemo = () => {
+    cancelarEdicionDemo();
+    filtrosDemo.value = [];
+    filtrarDemo();
+};
+
+const cancelarEdicionDemo = () => {
+    editingIndexDemo.value = -1;
+    campoDemo.value = "";
+    condicionDemo.value = "";
+    valorDemo.value = "";
+    conjuncionDemo.value = "AND";
+};
+
+const guardarEdicionDemo = () => {
+    if (campoDemo.value && condicionDemo.value && (valorDemo.value || condicionDemo.value === 'IS NULL' || condicionDemo.value === 'IS NOT NULL')) {
+        let finalValor = valorDemo.value;
+        if (condicionDemo.value === 'IS NULL' || condicionDemo.value === 'IS NOT NULL') {
+            finalValor = "NULO";
+        }
+        filtrosDemo.value[editingIndexDemo.value] = {
+            campo: campoDemo.value,
+            condicion: condicionDemo.value,
+            valor: finalValor,
+            conjuncion: conjuncionDemo.value,
+            type: camposDemo[campoDemo.value]?.type || 'text'
+        };
+        cancelarEdicionDemo();
+        filtrarDemo();
+    } else {
+        notify({
+            group: "error",
+            title: "Error",
+            text: "Debe llenar todos los campos",
+        }, 3000);
+    }
+};
+
+const editaFiltroDemo = (campo_1, condicion_1, valor_1, conjuncion_1, index) => {
+    if (campoDemo.value && condicionDemo.value && (valorDemo.value || condicionDemo.value === 'IS NULL' || condicionDemo.value === 'IS NOT NULL') && editingIndexDemo.value !== index) {
+        notify({
+            group: "error",
+            title: "Error",
+            text: "Debe guardar el filtro actual antes de editar otro",
+        }, 3000);
+        return;
+    }
+    isProgrammaticChangeDemo.value = true;
+    campoDemo.value = campo_1;
+    condicionDemo.value = condicion_1;
+    valorDemo.value = valor_1 === 'NULO' ? '' : valor_1;
+    conjuncionDemo.value = conjuncion_1;
+    editingIndexDemo.value = index;
+    muestraFiltrosDemo.value = true;
+    isProgrammaticChangeDemo.value = false;
+};
+
 const filteredTableData = computed(() => {
-    if (!searchQuery.value) return tableData.value;
-    const query = searchQuery.value.toLowerCase().trim();
-    return tableData.value.filter(user => 
-        user.name.toLowerCase().includes(query) || 
-        user.email.toLowerCase().includes(query) || 
-        user.role.toLowerCase().includes(query)
-    );
+    let result = tableData.value;
+
+    
+    if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase().trim();
+        result = result.filter(user => 
+            user.name.toLowerCase().includes(query) || 
+            user.email.toLowerCase().includes(query) || 
+            user.role.toLowerCase().includes(query)
+        );
+    }
+    
+    if (filtrosAplicadosDemo.value.length > 0) {
+        result = result.filter(user => {
+            let match = true;
+            for (let i = 0; i < filtrosAplicadosDemo.value.length; i++) {
+                const f = filtrosAplicadosDemo.value[i];
+                const valUser = user[f.campo];
+                let fMatch = false;
+                
+                const valTarget = f.type === 'number' ? Number(f.valor) : f.valor;
+                const valSource = f.type === 'number' ? Number(valUser) : valUser;
+                
+                if (f.condicion === '=') {
+                    fMatch = String(valSource).toLowerCase() === String(valTarget).toLowerCase();
+                } else if (f.condicion === 'LIKE') {
+                    fMatch = String(valSource).toLowerCase().includes(String(valTarget).toLowerCase());
+                } else if (f.condicion === 'NOT LIKE') {
+                    fMatch = !String(valSource).toLowerCase().includes(String(valTarget).toLowerCase());
+                } else if (f.condicion === '>') {
+                    fMatch = valSource > valTarget;
+                } else if (f.condicion === '<') {
+                    fMatch = valSource < valTarget;
+                } else if (f.condicion === '>=') {
+                    fMatch = valSource >= valTarget;
+                } else if (f.condicion === '<=') {
+                    fMatch = valSource <= valTarget;
+                } else if (f.condicion === '!=') {
+                    fMatch = String(valSource).toLowerCase() !== String(valTarget).toLowerCase();
+                } else if (f.condicion === 'IS NULL') {
+                    fMatch = valUser === null || valUser === undefined;
+                } else if (f.condicion === 'IS NOT NULL') {
+                    fMatch = valUser !== null && valUser !== undefined;
+                }
+                
+                if (i === 0) {
+                    match = fMatch;
+                } else {
+                    if (f.conjuncion === 'AND') {
+                        match = match && fMatch;
+                    } else {
+                        match = match || fMatch;
+                    }
+                }
+            }
+            return match;
+        });
+    }
+    
+    return result;
 });
 
 const openCreateUserModal = () => {
@@ -554,16 +814,244 @@ onUnmounted(() => {
             <GlowCard class="lg:col-span-2">
                 <div>
                     <!-- Buscador de Usuarios Mock -->
-                    <div class="flex flex-wrap border-b border-dark-border bg-dark-surface/50 bg-glass-gradient backdrop-blur-md relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <div class="relative w-full flex flex-col border-b border-dark-border bg-dark-surface/90 bg-glass-gradient z-30">
+                        <!-- Fila del Buscador -->
+                        <div class="relative w-full flex items-center">
+                            <!-- Icono de Búsqueda o Spinner -->
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                                <font-awesome-icon
+                                    v-if="buscandoDemo"
+                                    icon="spinner"
+                                    class="text-slate-400 animate-spin"
+                                />
+                                <font-awesome-icon
+                                    v-else
+                                    icon="magnifying-glass"
+                                    class="text-slate-400"
+                                />
+                            </div>
+
+                            <!-- Input de Búsqueda -->
+                            <input
+                                class="block w-full pl-10 pr-12 bg-transparent border-0 text-slate-200 placeholder-slate-500 focus:ring-0 focus:outline-none text-sm py-3 z-0"
+                                placeholder="Buscar usuarios..."
+                                v-model="buscarDemo"
+                                type="text"
+                                @keyup.enter="realizarBusquedaDemo"
+                            />
+
+                            <!-- Botón de Filtros -->
+                            <button
+                                @click="muestraFiltrosDemo = !muestraFiltrosDemo"
+                                class="absolute inset-y-0 right-0 w-12 flex items-center justify-center hover:bg-dark-elevated/50 focus:outline-none transition-colors duration-200 z-10"
+                                :class="{
+                                    'text-slate-400': !muestraFiltrosDemo,
+                                    'text-brand-400 bg-dark-elevated/40': muestraFiltrosDemo,
+                                }"
+                                title="Filtros avanzados"
+                            >
+                                <font-awesome-icon
+                                    icon="filter"
+                                    :class="{
+                                        'animate-pulse text-brand-400': filtrosDemo.length > 0,
+                                    }"
+                                />
+                            </button>
                         </div>
-                        <input 
-                            type="text" 
-                            placeholder="Buscar usuarios..." 
-                            v-model="searchQuery" 
-                            class="block w-full pl-10 pr-4 py-3 bg-transparent border-0 text-slate-200 placeholder-slate-500 focus:ring-0 focus:outline-none text-sm rounded-t-xl"
-                        />
+
+                        <!-- Chips de Filtros Activos -->
+                        <div v-if="filtrosDemo.length > 0" class="flex flex-wrap items-center gap-2 px-4 py-2.5 border-t border-dark-border select-none">
+                            <div
+                                v-for="(filtro, index) in filtrosDemo"
+                                :key="index"
+                                class="inline-flex items-center gap-1.5 bg-brand-500/10 border border-brand-500/20 rounded-full px-3 py-0.5 text-xs text-brand-400 select-none shadow-sm hover:border-brand-500/40 transition"
+                            >
+                                <!-- Selector de Conjunción (Y / O) -->
+                                <span 
+                                    v-if="index > 0" 
+                                    @click="toggleConjuncionDemo(index)"
+                                    class="cursor-pointer font-bold px-1.5 py-0.5 bg-dark-surface/50 border border-dark-border rounded text-[9px] hover:bg-brand-500 hover:text-white transition uppercase mr-0.5"
+                                    :title="filtro.conjuncion === 'AND' ? 'Click para cambiar a O' : 'Click para cambiar a Y'"
+                                >
+                                    {{ filtro.conjuncion === 'AND' ? 'Y' : 'O' }}
+                                </span>
+                                <span class="opacity-75 font-medium">{{ getFieldLabelDemo(filtro.campo) }}</span>
+                                <span class="text-slate-500 font-mono text-[9px]">{{ filtro.condicion }}</span>
+                                <span class="font-bold text-slate-300">{{ getDisplayValueDemo(filtro) }}</span>
+                                <button
+                                    @click="eliminarFiltroDemo(index)"
+                                    class="ml-1 hover:text-red-400 transition"
+                                    title="Eliminar filtro"
+                                >
+                                    <font-awesome-icon icon="times" class="w-2.5 h-2.5" />
+                                </button>
+                            </div>
+                            <!-- Botón Limpiar Todo -->
+                            <button
+                                v-if="filtrosDemo.length > 1"
+                                @click="limpiarTodosFiltrosDemo"
+                                class="text-xs text-red-500 hover:text-red-400 font-semibold px-2 py-0.5 rounded hover:bg-red-500/10 transition ml-auto"
+                            >
+                                Limpiar todos
+                            </button>
+                        </div>
+
+                        <!-- Popover Flotante de Filtros Avanzados -->
+                        <transition name="slide-up">
+                            <div
+                                v-if="muestraFiltrosDemo"
+                                class="absolute right-2 top-[46px] w-[500px] max-w-[calc(100vw-1rem)] bg-dark-elevated backdrop-blur-xl border border-dark-border shadow-2xl rounded-xl p-4 z-50 flex flex-col gap-4 animate-fade-in"
+                            >
+                                <!-- Capa fija invisible para cerrar al hacer click fuera -->
+                                <div class="fixed inset-0 z-[-1]" @click="muestraFiltrosDemo = false"></div>
+
+                                <div class="flex items-center justify-between border-b border-dark-border pb-2">
+                                    <h4 class="text-slate-200 font-bold text-sm flex items-center gap-1.5">
+                                        <font-awesome-icon icon="filter" class="text-brand-400" />
+                                        Filtros Avanzados
+                                    </h4>
+                                    <button @click="muestraFiltrosDemo = false" class="text-slate-400 hover:text-slate-200 transition">
+                                        <font-awesome-icon icon="times" />
+                                    </button>
+                                </div>
+
+                                <!-- Formulario para agregar filtros -->
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                                    <!-- Campo -->
+                                    <div class="flex flex-col gap-1">
+                                        <JetLabel for="campoDemo" value="Campo" class="text-left" />
+                                        <Select
+                                            id="campoDemo"
+                                            v-model="campoDemo"
+                                            :options="Object.keys(camposDemo).map(key => ({ name: camposDemo[key].label, value: key }))"
+                                            placeholder="Seleccione..."
+                                            class="block w-full mt-1"
+                                        />
+                                    </div>
+
+                                    <!-- Condición -->
+                                    <div class="flex flex-col gap-1">
+                                        <JetLabel for="condicionDemo" value="Condición" class="text-left" />
+                                        <Select
+                                            id="condicionDemo"
+                                            v-model="condicionDemo"
+                                            :options="selectCondicionesDemo"
+                                            placeholder="Seleccione..."
+                                            class="block w-full mt-1"
+                                        />
+                                    </div>
+
+                                    <!-- Valor -->
+                                    <div class="flex flex-col gap-1">
+                                        <JetLabel for="valorDemo" value="Valor" class="text-left" />
+                                        <Select
+                                            v-if="isSelectFieldDemo"
+                                            id="valorDemo"
+                                            v-model="valorDemo"
+                                            :options="getFieldOptionsDemo"
+                                            placeholder="Seleccione..."
+                                            class="block w-full mt-1"
+                                        />
+                                        <JetInput
+                                            v-else
+                                            id="valorDemo"
+                                            type="text"
+                                            v-model="valorDemo"
+                                            placeholder="Ingrese valor"
+                                            class="block w-full mt-1"
+                                            @keyup.enter="editingIndexDemo === -1 ? agregarFiltroDemo() : guardarEdicionDemo()"
+                                            :disabled="condicionDemo === 'IS NULL' || condicionDemo === 'IS NOT NULL'"
+                                        />
+                                    </div>
+                                </div>
+
+                                <!-- Listado de Filtros Activos dentro del Popover -->
+                                <div v-if="filtrosDemo.length > 0" class="flex flex-col gap-2 border-t border-dark-border pt-3">
+                                    <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider text-left flex items-center gap-1.5 select-none">
+                                        <font-awesome-icon icon="list-check" class="text-brand-400" />
+                                        Filtros Aplicados
+                                    </h5>
+                                    <div class="flex flex-col gap-2 max-h-40 overflow-y-auto custom-scrollbar pr-1">
+                                        <div 
+                                            v-for="(filtro, index) in filtrosDemo" 
+                                            :key="index" 
+                                            class="flex items-center justify-between border rounded-lg p-2 gap-2 text-xs transition-all duration-200"
+                                            :class="editingIndexDemo === index ? 'bg-brand-500/10 border-brand-500/50 shadow-sm shadow-brand-500/10' : 'bg-dark-elevated/40 border-dark-border hover:border-brand-500/30'"
+                                        >
+                                            <div class="flex items-center gap-1.5 flex-1 min-w-0 text-left">
+                                                <button 
+                                                    v-if="index > 0"
+                                                    @click="toggleConjuncionDemo(index)"
+                                                    class="font-bold px-2 py-0.5 bg-dark-surface hover:bg-brand-500 hover:text-white border border-dark-border rounded text-[10px] text-brand-400 hover:border-brand-400 transition-all duration-200 uppercase shrink-0"
+                                                    :title="filtro.conjuncion === 'AND' ? 'Cambiar a O' : 'Cambiar a Y'"
+                                                >
+                                                    {{ filtro.conjuncion === 'AND' ? 'Y' : 'O' }}
+                                                </button>
+                                                <span v-else class="text-slate-500 font-bold shrink-0 uppercase text-[10px]">Donde</span>
+                                                
+                                                <span class="text-slate-200 font-medium truncate">{{ getFieldLabelDemo(filtro.campo) }}</span>
+                                                <span class="text-slate-400 font-mono text-[10px] shrink-0">{{ filtro.condicion }}</span>
+                                                <span class="text-brand-400 font-semibold truncate">{{ getDisplayValueDemo(filtro) }}</span>
+                                            </div>
+                                            <div class="flex items-center gap-1 shrink-0">
+                                                <button 
+                                                    @click="editaFiltroDemo(filtro.campo, filtro.condicion, filtro.valor, filtro.conjuncion, index)"
+                                                    class="p-1.5 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded transition-colors duration-200"
+                                                    title="Editar filtro"
+                                                >
+                                                    <font-awesome-icon icon="edit" class="w-3.5 h-3.5" />
+                                                </button>
+                                                <button 
+                                                    @click="eliminarFiltroDemo(index)"
+                                                    class="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors duration-200"
+                                                    title="Eliminar filtro"
+                                                >
+                                                    <font-awesome-icon icon="trash" class="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Botonera -->
+                                <div class="flex justify-end gap-2 border-t border-dark-border pt-3">
+                                    <button
+                                        v-if="editingIndexDemo === -1"
+                                        @click="agregarFiltroDemo"
+                                        type="button"
+                                        class="inline-flex items-center justify-center px-4 py-2 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white rounded font-bold text-xs uppercase tracking-widest transition shadow-md shadow-brand-500/10"
+                                    >
+                                        <font-awesome-icon icon="plus" class="mr-1.5" />
+                                        Agregar
+                                    </button>
+                                    <div v-else class="flex gap-2">
+                                        <button
+                                            @click="cancelarEdicionDemo"
+                                            type="button"
+                                            class="inline-flex items-center justify-center px-4 py-2 bg-dark-elevated hover:bg-dark-surface text-slate-300 border border-dark-border rounded font-bold text-xs uppercase tracking-widest transition duration-200"
+                                        >
+                                            Cancelar
+                                        </button>
+                                        <button
+                                            @click="guardarEdicionDemo"
+                                            type="button"
+                                            class="inline-flex items-center justify-center px-4 py-2 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white rounded font-bold text-xs uppercase tracking-widest transition shadow-md shadow-brand-500/10"
+                                        >
+                                            <font-awesome-icon icon="check" class="mr-1.5" />
+                                            Guardar
+                                        </button>
+                                    </div>
+                                    <button
+                                        v-if="editingIndexDemo === -1"
+                                        @click="filtrarDemo"
+                                        class="inline-flex items-center justify-center px-4 py-2 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded font-bold text-xs uppercase tracking-widest transition shadow-md shadow-blue-500/10"
+                                    >
+                                        <font-awesome-icon icon="filter" class="mr-1.5" />
+                                        Filtrar
+                                    </button>
+                                </div>
+                            </div>
+                        </transition>
                     </div>
 
                     <div class="overflow-hidden">
@@ -930,5 +1418,20 @@ onUnmounted(() => {
 .animate-ripple-3 {
   animation: ripple 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
   animation-delay: 2.6s;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+    transition: all 0.25s ease-out;
+}
+
+.slide-up-enter-from {
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.slide-up-leave-to {
+    opacity: 0;
+    transform: translateY(-30px);
 }
 </style>

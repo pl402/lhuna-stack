@@ -118,7 +118,7 @@ watch(campo, (newCampo) => {
         condicion.value = "=";
     }
     valor.value = "";
-});
+}, { flush: 'sync' });
 
 // Función para agregar campos
 const agregarFiltro = () => {
@@ -250,16 +250,13 @@ const editaFiltro = (campo_1, condicion_1, valor_1, conjuncion_1, index) => {
     }
 
     isProgrammaticChange.value = true;
-    editingIndex.value = index;
     campo.value = campo_1;
     condicion.value = condicion_1;
     valor.value = valor_1 === 'NULO' ? '' : valor_1;
     conjuncion.value = conjuncion_1;
+    editingIndex.value = index;
     muestraFiltros.value = true;
-
-    nextTick(() => {
-        isProgrammaticChange.value = false;
-    });
+    isProgrammaticChange.value = false;
 };
 
 onMounted(() => {
@@ -454,7 +451,7 @@ export default {};
         </div>
 
         <!-- Popover Flotante de Filtros Avanzados -->
-        <transition name="slide-fade">
+        <transition name="slide-up">
             <div
                 v-if="muestraFiltros"
                 class="absolute right-2 top-[46px] w-[500px] max-w-[calc(100vw-1rem)] bg-dark-elevated backdrop-blur-xl border border-dark-border shadow-2xl rounded-xl p-4 z-50 flex flex-col gap-4 animate-fade-in"

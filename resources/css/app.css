@@ -50,11 +50,11 @@
 }
 
 /* Backdrop blur for elevated backgrounds in both light and dark themes */
-[class*="bg-dark-elevated"] {
+[class*="bg-dark-elevated"]:not([class*="backdrop-blur"]) {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
 .bg-dark-elevated {
-  background-color: rgb(var(--color-bg-elevated) / 0.8) !important;
+  background-color: rgb(var(--color-bg-elevated) / 0.75) !important;
 }

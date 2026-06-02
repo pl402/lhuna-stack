@@ -24,7 +24,7 @@ class User extends Authenticatable
      *
      * @var string[]
      */
-    protected $fillable = ["name", "titulo", "email", "password"];
+    protected $fillable = ['name', 'titulo', 'email', 'password'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -32,10 +32,10 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        "password",
-        "remember_token",
-        "two_factor_recovery_codes",
-        "two_factor_secret",
+        'password',
+        'remember_token',
+        'two_factor_recovery_codes',
+        'two_factor_secret',
     ];
 
     /**
@@ -44,7 +44,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $casts = [
-        "email_verified_at" => "datetime",
+        'email_verified_at' => 'datetime',
     ];
 
     /**
@@ -52,13 +52,13 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $appends = ["profile_photo_url"];
+    protected $appends = ['profile_photo_url'];
 
-    protected $with = ["roles", "permissions"];
+    protected $with = ['roles', 'permissions'];
 
     public function scopeFiltros($query, array $filtros)
     {
-        /* Procesa los filtros cargados 
+        /* Procesa los filtros cargados
          el formato es un array con los siguientes campos:
          [
             {
@@ -67,22 +67,22 @@ class User extends Authenticatable
                 "condicion" => "!="
                 "valor" => "123"
                 "conjuncion" => "AND"
-            }, 
+            },
             ...
          ]
          */
 
         foreach ($filtros as $filtro) {
-            $campo = $filtro["campo"];
-            $condicion = $filtro["condicion"];
-            $valor = $filtro["valor"];
-            $conjuncion = $filtro["conjuncion"];
+            $campo = $filtro['campo'];
+            $condicion = $filtro['condicion'];
+            $valor = $filtro['valor'];
+            $conjuncion = $filtro['conjuncion'];
 
-            if ($condicion == "LIKE") {
+            if ($condicion == 'LIKE') {
                 $valor = "%{$valor}%";
             }
 
-            if ($conjuncion == "AND") {
+            if ($conjuncion == 'AND') {
                 $query->where($campo, $condicion, $valor);
             } else {
                 $query->orWhere($campo, $condicion, $valor);
@@ -95,9 +95,13 @@ class User extends Authenticatable
     public function scopeFiltro($query, $key)
     {
         return $query
-            ->orWhere("name", "LIKE", "%{$key}%")
-            ->orWhere("titulo", "LIKE", "%{$key}%")
-            ->orWhere("email", "LIKE", "%{$key}%")
-            ->orWhere("id", "LIKE", "%{$key}%");
+            ->orWhere('name', 'LIKE', "%{$key}%")
+            ->orWhere('titulo', 'LIKE', "%{$key}%")
+            ->orWhere('email', 'LIKE', "%{$key}%")
+            ->orWhere('id', 'LIKE', "%{$key}%");
     }
+
+                    // -- ENTITY DESIGNER RELATIONS START --
+
+    // -- ENTITY DESIGNER RELATIONS END --
 }

@@ -73,4 +73,17 @@ Route::middleware([
             "configuraciones.filter"
         );
     });
+
+    Route::group(["prefix" => "disenador"], function () {
+        Route::get("/", [\App\Http\Controllers\DesignerController::class, "index"])->name("designer.index");
+        Route::post("/save", [\App\Http\Controllers\DesignerController::class, "saveSchema"])->name("designer.save");
+        Route::post("/generate", [\App\Http\Controllers\DesignerController::class, "generateFiles"])->name("designer.generate");
+        Route::post("/migrate", [\App\Http\Controllers\DesignerController::class, "runMigrations"])->name("designer.migrate");
+    });
+
+    // -- ENTITY DESIGNER ROUTES START --
+    if (file_exists(base_path('routes/designer.php'))) {
+        require base_path('routes/designer.php');
+    }
+    // -- ENTITY DESIGNER ROUTES END --
 });

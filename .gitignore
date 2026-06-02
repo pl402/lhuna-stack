@@ -16,3 +16,11 @@ pnpm-debug.log
 /.idea
 /.vscode
 .agent/
+
+# Entity Designer generated files
+/routes/designer.php
+/database/migrations/designer/
+/database/metadata/
+/app/Models/Designer/
+/app/Http/Controllers/Designer/
+/resources/js/Pages/Designer/

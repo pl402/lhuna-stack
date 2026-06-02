@@ -66,36 +66,68 @@ watch(error, async () => {
     );
 });
 
-const menu = [
-    {
-        name: "Escritorio",
-        icon: "home",
-        href: route("escritorio"),
-        active: route().current("escritorio"),
-        show: true,
-    },
-    {
-        name: "Usuarios",
-        href: route("usuarios.index"),
-        icon: "users",
-        active:
-            route().current("usuarios.index") ||
-            route().current("usuarios.search") ||
-            route().current("usuarios.filter") ||
-            route().current("usuarios"),
-        show: true,
-    },
-    {
-        name: "Configuraciones",
-        href: route("configuraciones.index"),
-        icon: "cog",
-        active:
-            route().current("configuraciones.index") ||
-            route().current("configuraciones.search") ||
-            route().current("configuraciones"),
-        show: true,
-    },
-];
+const page = usePage();
+const menu = computed(() => {
+    const baseMenu = [
+        {
+            name: "Escritorio",
+            icon: "home",
+            href: route("escritorio"),
+            active: route().current("escritorio"),
+            show: true,
+        },
+        {
+            name: "Usuarios",
+            href: route("usuarios.index"),
+            icon: "users",
+            active:
+                route().current("usuarios.index") ||
+                route().current("usuarios.search") ||
+                route().current("usuarios.filter") ||
+                route().current("usuarios"),
+            show: true,
+        },
+        {
+            name: "Configuraciones",
+            href: route("configuraciones.index"),
+            icon: "cog",
+            active:
+                route().current("configuraciones.index") ||
+                route().current("configuraciones.search") ||
+                route().current("configuraciones"),
+            show: true,
+        },
+    ];
+
+    const roles = page.props.auth?.roles || [];
+    const isSadminOrAdmin = roles.includes('Administrador');
+
+    if (isSadminOrAdmin) {
+        baseMenu.push({
+            name: "Diseñador",
+            href: route("designer.index"),
+            icon: "screwdriver-wrench",
+            active: route().current("designer.index") || route().current("designer.*"),
+            show: true,
+        });
+    }
+
+    const dynamics = page.props.dynamicEntities || [];
+    dynamics.forEach(entity => {
+        if (entity.is_system) return;
+        const table = entity.table;
+        const pluralLabel = entity.plural_label || entity.name + 's';
+        baseMenu.push({
+            name: pluralLabel,
+            href: route(`${table}.index`),
+            icon: entity.icon || "table",
+            active: route().current(`${table}.index`) || route().current(`${table}.search`) || route().current(`${table}.filter`),
+            show: true,
+        });
+    });
+
+    return baseMenu;
+});
 
 const isDark = ref(localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches));
 

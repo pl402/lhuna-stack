@@ -100,6 +100,13 @@ class HandleInertiaRequests extends Middleware
                 } catch (\Exception $e) {}
                 return 'lg';
             },
+            'dynamicEntities' => function () {
+                $path = database_path('metadata/entities.json');
+                if (file_exists($path)) {
+                    return json_decode(file_get_contents($path), true);
+                }
+                return [];
+            },
         ]);
     }
 }
