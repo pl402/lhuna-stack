@@ -25,16 +25,16 @@ class Configuracion extends Model
     public function scopeFiltros($query, array $filtros)
     {
         foreach ($filtros as $filtro) {
-            $campo = $filtro["campo"];
-            $condicion = $filtro["condicion"];
-            $valor = $filtro["valor"];
-            $conjuncion = $filtro["conjuncion"];
+            $campo = $filtro['campo'];
+            $condicion = $filtro['condicion'];
+            $valor = $filtro['valor'];
+            $conjuncion = $filtro['conjuncion'];
 
-            if ($condicion == "LIKE") {
+            if ($condicion == 'LIKE') {
                 $valor = "%{$valor}%";
             }
 
-            if ($conjuncion == "AND") {
+            if ($conjuncion == 'AND') {
                 $query->where($campo, $condicion, $valor);
             } else {
                 $query->orWhere($campo, $condicion, $valor);
@@ -51,7 +51,6 @@ class Configuracion extends Model
                 ->orWhere('tipo', 'LIKE', "%{$key}%");
     }
 
-                                                                                                                                                // -- ENTITY DESIGNER RELATIONS START --
-
+    // -- ENTITY DESIGNER RELATIONS START --
     // -- ENTITY DESIGNER RELATIONS END --
 }

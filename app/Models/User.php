@@ -101,10 +101,6 @@ class User extends Authenticatable
             ->orWhere('id', 'LIKE', "%{$key}%");
     }
 
-                                    // -- ENTITY DESIGNER RELATIONS START --
-    public function cursos()
-    {
-        return $this->hasMany(\App\Models\Designer\Curso::class, 'user_id');
-    }
+    // -- ENTITY DESIGNER RELATIONS START --
     // -- ENTITY DESIGNER RELATIONS END --
 }
