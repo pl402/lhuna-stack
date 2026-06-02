@@ -255,6 +255,143 @@ class DesignerSeedDemoCommand extends Command
                         ]
                     ]
                 ]
+            ],
+            [
+                "id" => "demo_calificacion",
+                "name" => "Calificacion",
+                "table" => "calificaciones",
+                "plural_label" => "Calificaciones",
+                "icon" => "star",
+                "position" => [
+                    "x" => 600,
+                    "y" => 400
+                ],
+                "fields" => [
+                    [
+                        "name" => "id",
+                        "type" => "id",
+                        "label" => "ID",
+                        "required" => true,
+                        "unique" => true,
+                        "show_in_table" => true,
+                        "searchable" => false,
+                        "sortable" => true
+                    ],
+                    [
+                        "name" => "nota",
+                        "type" => "decimal",
+                        "label" => "Calificación (Nota)",
+                        "required" => true,
+                        "unique" => false,
+                        "default" => null,
+                        "input_type" => "number",
+                        "show_in_table" => true,
+                        "searchable" => false,
+                        "sortable" => true
+                    ],
+                    [
+                        "name" => "fecha",
+                        "type" => "date",
+                        "label" => "Fecha de Registro",
+                        "required" => true,
+                        "unique" => false,
+                        "default" => null,
+                        "input_type" => "date",
+                        "show_in_table" => true,
+                        "searchable" => false,
+                        "sortable" => true
+                    ],
+                    [
+                        "name" => "comentario",
+                        "type" => "string",
+                        "label" => "Comentarios/Observaciones",
+                        "required" => false,
+                        "unique" => false,
+                        "default" => null,
+                        "input_type" => "textarea",
+                        "show_in_table" => true,
+                        "searchable" => true,
+                        "sortable" => false
+                    ],
+                    [
+                        "name" => "user_id",
+                        "type" => "foreignId",
+                        "label" => "Alumno",
+                        "required" => true,
+                        "relation_target" => "users",
+                        "input_type" => "select",
+                        "show_in_table" => true,
+                        "searchable" => false,
+                        "sortable" => true
+                    ],
+                    [
+                        "name" => "materia_id",
+                        "type" => "foreignId",
+                        "label" => "Materia",
+                        "required" => true,
+                        "relation_target" => "materias",
+                        "input_type" => "select",
+                        "show_in_table" => true,
+                        "searchable" => false,
+                        "sortable" => true
+                    ],
+                    [
+                        "name" => "curso_id",
+                        "type" => "foreignId",
+                        "label" => "Curso",
+                        "required" => true,
+                        "relation_target" => "cursos",
+                        "input_type" => "select",
+                        "show_in_table" => true,
+                        "searchable" => false,
+                        "sortable" => true
+                    ]
+                ],
+                "relations" => [
+                    [
+                        "type" => "belongsTo",
+                        "target" => "User",
+                        "foreign_key" => "user_id",
+                        "relation_name" => "student"
+                    ],
+                    [
+                        "type" => "belongsTo",
+                        "target" => "Materia",
+                        "foreign_key" => "materia_id",
+                        "relation_name" => "materia"
+                    ],
+                    [
+                        "type" => "belongsTo",
+                        "target" => "Curso",
+                        "foreign_key" => "curso_id",
+                        "relation_name" => "curso"
+                    ]
+                ],
+                "is_system" => false,
+                "ui_layout" => [
+                    "sections" => [
+                        [
+                            "id" => "sec-calif-info",
+                            "title" => "Datos de la Calificación",
+                            "columns" => 2,
+                            "fields" => [
+                                "nota",
+                                "fecha",
+                                "materia_id"
+                            ]
+                        ],
+                        [
+                            "id" => "sec-calif-asoc",
+                            "title" => "Asociación y Comentarios",
+                            "columns" => 1,
+                            "fields" => [
+                                "curso_id",
+                                "user_id",
+                                "comentario"
+                            ]
+                        ]
+                    ]
+                ]
             ]
         ];
 
@@ -267,11 +404,13 @@ class DesignerSeedDemoCommand extends Command
         // Limpieza de tablas previas para evitar colisiones
         \Illuminate\Support\Facades\Schema::dropIfExists('curso_materia');
         \Illuminate\Support\Facades\Schema::dropIfExists('curso_user');
+        \Illuminate\Support\Facades\Schema::dropIfExists('calificaciones');
         \Illuminate\Support\Facades\Schema::dropIfExists('cursos');
         \Illuminate\Support\Facades\Schema::dropIfExists('materias');
         
         \Illuminate\Support\Facades\DB::table('migrations')->where('migration', 'like', '%_create_cursos_table')->delete();
         \Illuminate\Support\Facades\DB::table('migrations')->where('migration', 'like', '%_create_materias_table')->delete();
+        \Illuminate\Support\Facades\DB::table('migrations')->where('migration', 'like', '%_create_calificaciones_table')->delete();
         \Illuminate\Support\Facades\DB::table('migrations')->where('migration', 'like', '%_create_curso_user_table')->delete();
         \Illuminate\Support\Facades\DB::table('migrations')->where('migration', 'like', '%_create_curso_materia_table')->delete();
 
