@@ -152,6 +152,9 @@ PHP;
         // G. Create/Assign Spatie Permissions
         $this->registerPermissions($entities);
 
+        // I. Generate Assignment interfaces (controllers and views) if required
+        $this->generateAssignmentInterfaces($entities);
+
         // H. Update relations for protected models (e.g. User)
         foreach ($this->protectedModels as $pm) {
             $entityObj = null;
@@ -244,21 +247,28 @@ PHP;
 
         $pluralVar = Str::camel(Str::plural($name));
 
-        // Relations loading
+        // Relations loading (both belongsTo and belongsToMany)
         $relationsWith = "";
         $belongsToRelations = array_filter($relations, function($r) { return $r['type'] === 'belongsTo'; });
-        if (count($belongsToRelations) > 0) {
+        $belongsToManyRelations = array_filter($relations, function($r) { return $r['type'] === 'belongsToMany'; });
+        
+        $loadRelations = array_merge($belongsToRelations, $belongsToManyRelations);
+        if (count($loadRelations) > 0) {
             $relNames = array_map(function($r) {
-                return "'" . ($r['relation_name'] ?? Str::camel($r['target'])) . "'";
-            }, $belongsToRelations);
+                if ($r['type'] === 'belongsTo') {
+                    return "'" . ($r['relation_name'] ?? Str::camel($r['target'])) . "'";
+                } else {
+                    return "'" . ($r['relation_name'] ?? Str::plural(Str::camel($r['target']))) . "'";
+                }
+            }, $loadRelations);
             $relationsWith = "\$query->with([" . implode(", ", $relNames) . "]);";
         }
 
-        // Prefetch options for belongsTo relations
+        // Prefetch options for belongsTo & belongsToMany relations
         $prefetchOptions = "";
         $compactExtraArr = [];
-        $optionsProps = [];
-        foreach ($belongsToRelations as $r) {
+        $allSelectRelations = array_merge($belongsToRelations, $belongsToManyRelations);
+        foreach ($allSelectRelations as $r) {
             $target = $r['target'];
             $pluralTarget = Str::plural($target);
             $optionsVar = Str::camel($pluralTarget) . 'Options';
@@ -304,18 +314,34 @@ PHP;
             $validationRules[] = "'{$fName}' => [" . implode(", ", $rules) . "]";
             $createFields[] = "'{$fName}' => \$datos['{$fName}']";
         }
+
+        // Add belongsToMany relations to validation rules as arrays
+        foreach ($belongsToManyRelations as $r) {
+            $relName = $r['relation_name'] ?? Str::plural(Str::camel($r['target']));
+            $validationRules[] = "'{$relName}' => ['nullable', 'array']";
+        }
+
         $validationRulesStr = implode(",\n                ", $validationRules);
         $createFieldsStr = implode(",\n                ", $createFields);
+
+        // Sync relations code
+        $syncRelationsCode = "";
+        foreach ($belongsToManyRelations as $r) {
+            $relName = $r['relation_name'] ?? Str::plural(Str::camel($r['target']));
+            $syncRelationsCode .= "            \$record->{$relName}()->sync(\$datos['{$relName}'] ?? []);\n";
+        }
 
         $template = $this->getControllerTemplate();
         $code = str_replace(
             [
                 '{{modelName}}', '{{tableName}}', '{{pluralVar}}', '{{relationsWith}}',
-                '{{prefetchOptions}}', '{{compactExtra}}', '{{validationRules}}', '{{createFields}}'
+                '{{prefetchOptions}}', '{{compactExtra}}', '{{validationRules}}', '{{createFields}}',
+                '{{syncRelations}}'
             ],
             [
                 $name, $table, $pluralVar, $relationsWith,
-                $prefetchOptions, $compactExtra, $validationRulesStr, $createFieldsStr
+                $prefetchOptions, $compactExtra, $validationRulesStr, $createFieldsStr,
+                $syncRelationsCode
             ],
             $template
         );
@@ -344,7 +370,9 @@ PHP;
         $errorFields = [];
         $modalInputs = [];
         $optionsProps = [];
+        
         $belongsToRelations = array_filter($relations, function($r) { return $r['type'] === 'belongsTo'; });
+        $belongsToManyRelations = array_filter($relations, function($r) { return $r['type'] === 'belongsToMany'; });
 
         // Build list of relation targets
         $relationTargetByFk = [];
@@ -406,8 +434,15 @@ PHP;
                     }
                 }
             }
+        }
 
-            // 2. Form definition
+        // 2. Form definition
+        $fieldsByName = [];
+        foreach ($fields as $field) {
+            $fName = $field['name'];
+            $fType = $field['type'];
+            $fieldsByName[$fName] = $field;
+
             if ($fName !== 'id') {
                 $defaultVal = "''";
                 if ($fType === 'integer' || $fType === 'decimal') {
@@ -417,41 +452,184 @@ PHP;
                 }
                 $formFields[] = "  {$fName}: {$defaultVal}";
                 $errorFields[] = "  {$fName}: ''";
-
-                // 3. Modal Inputs
-                $isRequired = $field['required'] ?? false;
-                $reqAttr = $isRequired ? "required" : "";
-
-                $inputType = $field['input_type'] ?? 'text';
-                $modalInputs[] = "          <label class=\"block mb-3\">";
-                $modalInputs[] = "            <JetLabel for=\"{$fName}\" value=\"{$fLabel}\" class=\"float-left mb-1\" />";
-
-                if (isset($relationTargetByFk[$fName])) {
-                    // It is a belongsTo relation select
-                    $r = $relationTargetByFk[$fName];
-                    $optionsName = Str::camel(Str::plural($r['target'])) . 'Options';
-                    $optionsProps[] = "  {$optionsName}: Array,";
-                    $modalInputs[] = "            <Select id=\"{$fName}\" v-model=\"form.{$fName}\" :value=\"form.{$fName}\" class=\"mt-1 block w-full\" :options=\"{$optionsName}\" {$reqAttr} />";
-                } elseif ($inputType === 'textarea') {
-                    $modalInputs[] = "            <Textarea id=\"{$fName}\" v-model=\"form.{$fName}\" class=\"mt-1 block w-full\" rows=\"3\" {$reqAttr} />";
-                } elseif ($inputType === 'toggle' || $fType === 'boolean') {
-                    $modalInputs[] = "            <div class=\"mt-2 text-left\"><Toggle id=\"{$fName}\" v-model=\"form.{$fName}\" /></div>";
-                } elseif ($inputType === 'number' || $fType === 'integer' || $fType === 'decimal') {
-                    $modalInputs[] = "            <JetInput id=\"{$fName}\" v-model=\"form.{$fName}\" type=\"number\" step=\"any\" class=\"mt-1 block w-full\" {$reqAttr} />";
-                } elseif ($inputType === 'date') {
-                    $modalInputs[] = "            <JetInput id=\"{$fName}\" v-model=\"form.{$fName}\" type=\"date\" class=\"mt-1 block w-full\" {$reqAttr} />";
-                } else {
-                    $modalInputs[] = "            <JetInput id=\"{$fName}\" v-model=\"form.{$fName}\" type=\"text\" class=\"mt-1 block w-full\" {$reqAttr} />";
-                }
-                $modalInputs[] = "            <JetInputError :message=\"error.{$fName}\" class=\"mt-1\" />";
-                $modalInputs[] = "          </label>";
             }
+        }
+
+        $renderedRelations = [];
+
+        // Helper to render field HTML
+        $renderFieldHtml = function($fieldName) use ($fieldsByName, $relationTargetByFk, $belongsToManyRelations, &$optionsProps, &$renderedRelations) {
+            // Check if it's a belongsToMany relationship
+            $b2mRel = null;
+            foreach ($belongsToManyRelations as $r) {
+                $relName = $r['relation_name'] ?? Str::plural(Str::camel($r['target']));
+                if ($relName === $fieldName) {
+                    $b2mRel = $r;
+                    break;
+                }
+            }
+
+            if ($b2mRel) {
+                $relName = $b2mRel['relation_name'] ?? Str::plural(Str::camel($b2mRel['target']));
+                $relLabel = Str::plural($b2mRel['target']);
+                $optionsName = Str::camel(Str::plural($b2mRel['target'])) . 'Options';
+
+                if (!in_array("  {$optionsName}: Array,", $optionsProps)) {
+                    $optionsProps[] = "  {$optionsName}: Array,";
+                }
+
+                $renderedRelations[$relName] = true;
+
+                $html = "";
+                $html .= "              <label class=\"block mb-3 text-left col-span-full\">\n";
+                $html .= "                <JetLabel value=\"Asociar {$relLabel}\" class=\"float-left mb-1\" />\n";
+                $html .= "                <div class=\"mt-1 block w-full bg-dark-surface border border-dark-border rounded-xl p-2 min-h-[42px]\">\n";
+                $html .= "                  <div class=\"flex flex-wrap gap-1.5 mb-2\">\n";
+                $html .= "                    <span v-for=\"itemId in form.{$relName}\" :key=\"itemId\" class=\"inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20\">\n";
+                $html .= "                      {{ ({$optionsName}.find(o => o.value === itemId) || {name: itemId}).name }}\n";
+                $html .= "                      <button type=\"button\" @click=\"form.{$relName} = form.{$relName}.filter(id => id !== itemId)\" class=\"hover:text-red-400 font-bold ml-1\">×</button>\n";
+                $html .= "                    </span>\n";
+                $html .= "                  </div>\n";
+                $html .= "                  <select @change=\"(e) => { const val = isNaN(e.target.value) ? e.target.value : Number(e.target.value); if (val && !form.{$relName}.includes(val)) { form.{$relName}.push(val); } e.target.value = ''; }\" class=\"w-full bg-transparent border-0 focus:ring-0 text-xs text-slate-300 cursor-pointer p-0\">\n";
+                $html .= "                    <option value=\"\" disabled selected>Asociar nuevo...</option>\n";
+                $html .= "                    <option v-for=\"opt in {$optionsName}\" :key=\"opt.value\" :value=\"opt.value\" :disabled=\"form.{$relName}.includes(opt.value)\">{{ opt.name }}</option>\n";
+                $html .= "                  </select>\n";
+                $html .= "                </div>\n";
+                $html .= "                <JetInputError :message=\"error.{$relName}\" class=\"mt-1\" />\n";
+                $html .= "              </label>\n";
+                return $html;
+            }
+
+            if (!isset($fieldsByName[$fieldName])) {
+                return "";
+            }
+            $field = $fieldsByName[$fieldName];
+            $fName = $field['name'];
+            $fLabel = $field['label'] ?? ucfirst($fName);
+            $fType = $field['type'];
+            
+            $isRequired = $field['required'] ?? false;
+            $reqAttr = $isRequired ? "required" : "";
+
+            $inputType = $field['input_type'] ?? 'text';
+            
+            $html = "";
+            $html .= "              <label class=\"block mb-3 text-left\">\n";
+            $html .= "                <JetLabel for=\"{$fName}\" value=\"{$fLabel}\" class=\"float-left mb-1\" />\n";
+
+            if (isset($relationTargetByFk[$fName])) {
+                $r = $relationTargetByFk[$fName];
+                $optionsName = Str::camel(Str::plural($r['target'])) . 'Options';
+                if (!in_array("  {$optionsName}: Array,", $optionsProps)) {
+                    $optionsProps[] = "  {$optionsName}: Array,";
+                }
+                $html .= "                <Select id=\"{$fName}\" v-model=\"form.{$fName}\" :value=\"form.{$fName}\" class=\"mt-1 block w-full\" :options=\"{$optionsName}\" {$reqAttr} />\n";
+            } elseif ($inputType === 'textarea') {
+                $html .= "                <Textarea id=\"{$fName}\" v-model=\"form.{$fName}\" class=\"mt-1 block w-full\" rows=\"3\" {$reqAttr} />\n";
+            } elseif ($inputType === 'toggle' || $fType === 'boolean') {
+                $html .= "                <div class=\"mt-2 text-left\"><Toggle id=\"{$fName}\" v-model=\"form.{$fName}\" /></div>\n";
+            } elseif ($inputType === 'number' || $fType === 'integer' || $fType === 'decimal') {
+                $html .= "                <JetInput id=\"{$fName}\" v-model=\"form.{$fName}\" type=\"number\" step=\"any\" class=\"mt-1 block w-full\" {$reqAttr} />\n";
+            } elseif ($inputType === 'date') {
+                $html .= "                <JetInput id=\"{$fName}\" v-model=\"form.{$fName}\" type=\"date\" class=\"mt-1 block w-full\" {$reqAttr} />\n";
+            } else {
+                $html .= "                <JetInput id=\"{$fName}\" v-model=\"form.{$fName}\" type=\"text\" class=\"mt-1 block w-full\" {$reqAttr} />\n";
+            }
+            $html .= "                <JetInputError :message=\"error.{$fName}\" class=\"mt-1\" />\n";
+            $html .= "              </label>\n";
+            return $html;
+        };
+
+        // Render layout sections or sequential fallback
+        $modalInputsHtml = "";
+        if (isset($entity['ui_layout']) && isset($entity['ui_layout']['sections']) && count($entity['ui_layout']['sections']) > 0) {
+            foreach ($entity['ui_layout']['sections'] as $sec) {
+                $secTitle = $sec['title'] ?? 'Sección';
+                $secCols = intval($sec['columns'] ?? 2);
+                $gridClass = "grid grid-cols-1 md:grid-cols-2 gap-4";
+                if ($secCols === 1) {
+                    $gridClass = "grid grid-cols-1 gap-4";
+                } elseif ($secCols === 3) {
+                    $gridClass = "grid grid-cols-1 md:grid-cols-3 gap-4";
+                }
+
+                $modalInputsHtml .= "          <!-- Sección: {$secTitle} -->\n";
+                $modalInputsHtml .= "          <div class=\"border border-dark-border/40 p-4 rounded-xl mb-4 bg-dark-elevated/5\">\n";
+                $modalInputsHtml .= "            <h4 class=\"text-xs font-bold uppercase tracking-wider text-slate-300 mb-3 text-left\">{$secTitle}</h4>\n";
+                $modalInputsHtml .= "            <div class=\"{$gridClass}\">\n";
+                foreach ($sec['fields'] as $fieldName) {
+                    $modalInputsHtml .= $renderFieldHtml($fieldName);
+                }
+                $modalInputsHtml .= "            </div>\n";
+                $modalInputsHtml .= "          </div>\n";
+            }
+        } else {
+            $modalInputsHtml .= "          <div class=\"grid grid-cols-1 md:grid-cols-2 gap-4\">\n";
+            foreach ($fields as $field) {
+                $fName = $field['name'];
+                if ($fName !== 'id') {
+                    $modalInputsHtml .= $renderFieldHtml($fName);
+                }
+            }
+            $modalInputsHtml .= "          </div>\n";
+        }
+
+        // Add belongsToMany options props
+        foreach ($belongsToManyRelations as $r) {
+            $optionsName = Str::camel(Str::plural($r['target'])) . 'Options';
+            if (!in_array("  {$optionsName}: Array,", $optionsProps)) {
+                $optionsProps[] = "  {$optionsName}: Array,";
+            }
+        }
+
+        // Add belongsToMany fields to form and errors
+        foreach ($belongsToManyRelations as $r) {
+            $relName = $r['relation_name'] ?? Str::plural(Str::camel($r['target']));
+            $formFields[] = "  {$relName}: []";
+            $errorFields[] = "  {$relName}: ''";
+        }
+
+        // Add belongsToMany inputs (Multi-Select Tag Interface) fallback
+        $remainingB2m = array_filter($belongsToManyRelations, function($r) use ($renderedRelations) {
+            $relName = $r['relation_name'] ?? Str::plural(Str::camel($r['target']));
+            return !isset($renderedRelations[$relName]);
+        });
+
+        if (count($remainingB2m) > 0) {
+            $modalInputsHtml .= "          <!-- Relaciones Muchos a Muchos -->\n";
+            $modalInputsHtml .= "          <div class=\"border border-dark-border/40 p-4 rounded-xl mb-4 bg-dark-elevated/5\">\n";
+            $modalInputsHtml .= "            <h4 class=\"text-xs font-bold uppercase tracking-wider text-slate-300 mb-3 text-left\">Relaciones Asociadas</h4>\n";
+            $modalInputsHtml .= "            <div class=\"grid grid-cols-1 gap-4\">\n";
+            foreach ($remainingB2m as $r) {
+                $relName = $r['relation_name'] ?? Str::plural(Str::camel($r['target']));
+                $relLabel = Str::plural($r['target']);
+                $optionsName = Str::camel(Str::plural($r['target'])) . 'Options';
+
+                $modalInputsHtml .= "              <label class=\"block mb-3 text-left\">\n";
+                $modalInputsHtml .= "                <JetLabel value=\"Asociar {$relLabel}\" class=\"float-left mb-1\" />\n";
+                $modalInputsHtml .= "                <div class=\"mt-1 block w-full bg-dark-surface border border-dark-border rounded-xl p-2 min-h-[42px]\">\n";
+                $modalInputsHtml .= "                  <div class=\"flex flex-wrap gap-1.5 mb-2\">\n";
+                $modalInputsHtml .= "                    <span v-for=\"itemId in form.{$relName}\" :key=\"itemId\" class=\"inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20\">\n";
+                $modalInputsHtml .= "                      {{ ({$optionsName}.find(o => o.value === itemId) || {name: itemId}).name }}\n";
+                $modalInputsHtml .= "                      <button type=\"button\" @click=\"form.{$relName} = form.{$relName}.filter(id => id !== itemId)\" class=\"hover:text-red-400 font-bold ml-1\">×</button>\n";
+                $modalInputsHtml .= "                    </span>\n";
+                $modalInputsHtml .= "                  </div>\n";
+                $modalInputsHtml .= "                  <select @change=\"(e) => { const val = isNaN(e.target.value) ? e.target.value : Number(e.target.value); if (val && !form.{$relName}.includes(val)) { form.{$relName}.push(val); } e.target.value = ''; }\" class=\"w-full bg-transparent border-0 focus:ring-0 text-xs text-slate-300 cursor-pointer p-0\">\n";
+                $modalInputsHtml .= "                    <option value=\"\" disabled selected>Asociar nuevo...</option>\n";
+                $modalInputsHtml .= "                    <option v-for=\"opt in {$optionsName}\" :key=\"opt.value\" :value=\"opt.value\" :disabled=\"form.{$relName}.includes(opt.value)\">{{ opt.name }}</option>\n";
+                $modalInputsHtml .= "                  </select>\n";
+                $modalInputsHtml .= "                </div>\n";
+                $modalInputsHtml .= "                <JetInputError :message=\"error.{$relName}\" class=\"mt-1\" />\n";
+                $modalInputsHtml .= "              </label>\n";
+            }
+            $modalInputsHtml .= "            </div>\n";
+            $modalInputsHtml .= "          </div>\n";
         }
 
         $formFieldsStr = implode(",\n    ", $formFields);
         $errorFieldsStr = implode(",\n    ", $errorFields);
         $optionsPropsStr = implode("\n  ", $optionsProps);
-        $modalInputsStr = implode("\n", $modalInputs);
+        $modalInputsStr = $modalInputsHtml;
 
         // Build campos list for Buscador component
         $camposProps = [];
@@ -476,6 +654,12 @@ PHP;
             if ($fName === 'id') continue;
             $editMappingArr[] = "  form.{$fName} = item.{$fName};";
         }
+        
+        // Map belongsToMany relations for editing
+        foreach ($belongsToManyRelations as $r) {
+            $relName = $r['relation_name'] ?? Str::plural(Str::camel($r['target']));
+            $editMappingArr[] = "  form.{$relName} = item.{$relName} ? item.{$relName}.map(x => x.id) : [];";
+        }
         $editMapping = implode("\n  ", $editMappingArr);
 
         // Reset error fields
@@ -485,6 +669,11 @@ PHP;
             if ($fName === 'id') continue;
             $resetErrorsArr[] = "  error.{$fName} = '';";
         }
+        
+        foreach ($belongsToManyRelations as $r) {
+            $relName = $r['relation_name'] ?? Str::plural(Str::camel($r['target']));
+            $resetErrorsArr[] = "  error.{$relName} = '';";
+        }
         $resetErrors = implode("\n  ", $resetErrorsArr);
 
         // Handle error responses in frontend
@@ -493,6 +682,11 @@ PHP;
             $fName = $field['name'];
             if ($fName === 'id') continue;
             $errorAssignmentsArr[] = "      error.{$fName} = errors.{$fName} ? errors.{$fName} : null;";
+        }
+        
+        foreach ($belongsToManyRelations as $r) {
+            $relName = $r['relation_name'] ?? Str::plural(Str::camel($r['target']));
+            $errorAssignmentsArr[] = "      error.{$relName} = errors.{$relName} ? errors.{$relName} : null;";
         }
         $errorAssignments = implode("\n", $errorAssignmentsArr);
 
@@ -728,8 +922,8 @@ PHP;
                     $nameA = $entity['name'];
                     $nameB = $rel['target'];
 
-                    $singularA = Str::snake(Str::singular($nameA));
-                    $singularB = Str::snake(Str::singular($nameB));
+                    $singularA = Str::snake($nameA);
+                    $singularB = Str::snake($nameB);
                     $names = [$singularA, $singularB];
                     sort($names);
                     $pivotTable = $names[0] . '_' . $names[1];
@@ -740,6 +934,14 @@ PHP;
                         if (str_contains($em, "create_{$pivotTable}_table")) {
                             $exists = true;
                             break;
+                        }
+                    }
+                    if (!$exists) {
+                        foreach ($generated as $g) {
+                            if (str_contains(basename($g), "create_{$pivotTable}_table")) {
+                                $exists = true;
+                                break;
+                            }
                         }
                     }
 
@@ -858,10 +1060,30 @@ PHP;
             $routesCode .= "    Route::get('/filtro', [\\App\\Http\\Controllers\\Designer\\{$name}Controller::class, 'filter'])->name('{$table}.filter');\n";
             $routesCode .= "});\n\n";
         }
+
+        // Add assignment routes
+        foreach ($entities as $entity) {
+            $relations = $entity['relations'] ?? [];
+            foreach ($relations as $rel) {
+                if ($rel['type'] === 'belongsToMany' && ($rel['generate_assignment_ui'] ?? false)) {
+                    $sourceName = $entity['name'];
+                    $targetName = $rel['target'];
+                    $relName = $rel['relation_name'] ?? Str::plural(Str::camel($targetName));
+                    $assignmentName = $sourceName . Str::studly($relName);
+                    $routeName = Str::kebab($assignmentName);
+                    
+                    $routesCode .= "// Assignment routes for {$assignmentName}\n";
+                    $routesCode .= "Route::group(['prefix' => 'asignar/{$routeName}'], function () {\n";
+                    $routesCode .= "    Route::get('/', [\\App\\Http\\Controllers\\Designer\\{$assignmentName}AssignmentController::class, 'index'])->name('assignment.{$routeName}.index');\n";
+                    $routesCode .= "    Route::post('/sync', [\\App\\Http\\Controllers\\Designer\\{$assignmentName}AssignmentController::class, 'sync'])->name('assignment.{$routeName}.sync');\n";
+                    $routesCode .= "});\n\n";
+                }
+            }
+        }
+
         $routesCode .= "// -- ENTITY DESIGNER ROUTES END --";
 
         File::put($routesPath, $routesCode);
-        $this->addToGitignore($routesPath);
     }
 
     protected function registerPermissions(array $entities)
@@ -893,6 +1115,28 @@ PHP;
                 $adminRole = \Spatie\Permission\Models\Role::where('name', 'Administrador')->first();
                 if ($adminRole) {
                     $adminRole->givePermissionTo($perm);
+                }
+            }
+        }
+
+        // Register belongsToMany assignment permissions
+        foreach ($entities as $entity) {
+            $relations = $entity['relations'] ?? [];
+            foreach ($relations as $rel) {
+                if ($rel['type'] === 'belongsToMany' && ($rel['generate_assignment_ui'] ?? false)) {
+                    $sourceName = $entity['name'];
+                    $targetName = $rel['target'];
+                    $relName = $rel['relation_name'] ?? Str::plural(Str::camel($targetName));
+                    $assignmentName = $sourceName . Str::studly($relName);
+                    $permName = Str::snake($assignmentName) . '.assign';
+                    
+                    \Spatie\Permission\Models\Permission::firstOrCreate(['name' => $permName, 'guard_name' => 'web']);
+                    
+                    // Assign to Admin role if exists
+                    $adminRole = \Spatie\Permission\Models\Role::where('name', 'Administrador')->first();
+                    if ($adminRole) {
+                        $adminRole->givePermissionTo($permName);
+                    }
                 }
             }
         }
@@ -1088,6 +1332,8 @@ class {{modelName}}Controller extends Controller
                 {{createFields}}
             ]);
 
+{{syncRelations}}
+
             return redirect()
                 ->back()
                 ->with("success", "{{modelName}} creado con éxito")
@@ -1113,6 +1359,8 @@ class {{modelName}}Controller extends Controller
             $record->update([
                 {{createFields}}
             ]);
+
+{{syncRelations}}
 
             return redirect()
                 ->back()
@@ -1593,8 +1841,8 @@ VUE;
                     $generatedMethods[] = $methodName;
                 }
             } elseif ($relType === 'belongsToMany') {
-                $singularA = Str::snake(Str::singular($name));
-                $singularB = Str::snake(Str::singular($target));
+                $singularA = Str::snake($name);
+                $singularB = Str::snake($target);
                 $names = [$singularA, $singularB];
                 sort($names);
                 $pivotTable = $names[0] . '_' . $names[1];
@@ -1636,8 +1884,8 @@ VUE;
                             $generatedMethods[] = $methodName;
                         }
                     } elseif ($otherType === 'belongsToMany') {
-                        $singularA = Str::snake(Str::singular($name));
-                        $singularB = Str::snake(Str::singular($otherName));
+                        $singularA = Str::snake($name);
+                        $singularB = Str::snake($otherName);
                         $names = [$singularA, $singularB];
                         sort($names);
                         $pivotTable = $names[0] . '_' . $names[1];
@@ -1696,21 +1944,6 @@ VUE;
         return "\\App\\Models\\Designer\\{$name}";
     }
 
-    protected function addToGitignore($path)
-    {
-        $gitignorePath = base_path('.gitignore');
-        if (!File::exists($gitignorePath)) return;
-
-        $content = File::get($gitignorePath);
-        $relativePath = '/' . ltrim(str_replace(base_path(), '', $path), '/\\');
-        $relativePath = str_replace('\\', '/', $relativePath); // normalize path slashes
-
-        // Check if already in gitignore
-        if (!str_contains($content, $relativePath)) {
-            File::append($gitignorePath, "\n{$relativePath}");
-        }
-    }
-
     protected function getExistingMigrations()
     {
         $dir = database_path('migrations');
@@ -1721,5 +1954,235 @@ VUE;
         
         $allFiles = array_merge($files, $designerFiles);
         return array_map('basename', $allFiles);
+    }
+
+    protected function generateAssignmentInterfaces(array $entities)
+    {
+        // Shunted: belongsToMany relationships are now positioned visually inside form layouts
+    }
+
+    protected function getAssignmentControllerTemplate()
+    {
+        return <<<'PHP'
+<?php
+
+namespace App\Http\Controllers\Designer;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class {{controllerName}} extends Controller
+{
+    public function index(Request $request)
+    {
+        $user = \Auth::user();
+        if ($user->can("{{permissionName}}") || $user->hasRole("Administrador")) {
+            // Load source records
+            $sourceRecords = \{{sourceModelFqn}}::with(['{{relationName}}'])->get()->map(function($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->nombre ?? $item->name ?? $item->titulo ?? $item->title ?? $item->id,
+                    'selected_ids' => $item->{{relationName}}->pluck('id')->toArray()
+                ];
+            });
+
+            // Load target options
+            $targetRecords = \{{targetModelFqn}}::all()->map(function($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->nombre ?? $item->name ?? $item->titulo ?? $item->title ?? $item->id
+                ];
+            });
+
+            return Inertia::render('Designer/{{viewName}}', compact('sourceRecords', 'targetRecords'));
+        } else {
+            return redirect()->back()->with("error", "No cuenta con los permisos necesarios para realizar esta acción.");
+        }
+    }
+
+    public function sync(Request $request)
+    {
+        $user = \Auth::user();
+        if ($user->can("{{permissionName}}") || $user->hasRole("Administrador")) {
+            $request->validate([
+                'source_id' => 'required',
+                'target_ids' => 'nullable|array'
+            ]);
+
+            $record = \{{sourceModelFqn}}::findOrFail($request->source_id);
+            $record->{{relationName}}()->sync($request->target_ids ?? []);
+
+            return redirect()->back()->with('success', 'Relaciones actualizadas con éxito.');
+        } else {
+            return response()->json(['ok' => false, 'message' => 'No cuenta con los permisos necesarios.'], 403);
+        }
+    }
+}
+PHP;
+    }
+
+    protected function getAssignmentViewTemplate()
+    {
+        return <<<'VUE'
+<script setup>
+import AppLayout from "@/Layouts/AppLayout.vue";
+import { ref, computed } from "vue";
+import { router } from "@inertiajs/vue3";
+import axios from "axios";
+import { notify } from "notiwind";
+import GlowCard from "@/Components/GlowCard.vue";
+import JetInput from "@/Jetstream/Input.vue";
+import JetLabel from "@/Jetstream/Label.vue";
+
+const props = defineProps({
+  sourceRecords: Array,
+  targetRecords: Array
+});
+
+const searchSource = ref("");
+const searchTarget = ref("");
+const selectedSourceId = ref(props.sourceRecords.length > 0 ? props.sourceRecords[0].id : null);
+const saving = ref(false);
+
+const selectedSource = computed(() => {
+  return props.sourceRecords.find(r => r.id === selectedSourceId.value) || null;
+});
+
+const filteredSources = computed(() => {
+  if (!searchSource.value) return props.sourceRecords;
+  const q = searchSource.value.toLowerCase();
+  return props.sourceRecords.filter(r => r.name.toLowerCase().includes(q));
+});
+
+const filteredTargets = computed(() => {
+  if (!searchTarget.value) return props.targetRecords;
+  const q = searchTarget.value.toLowerCase();
+  return props.targetRecords.filter(r => r.name.toLowerCase().includes(q));
+});
+
+const isAssociated = (targetId) => {
+  if (!selectedSource.value) return false;
+  return selectedSource.value.selected_ids.includes(targetId);
+};
+
+const toggleAssociation = async (targetId) => {
+  if (!selectedSource.value || saving.value) return;
+  saving.value = true;
+
+  const currentIds = [...selectedSource.value.selected_ids];
+  const idx = currentIds.indexOf(targetId);
+  if (idx > -1) {
+    currentIds.splice(idx, 1);
+  } else {
+    currentIds.push(targetId);
+  }
+
+  try {
+    await axios.post(route('assignment.{{routeName}}.sync'), {
+      source_id: selectedSourceId.value,
+      target_ids: currentIds
+    }, {
+      headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content }
+    });
+
+    // Update local state immediately
+    selectedSource.value.selected_ids = currentIds;
+    notify({ group: "main", title: "Actualizado", text: "Asignación actualizada con éxito" }, 2000);
+  } catch (err) {
+    notify({ group: "main", title: "Error", text: "No se pudo actualizar la relación" }, 3000);
+  } finally {
+    saving.value = false;
+  }
+};
+</script>
+
+<template>
+  <AppLayout title="Asignación de Relaciones" :mainScrollable="false">
+    <div class="w-full max-w-full mx-auto p-4 flex-1 min-h-0 flex flex-col md:flex-row gap-4 h-full">
+      <!-- Left Column: Source Records -->
+      <GlowCard class="w-full md:w-1/2 flex flex-col min-h-0 p-4 border border-dark-border bg-dark-surface/90 backdrop-blur-md rounded-2xl">
+        <h3 class="text-sm font-bold text-slate-200 mb-3 uppercase tracking-wider">
+          Seleccionar Registro Origen
+        </h3>
+        <div class="mb-3">
+          <JetInput 
+            v-model="searchSource" 
+            type="text" 
+            placeholder="Buscar..." 
+            class="w-full text-sm"
+          />
+        </div>
+        <div class="flex-1 overflow-y-auto space-y-1.5 custom-scrollbar pr-1">
+          <button
+            v-for="item in filteredSources"
+            :key="item.id"
+            type="button"
+            @click="selectedSourceId = item.id"
+            class="w-full text-left p-3 rounded-xl border text-sm transition flex items-center justify-between"
+            :class="[
+              selectedSourceId === item.id
+                ? 'bg-brand-500/10 border-brand-500/30 text-brand-400 font-semibold'
+                : 'bg-dark-elevated/20 border-dark-border/40 text-slate-300 hover:bg-dark-elevated/40'
+            ]"
+          >
+            <span>{{ item.name }}</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-dark-elevated text-slate-400 border border-dark-border">
+              {{ item.selected_ids.length }} asoc.
+            </span>
+          </button>
+          <div v-if="filteredSources.length === 0" class="text-center py-6 text-slate-500 text-xs italic">
+            Sin resultados
+          </div>
+        </div>
+      </GlowCard>
+
+      <!-- Right Column: Target Records (Checkboxes) -->
+      <GlowCard class="w-full md:w-1/2 flex flex-col min-h-0 p-4 border border-dark-border bg-dark-surface/90 backdrop-blur-md rounded-2xl">
+        <div v-if="selectedSource" class="flex flex-col h-full min-h-0">
+          <div class="border-b border-dark-border pb-3 mb-3">
+            <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider truncate">
+              Asociar a: <span class="text-brand-400 normal-case">{{ selectedSource.name }}</span>
+            </h3>
+            <p class="text-[10px] text-slate-500 mt-0.5">Marca o desmarca los elementos para asociarlos.</p>
+          </div>
+          <div class="mb-3">
+            <JetInput 
+              v-model="searchTarget" 
+              type="text" 
+              placeholder="Filtrar opciones..." 
+              class="w-full text-sm"
+            />
+          </div>
+          <div class="flex-1 overflow-y-auto space-y-1.5 custom-scrollbar pr-1">
+            <label
+              v-for="target in filteredTargets"
+              :key="target.id"
+              class="w-full flex items-center justify-between p-3 bg-dark-elevated/10 border border-dark-border/30 rounded-xl cursor-pointer hover:bg-dark-elevated/20 transition select-none"
+            >
+              <span class="text-sm text-slate-300">{{ target.name }}</span>
+              <div class="flex items-center">
+                <input
+                  type="checkbox"
+                  :checked="isAssociated(target.id)"
+                  @change="toggleAssociation(target.id)"
+                  :disabled="saving"
+                  class="rounded h-4 w-4 bg-dark-surface border-dark-border text-brand-500 focus:ring-brand-500 focus:ring-offset-0 disabled:opacity-50"
+                />
+              </div>
+            </label>
+            <div v-if="filteredTargets.length === 0" class="text-center py-6 text-slate-500 text-xs italic">
+              Sin resultados
+            </div>
+          </div>
+        </div>
+        <div v-else class="flex-1 flex items-center justify-center text-slate-500 text-sm italic">
+          Selecciona un registro de la izquierda para comenzar
+        </div>
+      </GlowCard>
+    </div>
+  </AppLayout>
+</template>
+VUE;
     }
 }

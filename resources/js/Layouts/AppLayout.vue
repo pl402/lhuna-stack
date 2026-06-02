@@ -112,7 +112,10 @@ const menu = computed(() => {
         });
     }
 
+    const permissions = page.props.auth?.permissions || [];
     const dynamics = page.props.dynamicEntities || [];
+    
+    // Add dynamic entities CRUD menus
     dynamics.forEach(entity => {
         if (entity.is_system) return;
         const table = entity.table;
@@ -123,6 +126,37 @@ const menu = computed(() => {
             icon: entity.icon || "table",
             active: route().current(`${table}.index`) || route().current(`${table}.search`) || route().current(`${table}.filter`),
             show: true,
+        });
+    });
+
+    // Add on-the-fly relation assignment UI menus
+    dynamics.forEach(entity => {
+        const relations = entity.relations || [];
+        relations.forEach(rel => {
+            if (rel.type === 'belongsToMany' && rel.generate_assignment_ui) {
+                const sourceName = entity.name;
+                const targetName = rel.target;
+                
+                // Construct route name and permission matching CodeGeneratorService
+                const studlyRelName = rel.relation_name 
+                    ? rel.relation_name.charAt(0).toUpperCase() + rel.relation_name.slice(1)
+                    : (targetName.charAt(0).toUpperCase() + targetName.slice(1)) + 's';
+                
+                const assignmentName = sourceName + studlyRelName;
+                const routeName = assignmentName.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+                const permName = assignmentName.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase() + '.assign';
+
+                const hasPerm = isSadminOrAdmin || permissions.includes(permName);
+                if (hasPerm) {
+                    baseMenu.push({
+                        name: `Asignar ${rel.relation_name || targetName}`,
+                        href: route(`assignment.${routeName}.index`),
+                        icon: "link",
+                        active: route().current(`assignment.${routeName}.index`),
+                        show: true,
+                    });
+                }
+            }
         });
     });
 

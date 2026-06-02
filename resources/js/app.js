@@ -1,3 +1,4 @@
+// Touch to trigger rebuild
 require('./bootstrap');
 
 import { createApp, h } from 'vue';

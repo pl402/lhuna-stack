@@ -27,5 +27,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->loadMigrationsFrom(database_path('migrations/designer'));
+
+        // Reset designer files automatically when running migrate:fresh
+        \Illuminate\Support\Facades\Event::listen(
+            \Illuminate\Console\Events\CommandStarting::class,
+            function (\Illuminate\Console\Events\CommandStarting $event) {
+                if ($event->command === 'migrate:fresh') {
+                    \Illuminate\Support\Facades\Artisan::call('designer:reset');
+                }
+            }
+        );
     }
 }

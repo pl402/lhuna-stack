@@ -79,6 +79,7 @@ import {
     faRocket,
     faCircleXmark,
     faXmark,
+    faPalette,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { faSquarePlus as farSquarePlus, faSquareMinus as farSquareMinus } from "@fortawesome/free-regular-svg-icons";
@@ -166,6 +167,7 @@ library.add(
     faRocket,
     faCircleXmark,
     faXmark,
+    faPalette,
 );
 
 export default FontAwesomeIcon;

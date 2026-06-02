@@ -51,6 +51,7 @@ class Configuracion extends Model
                 ->orWhere('tipo', 'LIKE', "%{$key}%");
     }
 
-    // -- ENTITY DESIGNER RELATIONS START --
+                                                                                                                                                                    // -- ENTITY DESIGNER RELATIONS START --
+
     // -- ENTITY DESIGNER RELATIONS END --
 }
