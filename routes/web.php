@@ -81,6 +81,19 @@ Route::middleware([
         Route::post("/migrate", [\App\Http\Controllers\DesignerController::class, "runMigrations"])->name("designer.migrate");
     });
 
+    Route::group(["prefix" => "reportes"], function () {
+        Route::get("/", [\App\Http\Controllers\ReportController::class, "index"])->name("reportes.index");
+        Route::get("/crear", [\App\Http\Controllers\ReportController::class, "create"])->name("reportes.create");
+        Route::get("/{id}/editar", [\App\Http\Controllers\ReportController::class, "edit"])->name("reportes.edit");
+        Route::post("/", [\App\Http\Controllers\ReportController::class, "store"])->name("reportes.store");
+        Route::post("/{id}", [\App\Http\Controllers\ReportController::class, "update"])->name("reportes.update");
+        Route::delete("/{id}", [\App\Http\Controllers\ReportController::class, "destroy"])->name("reportes.destroy");
+        Route::get("/buscar/{filtro}", [\App\Http\Controllers\ReportController::class, "search"])->name("reportes.search");
+        Route::get("/filtro", [\App\Http\Controllers\ReportController::class, "filter"])->name("reportes.filter");
+        Route::get("/{id}/preview", [\App\Http\Controllers\ReportController::class, "preview"])->name("reportes.preview");
+        Route::get("/{id}/excel", [\App\Http\Controllers\ReportController::class, "exportExcel"])->name("reportes.excel");
+    });
+
     // -- ENTITY DESIGNER ROUTES START --
     if (file_exists(base_path('routes/designer.php'))) {
         require base_path('routes/designer.php');

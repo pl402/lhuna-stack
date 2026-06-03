@@ -147,6 +147,14 @@ const menu = computed(() => {
 
     // Always core items at the end
     items.push({
+        name: "Reportes",
+        href: route("reportes.index"),
+        icon: "file-invoice",
+        active: route().current("reportes.index") || route().current("reportes.*"),
+        show: true,
+    });
+
+    items.push({
         name: "Usuarios",
         href: route("usuarios.index"),
         icon: "users",
