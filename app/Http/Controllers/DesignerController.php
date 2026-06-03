@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
+use Symfony\Component\Process\Process;
 
 class DesignerController extends Controller
 {
@@ -167,7 +168,30 @@ class DesignerController extends Controller
                 Artisan::call('route:clear');
                 Artisan::call('cache:clear');
 
-                return response()->json(['ok' => true, 'message' => 'Código fuente generado exitosamente.', 'generated' => count($result['generated'])]);
+                // Compile assets automatically
+                $cwd = base_path();
+                $hasPnpm = @shell_exec("which pnpm") ? true : false;
+                
+                if ($hasPnpm) {
+                    $process = new Process(['pnpm', 'run', 'prod'], $cwd);
+                } else {
+                    $process = new Process(['npm', 'run', 'prod'], $cwd);
+                }
+                
+                $process->setTimeout(300);
+                $process->run();
+                
+                if (!$process->isSuccessful()) {
+                    if ($hasPnpm) {
+                        $processDev = new Process(['pnpm', 'run', 'dev'], $cwd);
+                    } else {
+                        $processDev = new Process(['npm', 'run', 'dev'], $cwd);
+                    }
+                    $processDev->setTimeout(300);
+                    $processDev->run();
+                }
+
+                return response()->json(['ok' => true, 'message' => 'Código fuente generado y assets compilados exitosamente.', 'generated' => count($result['generated'])]);
             } catch (\Exception $e) {
                 return response()->json(['ok' => false, 'message' => $e->getMessage()], 500);
             }

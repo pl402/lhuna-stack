@@ -48,6 +48,12 @@ Lhuna Stack es una plantilla base premium diseñada para optimizar los tiempos d
 * **Animaciones Fluidas**: Efecto de logo latente con anillos concéntricos en el Login y Hero, y transiciones dinámicas de listas (`TransitionGroup`) en las tablas de datos para una experiencia interactiva superior.
 * **Layouts Completos**: Vistas listas para producción de Autenticación, Dashboard de métricas, Panel de Usuarios y Configuración de Sistema.
 
+### 📐 Diseñador Visual de Entidades y Formularios
+* **Generación Completa en Tiempo Real**: Crea modelos Eloquent, migraciones base de datos incrementales, controladores estructurados y vistas interactivas Vue.js sin escribir código manualmente.
+* **Canvas UML/Relacional (Graph Editor)**: Pestaña "Base de datos" para modelar tus entidades gráficamente en un canvas de nodos interactivo y definir relaciones `belongsTo`, `hasMany` o `belongsToMany` conectándolos con cables.
+* **Maquetador de Layouts (UI Builder)**: Pestaña "Diseñador de Interfaces" para arrastrar y soltar campos en columnas y secciones personalizadas, configurando si el formulario será un modal flotante o una página completa.
+* **Carga e Inspección de Archivos**: Soporte nativo para inputs de tipo `file` con filtrado de extensiones en frontend (`accept`) y validación segura en backend (`mimes`).
+
 ---
 
 ## 🛠️ Stack Tecnológico
@@ -127,6 +133,16 @@ $ pnpm dev
 Dirígete a `http://localhost:8000/` en tu navegador e ingresa con:
 * **Usuario:** `correo@admin.com`
 * **Contraseña:** `C0n7r4s3ña!`
+
+### 7. Inicializar Diseñador Visual y Datos Demo
+Para probar la suite completa generada de Curso, Materia y Calificaciones junto con sus archivos de prueba (imágenes de portada y PDFs de temarios):
+```bash
+# Crear enlace de archivos para subidas/imágenes
+$ php artisan storage:link
+
+# Ejecutar el constructor de entidades demo con datos de prueba
+$ php artisan designer:demo
+```
 
 ---
 

@@ -68,7 +68,7 @@ watch(error, async () => {
 
 const page = usePage();
 const menu = computed(() => {
-    const baseMenu = [
+    const items = [
         {
             name: "Escritorio",
             icon: "home",
@@ -77,50 +77,29 @@ const menu = computed(() => {
             show: true,
         },
         {
-            name: "Usuarios",
-            href: route("usuarios.index"),
-            icon: "users",
-            active:
-                route().current("usuarios.index") ||
-                route().current("usuarios.search") ||
-                route().current("usuarios.filter") ||
-                route().current("usuarios"),
-            show: true,
-        },
-        {
-            name: "Configuraciones",
-            href: route("configuraciones.index"),
-            icon: "cog",
-            active:
-                route().current("configuraciones.index") ||
-                route().current("configuraciones.search") ||
-                route().current("configuraciones"),
-            show: true,
-        },
+            type: "divider",
+            show: true
+        }
     ];
 
     const roles = page.props.auth?.roles || [];
     const isSadminOrAdmin = roles.includes('Administrador');
-
-    if (isSadminOrAdmin) {
-        baseMenu.push({
-            name: "Diseñador",
-            href: route("designer.index"),
-            icon: "screwdriver-wrench",
-            active: route().current("designer.index") || route().current("designer.*"),
-            show: true,
-        });
-    }
-
     const permissions = page.props.auth?.permissions || [];
     const dynamics = page.props.dynamicEntities || [];
+
+    // Sort dynamic entities by their layout menu order (if configured) or maintain database order
+    const sortedDynamics = [...dynamics].sort((a, b) => {
+        const orderA = a.ui_layout?.menu_order ?? 999;
+        const orderB = b.ui_layout?.menu_order ?? 999;
+        return orderA - orderB;
+    });
     
     // Add dynamic entities CRUD menus
-    dynamics.forEach(entity => {
+    sortedDynamics.forEach(entity => {
         if (entity.is_system) return;
         const table = entity.table;
         const pluralLabel = entity.plural_label || entity.name + 's';
-        baseMenu.push({
+        items.push({
             name: pluralLabel,
             href: route(`${table}.index`),
             icon: entity.icon || "table",
@@ -130,7 +109,7 @@ const menu = computed(() => {
     });
 
     // Add on-the-fly relation assignment UI menus
-    dynamics.forEach(entity => {
+    sortedDynamics.forEach(entity => {
         const relations = entity.relations || [];
         relations.forEach(rel => {
             if (rel.type === 'belongsToMany' && rel.generate_assignment_ui) {
@@ -148,7 +127,7 @@ const menu = computed(() => {
 
                 const hasPerm = isSadminOrAdmin || permissions.includes(permName);
                 if (hasPerm) {
-                    baseMenu.push({
+                    items.push({
                         name: `Asignar ${rel.relation_name || targetName}`,
                         href: route(`assignment.${routeName}.index`),
                         icon: "link",
@@ -160,7 +139,47 @@ const menu = computed(() => {
         });
     });
 
-    return baseMenu;
+    // Divider before main system section
+    items.push({
+        type: "divider",
+        show: true
+    });
+
+    // Always core items at the end
+    items.push({
+        name: "Usuarios",
+        href: route("usuarios.index"),
+        icon: "users",
+        active:
+            route().current("usuarios.index") ||
+            route().current("usuarios.search") ||
+            route().current("usuarios.filter") ||
+            route().current("usuarios"),
+        show: true,
+    });
+
+    items.push({
+        name: "Configuraciones",
+        href: route("configuraciones.index"),
+        icon: "cog",
+        active:
+            route().current("configuraciones.index") ||
+            route().current("configuraciones.search") ||
+            route().current("configuraciones"),
+        show: true,
+    });
+
+    if (isSadminOrAdmin) {
+        items.push({
+            name: "Diseñador",
+            href: route("designer.index"),
+            icon: "screwdriver-wrench",
+            active: route().current("designer.index") || route().current("designer.*"),
+            show: true,
+        });
+    }
+
+    return items;
 });
 
 const isDark = ref(localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches));
@@ -284,18 +303,20 @@ const toggleTheme = () => {
                     "
                 >
                     <div class="">
-                        <JetResponsiveNavLink
-                            v-for="(item, index) in menu"
-                            :key="index"
-                            :href="item.href"
-                            :active="item.active"
-                            v-show="item.show"
-                        >
-                            <font-awesome-icon
-                                :icon="item.icon ? item.icon : 'square-pen'"
-                                class="w-5 mr-2"
-                            />{{ item.name }}
-                        </JetResponsiveNavLink>
+                        <template v-for="(item, index) in menu" :key="index">
+                            <div v-if="item.type === 'divider'" class="border-t border-dark-border my-2.5"></div>
+                            <JetResponsiveNavLink
+                                v-else
+                                :href="item.href"
+                                :active="item.active"
+                                v-show="item.show"
+                            >
+                                <font-awesome-icon
+                                    :icon="item.icon ? item.icon : 'square-pen'"
+                                    class="w-5 mr-2"
+                                />{{ item.name }}
+                            </JetResponsiveNavLink>
+                        </template>
                     </div>
                     <div class="border-t border-dark-border my-[1px]"></div>
                     <!-- Responsive Settings Options -->
@@ -376,20 +397,22 @@ const toggleTheme = () => {
 
                         <div class="flex-1">
                             <div class="">
-                                <JetResponsiveNavLink
-                                    v-for="(item, index) in menu"
-                                    :key="index"
-                                    :href="item.href"
-                                    :active="item.active"
-                                    v-show="item.show"
-                                >
-                                    <font-awesome-icon
-                                        :icon="
-                                            item.icon ? item.icon : 'square-pen'
-                                        "
-                                        class="w-5 mr-2"
-                                    />{{ item.name }}
-                                </JetResponsiveNavLink>
+                                <template v-for="(item, index) in menu" :key="index">
+                                    <div v-if="item.type === 'divider'" class="border-t border-dark-border my-2.5"></div>
+                                    <JetResponsiveNavLink
+                                        v-else
+                                        :href="item.href"
+                                        :active="item.active"
+                                        v-show="item.show"
+                                    >
+                                        <font-awesome-icon
+                                            :icon="
+                                                item.icon ? item.icon : 'square-pen'
+                                            "
+                                            class="w-5 mr-2"
+                                        />{{ item.name }}
+                                    </JetResponsiveNavLink>
+                                </template>
                             </div>
                             <div
                                 class="border-t border-dark-border my-[1px]"

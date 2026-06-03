@@ -47,6 +47,7 @@ watch(selectedNode, () => {
 // UI Layout Designer state
 const activeTab = ref('db'); // 'db' or 'ui'
 const selectedUiEntityId = ref(null);
+const uiSidebarTab = ref('fields');
 
 const selectedUiEntity = computed(() => {
   if (!selectedUiEntityId.value) return null;
@@ -107,6 +108,11 @@ const initLayoutForNode = (node) => {
   const elements = getAvailableUiElements(node);
   if (!node.data.ui_layout) {
     node.data.ui_layout = {
+      layout_type: 'modal',
+      modal_width: 'max-w-2xl',
+      description: 'Define los detalles del registro.',
+      show_edit_action: true,
+      show_delete_action: true,
       sections: [
         {
           id: 'sec-' + Math.random().toString(36).substring(2, 9),
@@ -117,6 +123,13 @@ const initLayoutForNode = (node) => {
       ]
     };
   } else {
+    // Ensure default settings exist
+    if (node.data.ui_layout.layout_type === undefined) node.data.ui_layout.layout_type = 'modal';
+    if (node.data.ui_layout.modal_width === undefined) node.data.ui_layout.modal_width = 'max-w-2xl';
+    if (node.data.ui_layout.description === undefined) node.data.ui_layout.description = 'Define los detalles del registro.';
+    if (node.data.ui_layout.show_edit_action === undefined) node.data.ui_layout.show_edit_action = true;
+    if (node.data.ui_layout.show_delete_action === undefined) node.data.ui_layout.show_delete_action = true;
+
     // Sync fields from DB to layout
     const layoutFields = [];
     node.data.ui_layout.sections.forEach(s => {
@@ -312,6 +325,59 @@ const connectionData = ref({
   generate_assignment_ui: false
 });
 
+// Function to update edges, grouping relationships between same nodes to prevent layout clutter
+const updateEdges = () => {
+  const newEdges = [];
+  const edgeGroups = {};
+
+  nodes.value.forEach(node => {
+    const relations = node.data.relations || [];
+    relations.forEach((rel) => {
+      // Find target node in nodes.value by matching the target model name
+      const targetNode = nodes.value.find(n => n.data.name === rel.target);
+      if (targetNode) {
+        const ids = [node.id, targetNode.id].sort();
+        const key = ids.join('-');
+
+        if (!edgeGroups[key]) {
+          edgeGroups[key] = [];
+        }
+        
+        // Avoid duplicate labels in the same group (e.g. if the same relationship is defined multiple times)
+        const labelText = `${rel.type} (${rel.foreign_key || 'null'})`;
+        const exists = edgeGroups[key].some(item => item.label === labelText);
+        if (!exists) {
+          edgeGroups[key].push({
+            source: node.id,
+            target: targetNode.id,
+            label: labelText
+          });
+        }
+      }
+    });
+  });
+
+  Object.keys(edgeGroups).forEach(key => {
+    const group = edgeGroups[key];
+    if (group.length === 0) return;
+    
+    const first = group[0];
+    const combinedLabel = group.map(item => item.label).join(' | ');
+
+    newEdges.push({
+      id: `e-${key}`,
+      source: first.source,
+      target: first.target,
+      label: combinedLabel,
+      animated: true,
+      style: { stroke: 'var(--color-brand-500)', strokeWidth: 2 },
+      labelStyle: { fontSize: '9px', fontWeight: 'bold' }
+    });
+  });
+
+  edges.value = newEdges;
+};
+
 // Load schema into Vue Flow
 const loadSchema = () => {
   if (!props.entities) return;
@@ -352,25 +418,7 @@ const loadSchema = () => {
   });
 
   // Load edges from relationships
-  const newEdges = [];
-  props.entities.forEach(entity => {
-    const relations = entity.relations || [];
-    relations.forEach((rel, rIdx) => {
-      const targetEntity = props.entities.find(e => e.name === rel.target);
-      if (targetEntity) {
-        newEdges.push({
-          id: `e-${entity.id}-${targetEntity.id}-${rel.type}-${rIdx}`,
-          source: entity.id,
-          target: targetEntity.id,
-          label: `${rel.type} (${rel.foreign_key})`,
-          animated: true,
-          style: { stroke: 'var(--color-brand-500)', strokeWidth: 2 },
-          labelStyle: { fontSize: '9px', fontWeight: 'bold' }
-        });
-      }
-    });
-  });
-  edges.value = newEdges;
+  updateEdges();
 };
 
 // Dirty / Unpublished state tracking
@@ -494,15 +542,7 @@ const confirmRelation = () => {
     }
 
     // Rebuild edges
-    edges.value.push({
-      id: `e-${data.sourceId}-${data.targetId}-${data.type}-${Date.now()}`,
-      source: data.sourceId,
-      target: data.targetId,
-      label: `${data.type} (${data.foreignKey})`,
-      animated: true,
-      style: { stroke: 'var(--color-brand-500)', strokeWidth: 2 },
-      labelStyle: { fontSize: '9px', fontWeight: 'bold' }
-    });
+    updateEdges();
 
     notify({ group: "main", title: "Relación Creada", text: "La relación ha sido registrada en el esquema" }, 3000);
   }
@@ -711,16 +751,15 @@ const moveFieldDown = (index) => {
 
 const removeRelation = (index) => {
   if (!selectedNode.value) return;
-  const rel = selectedNode.value.data.relations[index];
   selectedNode.value.data.relations.splice(index, 1);
-  edges.value = edges.value.filter(e => !(e.source === selectedNode.value.id && e.label.includes(rel.foreign_key)));
+  updateEdges();
 };
 
 const deleteEntity = () => {
   if (!selectedNode.value) return;
   const idToDelete = selectedNode.value.id;
-  edges.value = edges.value.filter(e => e.source !== idToDelete && e.target !== idToDelete);
   nodes.value = nodes.value.filter(n => n.id !== idToDelete);
+  updateEdges();
   isDrawerOpen.value = false;
   selectedNode.value = null;
   notify({ group: "main", title: "Entidad Eliminada", text: "La entidad y sus relaciones fueron quitadas del canvas." }, 3000);
@@ -745,7 +784,8 @@ const inputTypes = [
   { name: 'Caja Selección (Select)', value: 'select' },
   { name: 'Interruptor (Toggle)', value: 'toggle' },
   { name: 'Área de Texto', value: 'textarea' },
-  { name: 'Fecha', value: 'date' }
+  { name: 'Fecha', value: 'date' },
+  { name: 'Archivo / Imagen', value: 'file' }
 ];
 
 const relationTypes = [
@@ -794,6 +834,54 @@ const handleWindowClick = (event) => {
   }
 };
 
+const moveEntityMenuUp = (index) => {
+  const customNodes = nodes.value.filter(n => !n.data.is_system);
+  if (index <= 0 || index >= customNodes.length) return;
+  
+  const nodeA = customNodes[index];
+  const nodeB = customNodes[index - 1];
+  
+  const idxA = nodes.value.findIndex(n => n.id === nodeA.id);
+  const idxB = nodes.value.findIndex(n => n.id === nodeB.id);
+  
+  const temp = nodes.value[idxA];
+  nodes.value[idxA] = nodes.value[idxB];
+  nodes.value[idxB] = temp;
+  
+  updateMenuOrders();
+  isDirty.value = true;
+};
+
+const moveEntityMenuDown = (index) => {
+  const customNodes = nodes.value.filter(n => !n.data.is_system);
+  if (index < 0 || index >= customNodes.length - 1) return;
+  
+  const nodeA = customNodes[index];
+  const nodeB = customNodes[index + 1];
+  
+  const idxA = nodes.value.findIndex(n => n.id === nodeA.id);
+  const idxB = nodes.value.findIndex(n => n.id === nodeB.id);
+  
+  const temp = nodes.value[idxA];
+  nodes.value[idxA] = nodes.value[idxB];
+  nodes.value[idxB] = temp;
+  
+  updateMenuOrders();
+  isDirty.value = true;
+};
+
+const updateMenuOrders = () => {
+  let order = 1;
+  nodes.value.forEach(node => {
+    if (!node.data.is_system) {
+      if (!node.data.ui_layout) {
+        initLayoutForNode(node);
+      }
+      node.data.ui_layout.menu_order = order++;
+    }
+  });
+};
+
 onMounted(() => {
   window.addEventListener('click', handleWindowClick);
 });
@@ -831,8 +919,10 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- DB Designer Mode -->
-      <div v-show="activeTab === 'db'" class="flex-1 flex min-h-0 relative">
+      <!-- DB / UI Designers Transition Container -->
+      <Transition name="view-fade" mode="out-in">
+        <!-- DB Designer Mode -->
+        <div v-if="activeTab === 'db'" class="flex-1 flex min-h-0 relative" key="db">
         <!-- Flow Canvas Area -->
         <div class="flex-1 h-full min-h-0 relative select-none">
           <VueFlow
@@ -858,7 +948,7 @@ onUnmounted(() => {
                   <div 
                     v-for="field in data.fields" 
                     :key="field.name" 
-                    class="flex items-center justify-between text-[11px] py-0.5 border-b border-dark-border/20 last:border-b-0"
+                    class="flex items-center justify-between text-[11px] py-0.5 border-b border-dark-border last:border-b-0"
                   >
                     <span class="text-slate-300 font-medium">
                       {{ field.name }}
@@ -1088,7 +1178,7 @@ onUnmounted(() => {
               <div 
                 v-for="m in migrationsList" 
                 :key="m.name" 
-                class="flex items-center justify-between p-2 rounded-lg text-[10px] transition border border-dark-border/50 hover:border-dark-border bg-dark-elevated/10"
+                class="flex items-center justify-between p-2 rounded-lg text-[10px] transition border border-dark-border hover:border-dark-border bg-dark-elevated/10"
               >
                 <div class="flex flex-col truncate pr-2">
                   <span class="font-mono text-slate-300 truncate" :title="m.name">{{ cleanMigrationName(m.name) }}</span>
@@ -1308,6 +1398,38 @@ onUnmounted(() => {
                         <JetLabel :for="`f-def-${index}`" value="Valor Default" class="text-[10px]" />
                         <input :id="`f-def-${index}`" v-model="field.default" type="text" class="mt-0.5 block w-full px-2 py-1 bg-dark-surface border border-dark-border text-slate-100 rounded text-xs focus:border-brand-500 focus:ring-0" :disabled="selectedNode.data.is_system" />
                       </div>
+                      <div v-if="field.name !== 'id' && field.input_type === 'file'" class="col-span-2 space-y-2">
+                        <div>
+                          <JetLabel :for="`f-accept-sel-${index}`" value="Formatos Aceptados" class="text-[10px]" />
+                          <select 
+                            :id="`f-accept-sel-${index}`" 
+                            :value="['image/*', '.pdf', '.pdf,.doc,.docx,.xls,.xlsx', '.zip,.rar,.7z', '', null, undefined].includes(field.accept) ? (field.accept || '') : 'custom'"
+                            @change="(e) => {
+                              const val = e.target.value;
+                              if (val !== 'custom') {
+                                field.accept = val;
+                              } else {
+                                if (['image/*', '.pdf', '.pdf,.doc,.docx,.xls,.xlsx', '.zip,.rar,.7z', '', null, undefined].includes(field.accept)) {
+                                  field.accept = '.png';
+                                }
+                              }
+                            }"
+                            class="mt-0.5 block w-full !py-1.5 !text-xs !bg-dark-surface border-dark-border text-slate-100 rounded-md focus:border-brand-500 focus:ring-0"
+                            :disabled="selectedNode.data.is_system"
+                          >
+                            <option value="">Cualquier Archivo</option>
+                            <option value="image/*">Solo Imágenes (PNG, JPG, WebP...)</option>
+                            <option value=".pdf">Documento PDF (.pdf)</option>
+                            <option value=".pdf,.doc,.docx,.xls,.xlsx">Documentos Oficina (.pdf, .doc, .docx...)</option>
+                            <option value=".zip,.rar,.7z">Archivos Comprimidos (.zip, .rar...)</option>
+                            <option value="custom">Personalizado / Otro...</option>
+                          </select>
+                        </div>
+                        <div v-if="!['image/*', '.pdf', '.pdf,.doc,.docx,.xls,.xlsx', '.zip,.rar,.7z', '', null, undefined].includes(field.accept)">
+                          <JetLabel :for="`f-accept-custom-${index}`" value="Especificar Formatos Personalizados" class="text-[9px] text-slate-400" />
+                          <input :id="`f-accept-custom-${index}`" v-model="field.accept" type="text" placeholder="Ej: .csv,.txt" class="mt-0.5 block w-full px-2 py-1 bg-dark-surface border border-dark-border text-slate-100 rounded text-xs focus:border-brand-500 focus:ring-0" :disabled="selectedNode.data.is_system" />
+                        </div>
+                      </div>
 
                       <!-- Toggles block -->
                       <div class="col-span-2 mt-3.5 pt-2 border-t border-dark-border grid grid-cols-3 gap-2 text-left">
@@ -1379,54 +1501,102 @@ onUnmounted(() => {
           </div>
         </Transition>
 
-      </div>
-
-      <!-- UI Layout Designer Mode -->
-      <div v-show="activeTab === 'ui'" class="flex-1 flex min-h-0 relative bg-dark-base overflow-hidden">
-        <!-- Sidebar: List of custom entities -->
-        <div class="w-64 border-r border-dark-border bg-dark-surface/50 flex flex-col p-4 shrink-0 text-left">
-          <h3 class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-3">Entidades Disponibles</h3>
-          <div class="flex-1 overflow-y-auto space-y-1 custom-scrollbar">
-            <button
-              v-for="node in nodes.filter(n => !n.data.is_system)"
-              :key="node.id"
-              type="button"
-              @click="selectedUiEntityId = node.id"
-              class="w-full text-left p-3 rounded-xl border text-xs transition flex items-center gap-2"
-              :class="[
-                selectedUiEntityId === node.id
-                  ? 'bg-brand-500/10 border-brand-500/30 text-brand-400 font-semibold'
-                  : 'bg-dark-elevated/10 border-dark-border/30 text-slate-300 hover:bg-dark-elevated/20'
-              ]"
-            >
-              <font-awesome-icon :icon="node.data.icon || 'table'" />
-              <span>{{ node.data.plural_label || node.data.name }}</span>
-            </button>
-            <div v-if="nodes.filter(n => !n.data.is_system).length === 0" class="text-center py-6 text-slate-500 text-xs italic">
-              Crea una entidad primero
-            </div>
-          </div>
         </div>
 
+        <!-- UI Layout Designer Mode -->
+        <div v-else-if="activeTab === 'ui'" class="flex-1 flex min-h-0 relative bg-dark-base overflow-hidden" key="ui">
+        
         <!-- Canvas Central de Diseño de Bloques -->
-        <div class="flex-1 flex flex-col min-h-0 bg-dark-base relative p-6">
+        <div class="flex-1 flex flex-col min-h-0 bg-dark-base relative p-6 pt-20">
+          
+          <!-- Top Floating Toolbar -->
+          <div class="absolute top-4 left-4 z-10 flex gap-2">
+            <!-- Guardar -->
+            <button 
+              type="button"
+              @click.prevent="saveSchema" 
+              :disabled="saving"
+              class="relative inline-flex items-center justify-center px-4 py-2.5 bg-dark-elevated hover:bg-dark-surface text-slate-200 hover:text-slate-100 rounded-xl font-bold transition duration-200 text-xs gap-2 disabled:opacity-50 border border-dark-border"
+              :class="isDirty ? 'border-amber-500/60 shadow-sm shadow-amber-500/20' : 'border-dark-border'"
+              :title="isDirty ? 'Hay cambios sin guardar' : 'Solo guarda el diagrama sin generar archivos'"
+            >
+              <font-awesome-icon :icon="saving ? 'spinner' : 'floppy-disk'" :class="{ 'animate-spin': saving }" />
+              {{ saving ? 'Guardando...' : 'Guardar' }}
+            </button>
+
+            <!-- Publicar Sistema -->
+            <button 
+              type="button"
+              @click.prevent="publishSystem" 
+              :disabled="showPublishModal && !publishDone && !publishError"
+              class="relative inline-flex items-center justify-center px-5 py-2.5 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white rounded-xl font-bold transition duration-200 shadow-lg text-xs gap-2 disabled:opacity-60"
+              :class="isDirty || isUnpublished ? 'shadow-amber-500/30 ring-1 ring-amber-400/40' : 'shadow-brand-500/25 hover:shadow-brand-500/40'"
+              title="Guarda, genera todos los archivos y aplica las migraciones"
+            >
+              <font-awesome-icon icon="rocket" class="text-white/90" />
+              Publicar Sistema
+            </button>
+          </div>
+
+          <!-- Top Right Floating Status Badge -->
+          <div class="absolute top-4 right-4 z-10 flex items-center gap-2 select-none">
+            <div 
+              v-if="selectedUiEntity"
+              class="px-3 py-2 rounded-xl border border-dark-border bg-dark-surface/90 backdrop-blur-md text-xs font-bold text-slate-200 flex items-center gap-2"
+            >
+              <font-awesome-icon :icon="selectedUiEntity.data.icon || 'table'" class="text-brand-400" />
+              <span>Diseño: <span class="text-brand-300">{{ selectedUiEntity.data.name }}</span></span>
+            </div>
+
+            <div 
+              class="px-3 py-2 rounded-xl border backdrop-blur-md text-xs font-bold transition flex items-center gap-2"
+              :class="[
+                isDirty 
+                  ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' 
+                  : (isUnpublished || pendingCount > 0)
+                    ? 'bg-orange-500/10 border-orange-500/20 text-orange-400'
+                    : 'bg-green-500/10 border-green-500/20 text-green-400'
+              ]"
+            >
+              <span class="flex h-2 w-2 relative">
+                <span 
+                  v-if="isDirty || isUnpublished || pendingCount > 0"
+                  class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                  :class="isDirty ? 'bg-amber-400' : 'bg-orange-400'"
+                ></span>
+                <span 
+                  class="relative inline-flex rounded-full h-2 w-2"
+                  :class="isDirty ? 'bg-amber-500' : (isUnpublished || pendingCount > 0) ? 'bg-orange-500' : 'bg-green-500'"
+                ></span>
+              </span>
+              <span>
+                {{ 
+                  isDirty 
+                    ? 'Diseño con cambios sin guardar' 
+                    : (isUnpublished || pendingCount > 0)
+                      ? 'Esquema pendiente de Publicar'
+                      : 'Sistema Sincronizado'
+                }}
+              </span>
+            </div>
+          </div>
+
           <div v-if="selectedUiEntity" class="flex-1 flex flex-col min-h-0">
             <!-- Header of Entity Layout -->
-            <div class="flex items-center justify-between border-b border-dark-border pb-4 mb-4">
+            <div class="flex items-center justify-between border-b border-dark-border pb-3 mb-4">
               <div>
-                <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
-                  <font-awesome-icon :icon="selectedUiEntity.data.icon || 'table'" class="text-brand-500" />
-                  Diseñador de Interfaz: <span class="text-brand-400">{{ selectedUiEntity.data.name }}</span>
+                <h2 class="text-sm font-bold text-slate-100 uppercase tracking-wider flex items-center gap-2">
+                  <font-awesome-icon icon="palette" class="text-brand-500 text-xs" />
+                  Estructura de Formulario
                 </h2>
-                <p class="text-xs text-slate-500 mt-0.5">Define las secciones y distribuye las columnas para los formularios CRUD.</p>
               </div>
               <button
                 type="button"
                 @click.prevent="addSection"
-                class="inline-flex items-center justify-center px-4 py-2 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white rounded-xl font-bold transition text-xs gap-2 shadow-lg shadow-brand-500/20"
+                class="inline-flex items-center justify-center px-3 py-1.5 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white rounded-xl font-bold transition text-xs gap-2 shadow-lg shadow-brand-500/20"
               >
                 <font-awesome-icon icon="plus" />
-                Agregar Sección Visual
+                Agregar Sección
               </button>
             </div>
 
@@ -1440,13 +1610,13 @@ onUnmounted(() => {
                 <div 
                   v-for="sec in selectedUiEntity.data.ui_layout?.sections || []" 
                   :key="sec.id"
-                  class="border border-dark-border bg-dark-surface/90 border border-dark-border backdrop-blur-md rounded-2xl p-4 transition-all duration-300 relative group/section"
+                  class="border border-dark-border bg-dark-surface/90 backdrop-blur-md rounded-2xl p-4 transition-all duration-300 relative group/section"
                   draggable="true"
                   @dragstart="onDragStartSection(sec.id)"
                   @dragover="onDragOverField"
                   @drop="onDropSection(sec.id)"
                 >
-                  <div class="flex items-center justify-between border-b border-dark-border/40 pb-3 mb-3 cursor-move">
+                  <div class="flex items-center justify-between border-b border-dark-border pb-3 mb-3 cursor-move">
                     <div class="flex items-center gap-3">
                       <span class="text-slate-500 hover:text-slate-300">
                         <font-awesome-icon icon="list-check" />
@@ -1487,7 +1657,7 @@ onUnmounted(() => {
                   </div>
 
                   <div 
-                    class="min-h-[80px] rounded-xl border border-dashed border-dark-border/60 p-3 bg-dark-elevated/5 transition duration-200"
+                    class="min-h-[80px] rounded-xl border border-dashed border-dark-border p-3 bg-dark-elevated/5 transition duration-200"
                     :class="{ 'border-brand-500/50 bg-brand-500/5': draggedFieldName }"
                     @dragover="onDragOverField"
                     @drop.stop="onDropField(sec.id)"
@@ -1528,64 +1698,193 @@ onUnmounted(() => {
                   </div>
                 </div>
               </div>
-
-              <!-- Right workspace side -->
-              <div class="w-64 border border-dark-border bg-dark-surface/90 backdrop-blur-md rounded-2xl p-4 flex flex-col min-h-0 text-left shrink-0">
-                <h4 class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-2">Campos sin Asignar</h4>
-                <p class="text-[10px] text-slate-500 mb-3">Cualquier campo aquí no aparecerá en el formulario visual.</p>
-                <div 
-                  class="flex-1 overflow-y-auto space-y-2 border border-dashed border-dark-border/60 rounded-xl p-2 bg-dark-elevated/5 custom-scrollbar"
-                  @dragover="onDragOverField"
-                  @drop.stop="onDropOnUnassigned"
-                >
-                  <div 
-                    v-for="fName in unassignedFields" 
-                    :key="fName"
-                    class="border border-dark-border bg-dark-elevated/40 hover:border-brand-500/30 p-2.5 rounded-xl cursor-grab active:cursor-grabbing select-none transition flex items-center justify-between"
-                    draggable="true"
-                    @dragstart="onDragStartField(fName, 'unassigned')"
-                  >
-                    <div class="flex items-center gap-1.5 truncate">
-                      <font-awesome-icon icon="list-check" class="text-slate-500 text-xs shrink-0" />
-                      <span class="font-mono text-xs text-slate-200 truncate">{{ getElementName(fName) }}</span>
-                    </div>
-                  </div>
-                  <div v-if="unassignedFields.length === 0" class="text-center py-6 text-slate-500 text-[10px] italic">
-                    Todos los campos asignados
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
           <div v-else class="flex-1 flex flex-col items-center justify-center text-slate-500 text-sm italic">
             <font-awesome-icon icon="palette" class="text-4xl text-dark-border mb-3" />
             Selecciona una entidad en la barra lateral para diseñar su interfaz de usuario
           </div>
+        </div>
 
-          <!-- Bottom floating action toolbar -->
-          <div class="absolute bottom-4 left-4 z-10 flex gap-2">
-            <button 
-              type="button"
-              @click.prevent="saveSchema" 
-              :disabled="saving"
-              class="relative inline-flex items-center justify-center px-4 py-2.5 bg-dark-elevated hover:bg-dark-surface text-slate-200 hover:text-slate-100 rounded-xl font-bold transition duration-200 text-xs gap-2 disabled:opacity-50 border border-dark-border"
-              :class="isDirty ? 'border-amber-500/60 shadow-sm shadow-amber-500/20' : 'border-dark-border'"
+        <!-- Sidebar: Entity Settings and Unassigned Fields (On the right) -->
+        <div class="w-80 border-l border-dark-border bg-dark-surface/50 flex flex-col p-4 shrink-0 text-left">
+          
+          <!-- Dropdown selector to switch entities -->
+          <div class="mb-4">
+            <label class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1">Entidad en Edición</label>
+            <select 
+              v-model="selectedUiEntityId" 
+              class="w-full bg-dark-surface border border-dark-border rounded-xl text-xs text-slate-200 py-2 px-3 focus:ring-brand-500 focus:border-brand-500 cursor-pointer"
             >
-              <font-awesome-icon :icon="saving ? 'spinner' : 'floppy-disk'" :class="{ 'animate-spin': saving }" />
-              {{ saving ? 'Guardando...' : 'Guardar' }}
+              <option :value="null">-- Seleccionar Entidad --</option>
+              <option v-for="node in nodes.filter(n => !n.data.is_system)" :key="node.id" :value="node.id">
+                {{ node.data.plural_label || node.data.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Tabs for Config and Unassigned Fields (only if an entity is selected) -->
+          <div v-if="selectedUiEntity" class="flex gap-1 bg-dark-base p-1 rounded-xl mb-4 border border-dark-border">
+            <button 
+              type="button" 
+              @click="uiSidebarTab = 'fields'" 
+              class="flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase transition text-center"
+              :class="uiSidebarTab === 'fields' ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400 hover:text-slate-200'"
+            >
+              Campos
             </button>
-
             <button 
-              type="button"
-              @click.prevent="publishSystem" 
-              class="relative inline-flex items-center justify-center px-5 py-2.5 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white rounded-xl font-bold transition duration-200 shadow-lg text-xs gap-2"
+              type="button" 
+              @click="uiSidebarTab = 'settings'" 
+              class="flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase transition text-center"
+              :class="uiSidebarTab === 'settings' ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400 hover:text-slate-200'"
             >
-              <font-awesome-icon icon="rocket" class="text-white/90" />
-              Publicar Sistema
+              Ajustes UI
             </button>
           </div>
+
+          <!-- Sidebar Body Content -->
+          <div v-if="selectedUiEntity" class="flex-1 flex flex-col min-h-0">
+            <!-- TAB: UNASSIGNED FIELDS -->
+            <div v-show="uiSidebarTab === 'fields'" class="flex-1 flex flex-col min-h-0">
+              <h4 class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-2">Campos sin Asignar</h4>
+              <p class="text-[10px] text-slate-500 mb-3">Arrastra los campos desde aquí hacia las secciones del formulario para distribuirlos.</p>
+              
+              <div 
+                class="flex-1 overflow-y-auto space-y-2 border border-dashed border-dark-border rounded-xl p-2 bg-dark-elevated/5 custom-scrollbar"
+                @dragover="onDragOverField"
+                @drop.stop="onDropOnUnassigned"
+              >
+                <div 
+                  v-for="fName in unassignedFields" 
+                  :key="fName"
+                  class="border border-dark-border bg-dark-elevated/40 hover:border-brand-500/30 p-2.5 rounded-xl cursor-grab active:cursor-grabbing select-none transition flex items-center justify-between"
+                  draggable="true"
+                  @dragstart="onDragStartField(fName, 'unassigned')"
+                >
+                  <div class="flex items-center gap-1.5 truncate">
+                    <font-awesome-icon icon="list-check" class="text-slate-500 text-xs shrink-0" />
+                    <span class="font-mono text-xs text-slate-200 truncate">{{ getElementName(fName) }}</span>
+                  </div>
+                </div>
+                <div v-if="unassignedFields.length === 0" class="text-center py-6 text-slate-500 text-[10px] italic">
+                  Todos los campos asignados
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB: LAYOUT SETTINGS -->
+            <div v-show="uiSidebarTab === 'settings'" class="flex-1 overflow-y-auto space-y-4 pr-1 custom-scrollbar text-xs">
+              <h4 class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-3">Configuración de Interfaz</h4>
+              
+              <!-- Form type -->
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-semibold text-slate-400 block">Tipo de Presentación</label>
+                <select 
+                  v-model="selectedUiEntity.data.ui_layout.layout_type"
+                  class="w-full bg-dark-surface border border-dark-border rounded-xl text-xs text-slate-200 py-2 px-3 focus:ring-brand-500 focus:border-brand-500 cursor-pointer"
+                  @change="isDirty = true"
+                >
+                  <option value="modal">Modal Flotante</option>
+                  <option value="page">Página Completa</option>
+                </select>
+              </div>
+
+              <!-- Modal width -->
+              <div v-if="selectedUiEntity.data.ui_layout.layout_type === 'modal'" class="space-y-1">
+                <label class="text-[10px] uppercase font-semibold text-slate-400 block">Ancho del Modal</label>
+                <select 
+                  v-model="selectedUiEntity.data.ui_layout.modal_width"
+                  class="w-full bg-dark-surface border border-dark-border rounded-xl text-xs text-slate-200 py-2 px-3 focus:ring-brand-500 focus:border-brand-500 cursor-pointer"
+                  @change="isDirty = true"
+                >
+                  <option value="max-w-sm">Angosto (sm)</option>
+                  <option value="max-w-md">Normal (md)</option>
+                  <option value="max-w-lg">Medio (lg)</option>
+                  <option value="max-w-xl">Medio-Grande (xl)</option>
+                  <option value="max-w-2xl">Grande (2xl - Estándar)</option>
+                  <option value="max-w-4xl">Muy Grande (4xl)</option>
+                  <option value="max-w-6xl">Extragrande (6xl)</option>
+                  <option value="max-w-full">Pantalla Completa</option>
+                </select>
+              </div>
+
+              <!-- Subtitle / Description -->
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-semibold text-slate-400 block">Descripción del Formulario</label>
+                <textarea 
+                  v-model="selectedUiEntity.data.ui_layout.description"
+                  rows="3"
+                  class="w-full bg-dark-surface border border-dark-border rounded-xl text-xs text-slate-200 py-2 px-3 focus:ring-brand-500 focus:border-brand-500 resize-none"
+                  placeholder="Instrucciones del formulario..."
+                  @change="isDirty = true"
+                ></textarea>
+              </div>
+
+              <!-- Quick actions toggles -->
+              <div class="space-y-2 pt-2 border-t border-dark-border">
+                <label class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1">Acciones Habilitadas en CRUD</label>
+                
+                <div class="flex items-center justify-between p-2.5 rounded-xl border border-dark-border bg-dark-surface/30">
+                  <span class="text-slate-300">Habilitar Edición</span>
+                  <Toggle v-model="selectedUiEntity.data.ui_layout.show_edit_action" @change="isDirty = true" />
+                </div>
+                
+                <div class="flex items-center justify-between p-2.5 rounded-xl border border-dark-border bg-dark-surface/30">
+                  <span class="text-slate-300">Habilitar Eliminación</span>
+                  <Toggle v-model="selectedUiEntity.data.ui_layout.show_delete_action" @change="isDirty = true" />
+                </div>
+              </div>
+
+            </div>
+          </div>
+          
+          <div v-else class="flex-1 flex flex-col min-h-0">
+            <h4 class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-2">Orden del Menú Lateral</h4>
+            <p class="text-[10px] text-slate-500 mb-3">Reordena cómo aparecen las entidades en el menú lateral. Las secciones Configuraciones y Diseñador siempre aparecerán al final.</p>
+            
+            <div class="flex-1 overflow-y-auto border border-dark-border rounded-xl p-2 bg-dark-elevated/5 custom-scrollbar relative">
+              <TransitionGroup name="list-fields" tag="div" class="space-y-2 block relative">
+                <div 
+                  v-for="(node, index) in nodes.filter(n => !n.data.is_system)"
+                  :key="node.id"
+                  class="flex items-center justify-between p-2.5 border border-dark-border bg-dark-surface/40 rounded-xl transition-all duration-300"
+                >
+                  <div class="flex items-center gap-2 truncate">
+                    <font-awesome-icon :icon="node.data.icon || 'table'" class="text-slate-400" />
+                    <span class="text-xs font-semibold text-slate-200 truncate">{{ node.data.plural_label || node.data.name }}</span>
+                  </div>
+                  <div class="flex gap-1">
+                    <button 
+                      type="button"
+                      @click.prevent="moveEntityMenuUp(index)"
+                      :disabled="index === 0"
+                      class="text-slate-500 hover:text-brand-400 disabled:opacity-30 disabled:hover:text-slate-500 transition p-1"
+                      title="Subir en el menú"
+                    >
+                      <font-awesome-icon icon="arrow-up" class="text-xs" />
+                    </button>
+                    <button 
+                      type="button"
+                      @click.prevent="moveEntityMenuDown(index)"
+                      :disabled="index === nodes.filter(n => !n.data.is_system).length - 1"
+                      class="text-slate-500 hover:text-brand-400 disabled:opacity-30 disabled:hover:text-slate-500 transition p-1"
+                      title="Bajar en el menú"
+                    >
+                      <font-awesome-icon icon="arrow-down" class="text-xs" />
+                    </button>
+                  </div>
+                </div>
+              </TransitionGroup>
+              <div v-if="nodes.filter(n => !n.data.is_system).length === 0" class="text-center py-6 text-slate-500 text-[10px] italic">
+                Crea una entidad primero
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+
+        </div>
+      </Transition>
 
       <!-- Modal Crear Relación -->
       <JetDialogModal :show="showRelationModal" @close="showRelationModal = false" max-width="sm">
@@ -1732,5 +2031,19 @@ onUnmounted(() => {
 .list-fields-leave-active {
   position: absolute !important;
   width: 100%;
+}
+
+/* Transition between DB and UI views */
+.view-fade-enter-active,
+.view-fade-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.view-fade-enter-from {
+  opacity: 0;
+  transform: translateY(6px) scale(0.995);
+}
+.view-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.995);
 }
 </style>

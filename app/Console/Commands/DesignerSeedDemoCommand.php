@@ -103,6 +103,18 @@ class DesignerSeedDemoCommand extends Command
                         "sortable" => true
                     ],
                     [
+                        "name" => "imagen",
+                        "type" => "string",
+                        "label" => "Imagen de Portada",
+                        "required" => false,
+                        "unique" => false,
+                        "default" => null,
+                        "input_type" => "file",
+                        "show_in_table" => true,
+                        "searchable" => false,
+                        "sortable" => false
+                    ],
+                    [
                         "name" => "cupo",
                         "type" => "integer",
                         "label" => "Cupo Máximo",
@@ -162,7 +174,8 @@ class DesignerSeedDemoCommand extends Command
                             "columns" => 2,
                             "fields" => [
                                 "nombre",
-                                "cupo"
+                                "cupo",
+                                "imagen"
                             ]
                         ],
                         [
@@ -223,6 +236,18 @@ class DesignerSeedDemoCommand extends Command
                         "show_in_table" => true,
                         "searchable" => true,
                         "sortable" => true
+                    ],
+                    [
+                        "name" => "temario",
+                        "type" => "string",
+                        "label" => "Temario / Syllabus",
+                        "required" => false,
+                        "unique" => false,
+                        "default" => null,
+                        "input_type" => "file",
+                        "show_in_table" => true,
+                        "searchable" => false,
+                        "sortable" => false
                     ]
                 ],
                 "relations" => [
@@ -242,7 +267,8 @@ class DesignerSeedDemoCommand extends Command
                             "columns" => 2,
                             "fields" => [
                                 "nombre",
-                                "codigo"
+                                "codigo",
+                                "temario"
                             ]
                         ],
                         [
@@ -432,7 +458,137 @@ class DesignerSeedDemoCommand extends Command
             '--path' => 'database/migrations/designer'
         ]);
 
-        $this->info('¡Entidades de prueba cargadas y base de datos sincronizada correctamente!');
+        // 5. Crear archivos demo (Imágenes y PDFs)
+        $this->line('- Generando archivos mock para las pruebas...');
+        $uploadsDir = storage_path('app/public/uploads');
+        File::ensureDirectoryExists($uploadsDir);
+
+        $generateImage = function($filename, $text, $bgColor) use ($uploadsDir) {
+            $path = $uploadsDir . '/' . $filename;
+            if (extension_loaded('gd')) {
+                $im = imagecreatetruecolor(600, 400);
+                list($r, $g, $b) = sscanf($bgColor, "#%02x%02x%02x");
+                $bg = imagecolorallocate($im, $r, $g, $b);
+                imagefill($im, 0, 0, $bg);
+                $white = imagecolorallocate($im, 255, 255, 255);
+                imagerectangle($im, 10, 10, 590, 390, $white);
+                
+                // Simple title drawing
+                $font = 5;
+                $textWidth = imagefontwidth($font) * strlen($text);
+                $textHeight = imagefontheight($font);
+                $x = (600 - $textWidth) / 2;
+                $y = (400 - $textHeight) / 2;
+                imagestring($im, $font, $x, $y, $text, $white);
+                
+                imagepng($im, $path);
+                imagedestroy($im);
+            } else {
+                $pngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+                File::put($path, base64_decode($pngBase64));
+            }
+        };
+
+        $generatePdf = function($filename, $title) use ($uploadsDir) {
+            $path = $uploadsDir . '/' . $filename;
+            $pdfContent = "%PDF-1.4\n";
+            $pdfContent .= "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n";
+            $pdfContent .= "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n";
+            $pdfContent .= "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << >> /Contents 4 0 R >>\nendobj\n";
+            $pdfContent .= "4 0 obj\n<< /Length " . strlen("BT /F1 24 Tf 50 750 Td ({$title}) Tj ET") . " >>\nstream\nBT /F1 24 Tf 50 750 Td ({$title}) Tj ET\nendstream\nendobj\n";
+            $pdfContent .= "xref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000210 00000 n\n";
+            $pdfContent .= "trailer\n<< /Size 5 /Root 1 0 R >>\nstartxref\n310\n%%EOF";
+            File::put($path, $pdfContent);
+        };
+
+        $generateImage('laravel.png', 'Laravel Course', '#f05340');
+        $generateImage('vue.png', 'Vue.js Course', '#41b883');
+        $generateImage('database.png', 'Database Course', '#2f3542');
+
+        $generatePdf('temario_laravel.pdf', 'Syllabus Laravel Basico');
+        $generatePdf('temario_vue.pdf', 'Syllabus Vue.js Avanzado');
+        $generatePdf('temario_database.pdf', 'Syllabus Bases de Datos Relacionales');
+
+        // 6. Insertar datos demo
+        $this->line('- Insertando datos demo...');
+
+        $user1 = \App\Models\User::firstOrCreate(
+            ['email' => 'elias@demo.com'],
+            ['name' => 'Elías Alumno', 'password' => bcrypt('password'), 'titulo' => 'Alumno']
+        );
+        $user2 = \App\Models\User::firstOrCreate(
+            ['email' => 'juan@demo.com'],
+            ['name' => 'Juan Pérez', 'password' => bcrypt('password'), 'titulo' => 'Alumno']
+        );
+        $user3 = \App\Models\User::firstOrCreate(
+            ['email' => 'maria@demo.com'],
+            ['name' => 'María Gómez', 'password' => bcrypt('password'), 'titulo' => 'Alumno']
+        );
+
+        $materiaLaravel = \App\Models\Designer\Materia::create([
+            'nombre' => 'Laravel Básico',
+            'codigo' => 'LARA-101',
+            'temario' => 'uploads/temario_laravel.pdf'
+        ]);
+        $materiaVue = \App\Models\Designer\Materia::create([
+            'nombre' => 'Vue.js Avanzado',
+            'codigo' => 'VUE-202',
+            'temario' => 'uploads/temario_vue.pdf'
+        ]);
+        $materiaDatabase = \App\Models\Designer\Materia::create([
+            'nombre' => 'Bases de Datos Relacionales',
+            'codigo' => 'DB-303',
+            'temario' => 'uploads/temario_database.pdf'
+        ]);
+
+        $cursoFullstack = \App\Models\Designer\Curso::create([
+            'nombre' => 'Desarrollo Fullstack Laravel & Vue',
+            'imagen' => 'uploads/laravel.png',
+            'cupo' => 25,
+            'activo' => true,
+            'fecha_inicio' => '2026-07-01'
+        ]);
+        $cursoFrontend = \App\Models\Designer\Curso::create([
+            'nombre' => 'Especialidad en Frontend con Vue.js',
+            'imagen' => 'uploads/vue.png',
+            'cupo' => 20,
+            'activo' => true,
+            'fecha_inicio' => '2026-08-15'
+        ]);
+        $cursoDatabase = \App\Models\Designer\Curso::create([
+            'nombre' => 'Administración de Bases de Datos',
+            'imagen' => 'uploads/database.png',
+            'cupo' => 15,
+            'activo' => false,
+            'fecha_inicio' => '2026-09-01'
+        ]);
+
+        $cursoFullstack->materias()->sync([$materiaLaravel->id, $materiaVue->id, $materiaDatabase->id]);
+        $cursoFrontend->materias()->sync([$materiaVue->id]);
+        $cursoDatabase->materias()->sync([$materiaDatabase->id]);
+
+        $cursoFullstack->users()->sync([$user1->id, $user2->id]);
+        $cursoFrontend->users()->sync([$user2->id, $user3->id]);
+        $cursoDatabase->users()->sync([$user1->id, $user3->id]);
+
+        \App\Models\Designer\Calificacion::create([
+            'nota' => 9.5,
+            'fecha' => '2026-06-03',
+            'comentario' => 'Excelente desempeño en el proyecto final.',
+            'user_id' => $user1->id,
+            'materia_id' => $materiaLaravel->id,
+            'curso_id' => $cursoFullstack->id
+        ]);
+        \App\Models\Designer\Calificacion::create([
+            'nota' => 8.0,
+            'fecha' => '2026-06-03',
+            'comentario' => 'Buen dominio de los componentes reactivos.',
+            'user_id' => $user2->id,
+            'materia_id' => $materiaVue->id,
+            'curso_id' => $cursoFrontend->id
+        ]);
+
+        $this->info('¡Entidades de prueba cargadas, archivos creados y base de datos sincronizada correctamente!');
         return Command::SUCCESS;
     }
 }

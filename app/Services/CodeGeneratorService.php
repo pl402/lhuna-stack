@@ -289,6 +289,10 @@ PHP;
         // Validation Rules and Create fields
         $validationRules = [];
         $createFields = [];
+        $storeUploadsCode = "";
+        $updateUploadsCode = "";
+        $deleteUploadsCode = "";
+
         foreach ($fields as $field) {
             $fName = $field['name'];
             if ($fName === 'id') continue;
@@ -300,7 +304,41 @@ PHP;
                 $rules[] = "'nullable'";
             }
 
-            if ($field['type'] === 'string') {
+            $fInputType = $field['input_type'] ?? '';
+            if ($fInputType === 'file') {
+                $rules[] = "'max:10240'"; // Max 10MB
+                if (!empty($field['accept'])) {
+                    $acceptVal = $field['accept'];
+                    if (str_contains($acceptVal, 'image/*')) {
+                        $rules[] = "'image'";
+                    }
+                    preg_match_all('/\.([a-zA-Z0-9]+)/', $acceptVal, $matches);
+                    if (!empty($matches[1])) {
+                        $exts = implode(',', $matches[1]);
+                        $rules[] = "'mimes:" . $exts . "'";
+                    }
+                }
+                
+                $storeUploadsCode .= "            if (\$request->hasFile('{$fName}')) {\n";
+                $storeUploadsCode .= "                \$datos['{$fName}'] = \$request->file('{$fName}')->store('uploads', 'public');\n";
+                $storeUploadsCode .= "            }\n";
+
+                $updateUploadsCode .= "            if (\$request->hasFile('{$fName}')) {\n";
+                $updateUploadsCode .= "                if (\$record->{$fName}) {\n";
+                $updateUploadsCode .= "                    \\Illuminate\\Support\\Facades\\Storage::disk('public')->delete(\$record->{$fName});\n";
+                $updateUploadsCode .= "                }\n";
+                $updateUploadsCode .= "                \$datos['{$fName}'] = \$request->file('{$fName}')->store('uploads', 'public');\n";
+                $updateUploadsCode .= "            } else {\n";
+                $updateUploadsCode .= "                if (array_key_exists('{$fName}', \$datos) && empty(\$datos['{$fName}']) && \$record->{$fName}) {\n";
+                $updateUploadsCode .= "                    \\Illuminate\\Support\\Facades\\Storage::disk('public')->delete(\$record->{$fName});\n";
+                $updateUploadsCode .= "                    \$datos['{$fName}'] = null;\n";
+                $updateUploadsCode .= "                }\n";
+                $updateUploadsCode .= "            }\n";
+
+                $deleteUploadsCode .= "            if (\$record->{$fName}) {\n";
+                $deleteUploadsCode .= "                \\Illuminate\\Support\\Facades\\Storage::disk('public')->delete(\$record->{$fName});\n";
+                $deleteUploadsCode .= "            }\n";
+            } elseif ($field['type'] === 'string') {
                 $rules[] = "'string'";
                 $rules[] = "'max:255'";
             } elseif ($field['type'] === 'integer') {
@@ -336,12 +374,12 @@ PHP;
             [
                 '{{modelName}}', '{{tableName}}', '{{pluralVar}}', '{{relationsWith}}',
                 '{{prefetchOptions}}', '{{compactExtra}}', '{{validationRules}}', '{{createFields}}',
-                '{{syncRelations}}'
+                '{{syncRelations}}', '{{storeUploads}}', '{{updateUploads}}', '{{deleteUploads}}'
             ],
             [
                 $name, $table, $pluralVar, $relationsWith,
                 $prefetchOptions, $compactExtra, $validationRulesStr, $createFieldsStr,
-                $syncRelationsCode
+                $syncRelationsCode, $storeUploadsCode, $updateUploadsCode, $deleteUploadsCode
             ],
             $template
         );
@@ -424,6 +462,14 @@ PHP;
                         $tableRows .= "                <td class=\"px-4 py-3 text-sm text-slate-600 dark:text-slate-300 text-left\">\n";
                         $tableRows .= "                  {{ item.{$relName} ? (item.{$relName}.nombre || item.{$relName}.name || item.{$relName}.titulo || item.{$relName}.title || item.{$relName}.id) : item.{$fName} }}\n";
                         $tableRows .= "                </td>\n";
+                    } else if (($field['input_type'] ?? '') === 'file') {
+                        $tableRows .= "                <td class=\"px-4 py-3 text-sm text-left\">\n";
+                        $tableRows .= "                  <a v-if=\"item.{$fName}\" :href=\"'/storage/' + item.{$fName}\" target=\"_blank\" class=\"inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 transition-all hover:bg-brand-500/20\">\n";
+                        $tableRows .= "                    <svg class=\"w-3.5 h-3.5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1\"></path></svg>\n";
+                        $tableRows .= "                    Ver Archivo\n";
+                        $tableRows .= "                  </a>\n";
+                        $tableRows .= "                  <span v-else class=\"text-xs text-slate-500\">Sin archivo</span>\n";
+                        $tableRows .= "                </td>\n";
                     } else if ($fType === 'boolean') {
                         $tableRows .= "                <td class=\"px-4 py-3 text-sm text-left\">\n";
                         $tableRows .= "                  <span v-if=\"item.{$fName}\" class=\"px-2 py-0.5 rounded text-xs font-semibold bg-green-500/10 text-green-400 border border-green-500/20\">Sí</span>\n";
@@ -445,7 +491,10 @@ PHP;
 
             if ($fName !== 'id') {
                 $defaultVal = "''";
-                if ($fType === 'integer' || $fType === 'decimal') {
+                $fInputType = $field['input_type'] ?? '';
+                if ($fInputType === 'file') {
+                    $defaultVal = "null";
+                } elseif ($fType === 'integer' || $fType === 'decimal') {
                     $defaultVal = "0";
                 } elseif ($fType === 'boolean') {
                     $defaultVal = "false";
@@ -481,22 +530,22 @@ PHP;
                 $renderedRelations[$relName] = true;
 
                 $html = "";
-                $html .= "              <label class=\"block mb-3 text-left col-span-full\">\n";
-                $html .= "                <JetLabel value=\"Asociar {$relLabel}\" class=\"float-left mb-1\" />\n";
-                $html .= "                <div class=\"mt-1 block w-full bg-dark-surface border border-dark-border rounded-xl p-2 min-h-[42px]\">\n";
-                $html .= "                  <div class=\"flex flex-wrap gap-1.5 mb-2\">\n";
-                $html .= "                    <span v-for=\"itemId in form.{$relName}\" :key=\"itemId\" class=\"inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20\">\n";
-                $html .= "                      {{ ({$optionsName}.find(o => o.value === itemId) || {name: itemId}).name }}\n";
-                $html .= "                      <button type=\"button\" @click=\"form.{$relName} = form.{$relName}.filter(id => id !== itemId)\" class=\"hover:text-red-400 font-bold ml-1\">×</button>\n";
-                $html .= "                    </span>\n";
-                $html .= "                  </div>\n";
-                $html .= "                  <select @change=\"(e) => { const val = isNaN(e.target.value) ? e.target.value : Number(e.target.value); if (val && !form.{$relName}.includes(val)) { form.{$relName}.push(val); } e.target.value = ''; }\" class=\"w-full bg-transparent border-0 focus:ring-0 text-xs text-slate-300 cursor-pointer p-0\">\n";
+                $html .= "              <div class=\"block mb-3 text-left col-span-full\">\n";
+                $html .= "                <JetLabel value=\"Asociar {$relLabel}\" class=\"mb-1 text-slate-300 font-medium\" />\n";
+                $html .= "                <div class=\"space-y-2\">\n";
+                $html .= "                  <select @change=\"(e) => { const val = isNaN(e.target.value) ? e.target.value : Number(e.target.value); if (val && !form.{$relName}.includes(val)) { form.{$relName}.push(val); } e.target.value = ''; }\" class=\"w-full bg-dark-surface border border-dark-border rounded-xl text-xs text-slate-300 cursor-pointer py-2.5 px-3 focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition-colors duration-200\">\n";
                 $html .= "                    <option value=\"\" disabled selected>Asociar nuevo...</option>\n";
                 $html .= "                    <option v-for=\"opt in {$optionsName}\" :key=\"opt.value\" :value=\"opt.value\" :disabled=\"form.{$relName}.includes(opt.value)\">{{ opt.name }}</option>\n";
                 $html .= "                  </select>\n";
+                $html .= "                  <div v-if=\"form.{$relName} && form.{$relName}.length > 0\" class=\"flex flex-wrap gap-1.5 p-2 bg-dark-surface/40 border border-dark-border rounded-xl\">\n";
+                $html .= "                    <span v-for=\"itemId in form.{$relName}\" :key=\"itemId\" class=\"inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 transition-all hover:bg-brand-500/20\">\n";
+                $html .= "                      {{ ({$optionsName}.find(o => o.value === itemId) || {name: itemId}).name }}\n";
+                $html .= "                      <button type=\"button\" @click=\"form.{$relName} = form.{$relName}.filter(id => id !== itemId)\" class=\"hover:text-red-400 font-bold ml-1 transition-colors duration-150\">×</button>\n";
+                $html .= "                    </span>\n";
+                $html .= "                  </div>\n";
                 $html .= "                </div>\n";
                 $html .= "                <JetInputError :message=\"error.{$relName}\" class=\"mt-1\" />\n";
-                $html .= "              </label>\n";
+                $html .= "              </div>\n";
                 return $html;
             }
 
@@ -513,9 +562,54 @@ PHP;
 
             $inputType = $field['input_type'] ?? 'text';
             
+            if ($inputType === 'toggle' || $fType === 'boolean') {
+                $html = "";
+                $html .= "              <div class=\"flex items-center justify-between p-3 border border-dark-border rounded-xl mb-3 bg-dark-surface/30 col-span-full\">\n";
+                $html .= "                <JetLabel for=\"{$fName}\" value=\"{$fLabel}\" class=\"mb-0\" />\n";
+                $html .= "                <Toggle id=\"{$fName}\" v-model=\"form.{$fName}\" />\n";
+                $html .= "              </div>\n";
+                $html .= "              <JetInputError :message=\"error.{$fName}\" class=\"mt-1\" />\n";
+                return $html;
+            }
+
+            if ($inputType === 'file') {
+                $html = "";
+                $acceptAttr = "";
+                if (!empty($field['accept'])) {
+                    $acceptAttr = " accept=\"" . e($field['accept']) . "\"";
+                }
+                $html .= "              <div class=\"block mb-3 text-left col-span-full\">\n";
+                $html .= "                <JetLabel for=\"{$fName}\" value=\"{$fLabel}\" class=\"mb-1\" />\n";
+                $html .= "                <div class=\"mt-1 flex items-center gap-4 p-4 border border-dashed border-dark-border rounded-xl bg-dark-surface/20 hover:bg-dark-surface/40 transition-colors duration-200\">\n";
+                $html .= "                  <div class=\"w-16 h-16 rounded-lg bg-dark-elevated flex items-center justify-center border border-dark-border overflow-hidden\">\n";
+                $html .= "                    <template v-if=\"form.{$fName} && typeof form.{$fName} === 'string'\">\n";
+                $html .= "                      <img :src=\"'/storage/' + form.{$fName}\" class=\"w-full h-full object-cover\" />\n";
+                $html .= "                    </template>\n";
+                $html .= "                    <template v-else-if=\"form.{$fName} && typeof form.{$fName} === 'object' && form.{$fName}.type && form.{$fName}.type.startsWith('image/')\">\n";
+                $html .= "                      <img :src=\"getPreviewUrl(form.{$fName})\" class=\"w-full h-full object-cover\" />\n";
+                $html .= "                    </template>\n";
+                $html .= "                    <template v-else>\n";
+                $html .= "                      <svg class=\"w-6 h-6 text-slate-500\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12\"></path></svg>\n";
+                $html .= "                    </template>\n";
+                $html .= "                  </div>\n";
+                $html .= "                  <div class=\"flex-1\">\n";
+                $html .= "                    <input type=\"file\" id=\"{$fName}\"{$acceptAttr} class=\"hidden\" ref=\"fileInput_{$fName}\" @change=\"(e) => { if (e.target.files[0]) { form.{$fName} = e.target.files[0]; } }\" />\n";
+                $html .= "                    <JetSecondaryButton type=\"button\" @click=\"\$refs.fileInput_{$fName}.click()\" class=\"text-xs py-1.5 px-3\">\n";
+                $html .= "                      Seleccionar Archivo\n";
+                $html .= "                    </JetSecondaryButton>\n";
+                $html .= "                    <div class=\"text-[10px] text-slate-400 mt-1\">\n";
+                $html .= "                      {{ (form.{$fName} && typeof form.{$fName} === 'object') ? form.{$fName}.name : (form.{$fName} ? form.{$fName} : 'Ningún archivo seleccionado') }}\n";
+                $html .= "                    </div>\n";
+                $html .= "                  </div>\n";
+                $html .= "                </div>\n";
+                $html .= "                <JetInputError :message=\"error.{$fName}\" class=\"mt-1\" />\n";
+                $html .= "              </div>\n";
+                return $html;
+            }
+
             $html = "";
             $html .= "              <label class=\"block mb-3 text-left\">\n";
-            $html .= "                <JetLabel for=\"{$fName}\" value=\"{$fLabel}\" class=\"float-left mb-1\" />\n";
+            $html .= "                <JetLabel for=\"{$fName}\" value=\"{$fLabel}\" class=\"mb-1\" />\n";
 
             if (isset($relationTargetByFk[$fName])) {
                 $r = $relationTargetByFk[$fName];
@@ -526,8 +620,6 @@ PHP;
                 $html .= "                <Select id=\"{$fName}\" v-model=\"form.{$fName}\" :value=\"form.{$fName}\" class=\"mt-1 block w-full\" :options=\"{$optionsName}\" {$reqAttr} />\n";
             } elseif ($inputType === 'textarea') {
                 $html .= "                <Textarea id=\"{$fName}\" v-model=\"form.{$fName}\" class=\"mt-1 block w-full\" rows=\"3\" {$reqAttr} />\n";
-            } elseif ($inputType === 'toggle' || $fType === 'boolean') {
-                $html .= "                <div class=\"mt-2 text-left\"><Toggle id=\"{$fName}\" v-model=\"form.{$fName}\" /></div>\n";
             } elseif ($inputType === 'number' || $fType === 'integer' || $fType === 'decimal') {
                 $html .= "                <JetInput id=\"{$fName}\" v-model=\"form.{$fName}\" type=\"number\" step=\"any\" class=\"mt-1 block w-full\" {$reqAttr} />\n";
             } elseif ($inputType === 'date') {
@@ -554,7 +646,7 @@ PHP;
                 }
 
                 $modalInputsHtml .= "          <!-- Sección: {$secTitle} -->\n";
-                $modalInputsHtml .= "          <div class=\"border border-dark-border/40 p-4 rounded-xl mb-4 bg-dark-elevated/5\">\n";
+                $modalInputsHtml .= "          <div class=\"border border-dark-border p-4 rounded-xl mb-4 bg-dark-elevated/5\">\n";
                 $modalInputsHtml .= "            <h4 class=\"text-xs font-bold uppercase tracking-wider text-slate-300 mb-3 text-left\">{$secTitle}</h4>\n";
                 $modalInputsHtml .= "            <div class=\"{$gridClass}\">\n";
                 foreach ($sec['fields'] as $fieldName) {
@@ -597,7 +689,7 @@ PHP;
 
         if (count($remainingB2m) > 0) {
             $modalInputsHtml .= "          <!-- Relaciones Muchos a Muchos -->\n";
-            $modalInputsHtml .= "          <div class=\"border border-dark-border/40 p-4 rounded-xl mb-4 bg-dark-elevated/5\">\n";
+            $modalInputsHtml .= "          <div class=\"border border-dark-border p-4 rounded-xl mb-4 bg-dark-elevated/5\">\n";
             $modalInputsHtml .= "            <h4 class=\"text-xs font-bold uppercase tracking-wider text-slate-300 mb-3 text-left\">Relaciones Asociadas</h4>\n";
             $modalInputsHtml .= "            <div class=\"grid grid-cols-1 gap-4\">\n";
             foreach ($remainingB2m as $r) {
@@ -605,22 +697,22 @@ PHP;
                 $relLabel = Str::plural($r['target']);
                 $optionsName = Str::camel(Str::plural($r['target'])) . 'Options';
 
-                $modalInputsHtml .= "              <label class=\"block mb-3 text-left\">\n";
-                $modalInputsHtml .= "                <JetLabel value=\"Asociar {$relLabel}\" class=\"float-left mb-1\" />\n";
-                $modalInputsHtml .= "                <div class=\"mt-1 block w-full bg-dark-surface border border-dark-border rounded-xl p-2 min-h-[42px]\">\n";
-                $modalInputsHtml .= "                  <div class=\"flex flex-wrap gap-1.5 mb-2\">\n";
-                $modalInputsHtml .= "                    <span v-for=\"itemId in form.{$relName}\" :key=\"itemId\" class=\"inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20\">\n";
-                $modalInputsHtml .= "                      {{ ({$optionsName}.find(o => o.value === itemId) || {name: itemId}).name }}\n";
-                $modalInputsHtml .= "                      <button type=\"button\" @click=\"form.{$relName} = form.{$relName}.filter(id => id !== itemId)\" class=\"hover:text-red-400 font-bold ml-1\">×</button>\n";
-                $modalInputsHtml .= "                    </span>\n";
-                $modalInputsHtml .= "                  </div>\n";
-                $modalInputsHtml .= "                  <select @change=\"(e) => { const val = isNaN(e.target.value) ? e.target.value : Number(e.target.value); if (val && !form.{$relName}.includes(val)) { form.{$relName}.push(val); } e.target.value = ''; }\" class=\"w-full bg-transparent border-0 focus:ring-0 text-xs text-slate-300 cursor-pointer p-0\">\n";
+                $modalInputsHtml .= "              <div class=\"block mb-3 text-left\">\n";
+                $modalInputsHtml .= "                <JetLabel value=\"Asociar {$relLabel}\" class=\"mb-1 text-slate-300 font-medium\" />\n";
+                $modalInputsHtml .= "                <div class=\"space-y-2\">\n";
+                $modalInputsHtml .= "                  <select @change=\"(e) => { const val = isNaN(e.target.value) ? e.target.value : Number(e.target.value); if (val && !form.{$relName}.includes(val)) { form.{$relName}.push(val); } e.target.value = ''; }\" class=\"w-full bg-dark-surface border border-dark-border rounded-xl text-xs text-slate-300 cursor-pointer py-2.5 px-3 focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition-colors duration-200\">\n";
                 $modalInputsHtml .= "                    <option value=\"\" disabled selected>Asociar nuevo...</option>\n";
                 $modalInputsHtml .= "                    <option v-for=\"opt in {$optionsName}\" :key=\"opt.value\" :value=\"opt.value\" :disabled=\"form.{$relName}.includes(opt.value)\">{{ opt.name }}</option>\n";
                 $modalInputsHtml .= "                  </select>\n";
+                $modalInputsHtml .= "                  <div v-if=\"form.{$relName} && form.{$relName}.length > 0\" class=\"flex flex-wrap gap-1.5 p-2 bg-dark-surface/40 border border-dark-border rounded-xl\">\n";
+                $modalInputsHtml .= "                    <span v-for=\"itemId in form.{$relName}\" :key=\"itemId\" class=\"inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 transition-all hover:bg-brand-500/20\">\n";
+                $modalInputsHtml .= "                      {{ ({$optionsName}.find(o => o.value === itemId) || {name: itemId}).name }}\n";
+                $modalInputsHtml .= "                      <button type=\"button\" @click=\"form.{$relName} = form.{$relName}.filter(id => id !== itemId)\" class=\"hover:text-red-400 font-bold ml-1 transition-colors duration-150\">×</button>\n";
+                $modalInputsHtml .= "                    </span>\n";
+                $modalInputsHtml .= "                  </div>\n";
                 $modalInputsHtml .= "                </div>\n";
                 $modalInputsHtml .= "                <JetInputError :message=\"error.{$relName}\" class=\"mt-1\" />\n";
-                $modalInputsHtml .= "              </label>\n";
+                $modalInputsHtml .= "              </div>\n";
             }
             $modalInputsHtml .= "            </div>\n";
             $modalInputsHtml .= "          </div>\n";
@@ -690,19 +782,30 @@ PHP;
         }
         $errorAssignments = implode("\n", $errorAssignmentsArr);
 
+        $layoutType = $entity['ui_layout']['layout_type'] ?? 'modal';
+        $modalWidthRaw = $entity['ui_layout']['modal_width'] ?? 'max-w-2xl';
+        $modalWidth = str_replace('max-w-', '', $modalWidthRaw);
+        $formDescription = $entity['ui_layout']['description'] ?? 'Define los detalles del registro.';
+        $showEditAction = ($entity['ui_layout']['show_edit_action'] ?? true) ? 'true' : 'false';
+        $showDeleteAction = ($entity['ui_layout']['show_delete_action'] ?? true) ? 'true' : 'false';
+
         $template = $this->getViewTemplate();
         $code = str_replace(
             [
                 '{{modelName}}', '{{tableName}}', '{{pluralVar}}', '{{pluralLabel}}',
                 '{{optionsProps}}', '{{formFields}}', '{{errorFields}}', '{{camposProps}}',
                 '{{tableCols}}', '{{tableRows}}', '{{modalInputs}}', '{{editMapping}}',
-                '{{resetErrors}}', '{{errorAssignments}}'
+                '{{resetErrors}}', '{{errorAssignments}}',
+                '{{layoutType}}', '{{modalWidth}}', '{{formDescription}}',
+                '{{showEditAction}}', '{{showDeleteAction}}'
             ],
             [
                 $name, $table, $pluralVar, $pluralLabel,
                 $optionsPropsStr, $formFieldsStr, $errorFieldsStr, $camposPropsStr,
                 $tableCols, $tableRows, $modalInputsStr, $editMapping,
-                $resetErrors, $errorAssignments
+                $resetErrors, $errorAssignments,
+                $layoutType, $modalWidth, $formDescription,
+                $showEditAction, $showDeleteAction
             ],
             $template
         );
@@ -1320,13 +1423,14 @@ class {{modelName}}Controller extends Controller
     {
         $user = \Auth::user();
         if ($user->can("{{tableName}}.store")) {
-            $datos = $request->all();
-            
             $rules = [
                 {{validationRules}}
             ];
             
+            $datos = $request->all();
             Validator::make($datos, $rules)->validate();
+
+{{storeUploads}}
 
             $record = {{modelName}}::create([
                 {{createFields}}
@@ -1347,15 +1451,17 @@ class {{modelName}}Controller extends Controller
     {
         $user = \Auth::user();
         if ($user->can("{{tableName}}.update")) {
-            $datos = $request->all();
-            
             $rules = [
                 {{validationRules}}
             ];
             
+            $datos = $request->all();
             Validator::make($datos, $rules)->validate();
 
             $record = {{modelName}}::findOrFail($id);
+
+{{updateUploads}}
+
             $record->update([
                 {{createFields}}
             ]);
@@ -1376,6 +1482,9 @@ class {{modelName}}Controller extends Controller
         $user = \Auth::user();
         if ($user->can("{{tableName}}.destroy")) {
             $record = {{modelName}}::findOrFail($id);
+
+{{deleteUploads}}
+
             $record->delete();
 
             return redirect()
@@ -1507,6 +1616,23 @@ const props = defineProps({
   filtros: Array,
   {{optionsProps}}
 });
+
+const layoutType = '{{layoutType}}';
+const modalWidth = '{{modalWidth}}';
+const formDescription = '{{formDescription}}';
+const showEditAction = {{showEditAction}};
+const showDeleteAction = {{showDeleteAction}};
+
+const getPreviewUrl = (file) => {
+  if (file && typeof file === 'object') {
+    try {
+      return URL.createObjectURL(file);
+    } catch (e) {
+      return '';
+    }
+  }
+  return '';
+};
 
 // Scroll Infinito Logic
 const itemsLista = ref([...props.{{pluralVar}}.data]);
@@ -1680,84 +1806,136 @@ const borraRegistroDo = () => {
     <div class="w-full max-w-full mx-auto p-0 flex-1 min-h-0 flex flex-col">
       <GlowCard rounded="rounded-none" class="flex-1 min-h-0 border-0">
         <div class="flex flex-col h-full w-full">
-          <Buscador
-              v-model="buscar"
-              :orderByObject="orderByObject"
-              ruta="{{tableName}}"
-              :filtros="filtros"
-              :campos="campos"
-              autofocus
-            />
-            <Tabla v-if="itemsLista.length > 0" heightClass="flex-1 min-h-0">
-            <template #col>
+          <!-- Page view transition wrapper -->
+          <Transition name="fade-slide" mode="out-in">
+            <!-- Page Form Layout -->
+            <div v-if="layoutType === 'page' && estadoModal" class="flex-1 overflow-y-auto p-6 text-left custom-scrollbar" key="form">
+              <div class="flex items-center justify-between border-b border-dark-border pb-4 mb-4">
+                <div>
+                  <h2 class="text-lg font-bold text-slate-100">
+                    {{ accion === "new" ? "Crear {{modelName}}" : "Editar {{modelName}}" }}
+                  </h2>
+                  <p v-if="formDescription" class="text-xs text-slate-400 mt-1">{{ formDescription }}</p>
+                </div>
+                <div class="flex gap-2">
+                  <JetDangerButton v-if="accion === 'edit' && showDeleteAction" @click="estadoModalElimina = true" :disabled="form.processing">
+                    <font-awesome-icon icon="trash" class="mr-2" />
+                    Eliminar
+                  </JetDangerButton>
+                </div>
+              </div>
+
+              <form @submit.prevent="accion === 'new' ? nuevoRegistroDo : editaRegistroDo" class="space-y-4 w-full">
+{{modalInputs}}
+                
+                <div class="flex justify-between items-center pt-4 border-t border-dark-border">
+                  <div>
+                    <JetSecondaryButton @click="estadoModal = false" :disabled="form.processing" type="button">
+                      Cancelar
+                    </JetSecondaryButton>
+                  </div>
+                  <div class="flex gap-3">
+                    <JetButton v-if="accion === 'new'" type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                      <font-awesome-icon icon="plus" class="mr-2" />Crear Registro
+                    </JetButton>
+                    <JetButton v-if="accion === 'edit'" type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                      <font-awesome-icon icon="floppy-disk" class="mr-2" />Guardar Cambios
+                    </JetButton>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!-- Standard List Layout -->
+            <div v-else class="flex-1 min-h-0 flex flex-col" key="list">
+              <Buscador
+                  v-model="buscar"
+                  :orderByObject="orderByObject"
+                  ruta="{{tableName}}"
+                  :filtros="filtros"
+                  :campos="campos"
+                  autofocus
+                />
+              <Tabla v-if="itemsLista.length > 0" heightClass="flex-1 min-h-0">
+                <template #col>
 {{tableCols}}
-              <th class="px-4 py-3 w-5 text-center sticky right-0 bg-dark-surface/50 border-l border-dark-border">
+                  <th class="px-4 py-3 w-5 text-center sticky right-0 bg-dark-surface/50 border-l border-dark-border">
+                    <button 
+                        @click="nuevoRegistro" 
+                        class="inline-flex items-center justify-center px-3 py-2 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white rounded font-bold transition duration-200 shadow-md shadow-brand-500/20 hover:shadow-lg hover:shadow-brand-500/30"
+                        title="Agregar Nuevo"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    </button>
+                  </th>
+                </template>
+                <template #row>
+                  <tr
+                    class="text-slate-300 hover:bg-dark-elevated border-b border-dark-border"
+                    v-for="item in itemsLista"
+                    :key="item.id"
+                  >
+{{tableRows}}
+                    <td class="px-4 py-3 text-center sticky right-0 bg-dark-surface/50 border-l border-dark-border">
+                      <button
+                        v-if="showEditAction"
+                        @click="editaRegistro(item)"
+                        class="inline-flex items-center justify-center px-3 py-2 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded transition duration-200 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30"
+                        title="Editar"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr ref="loadMoreTrigger" class="opacity-0 h-1">
+                    <td colspan="100"></td>
+                  </tr>
+                </template>
+                <template #pagination>
+                  <div class="px-4 py-2.5 border-t border-dark-border text-xs font-semibold tracking-wide text-slate-500 uppercase bg-dark-surface/50 bg-glass-gradient backdrop-blur-md flex justify-between items-center select-none">
+                    <span>Mostrando {{ itemsLista.length }} de {{ {{pluralVar}}.total }} registros</span>
+                    <span v-if="loadingMore" class="flex items-center gap-1.5 text-brand-400">
+                      <font-awesome-icon icon="spinner" class="animate-spin" />
+                      Cargando más...
+                    </span>
+                    <span v-else-if="!hasMore && itemsLista.length > 0" class="text-slate-600 dark:text-slate-500">
+                      Fin de la lista
+                    </span>
+                  </div>
+                </template>
+              </Tabla>
+              <div v-else class="text-center p-5 text-slate-400 text-md">
+                Sin Registros
+                <br />
                 <button 
                     @click="nuevoRegistro" 
-                    class="inline-flex items-center justify-center px-3 py-2 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white rounded font-bold transition duration-200 shadow-md shadow-brand-500/20 hover:shadow-lg hover:shadow-brand-500/30"
-                    title="Agregar Nuevo"
+                    class="mt-2 inline-flex items-center justify-center px-4 py-2 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white rounded-lg font-semibold text-xs uppercase tracking-widest transition duration-200 shadow-md shadow-brand-500/20"
                 >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Agregar Nuevo Registro
                 </button>
-              </th>
-            </template>
-            <template #row>
-              <tr
-                class="text-slate-300 hover:bg-dark-elevated border-b border-dark-border"
-                v-for="item in itemsLista"
-                :key="item.id"
-              >
-{{tableRows}}
-                <td class="px-4 py-3 text-center sticky right-0 bg-dark-surface/50 border-l border-dark-border">
-                  <button
-                    @click="editaRegistro(item)"
-                    class="inline-flex items-center justify-center px-3 py-2 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded transition duration-200 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30"
-                    title="Editar"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                  </button>
-                </td>
-              </tr>
-              <tr ref="loadMoreTrigger" class="opacity-0 h-1">
-                <td colspan="100"></td>
-              </tr>
-            </template>
-            <template #pagination>
-              <div class="px-4 py-2.5 border-t border-dark-border text-xs font-semibold tracking-wide text-slate-500 uppercase bg-dark-surface/50 bg-glass-gradient backdrop-blur-md flex justify-between items-center select-none">
-                <span>Mostrando {{ itemsLista.length }} de {{ {{pluralVar}}.total }} registros</span>
-                <span v-if="loadingMore" class="flex items-center gap-1.5 text-brand-400">
-                  <font-awesome-icon icon="spinner" class="animate-spin" />
-                  Cargando más...
-                </span>
-                <span v-else-if="!hasMore && itemsLista.length > 0" class="text-slate-600 dark:text-slate-500">
-                  Fin de la lista
-                </span>
               </div>
-            </template>
-          </Tabla>
-          <div v-else class="text-center p-5 text-slate-400 text-md">
-            Sin Registros
-            <br />
-            <button 
-                @click="nuevoRegistro" 
-                class="mt-2 inline-flex items-center justify-center px-4 py-2 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white rounded-lg font-semibold text-xs uppercase tracking-widest transition duration-200 shadow-md shadow-brand-500/20"
-            >
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                Agregar Nuevo Registro
-            </button>
-          </div>
+            </div>
+          </Transition>
+
         </div>
       </GlowCard>
     </div>
 
-    <form class="flex flex-col" @submit.prevent="accion === 'new' ? nuevoRegistroDo : editaRegistroDo">
-      <JetDialogModal :show="estadoModal" @close="estadoModal = false" max-width="md">
+    <!-- Dialog Modal: Only used if layoutType is 'modal' -->
+    <form v-if="layoutType === 'modal'" class="flex flex-col" @submit.prevent="accion === 'new' ? nuevoRegistroDo : editaRegistroDo">
+      <JetDialogModal :show="estadoModal" @close="estadoModal = false" :max-width="modalWidth">
         <template #title>
-          {{ accion === "new" ? "Crear nuevo" : "Editar" }}
-          <JetDangerButton v-if="accion === 'edit'" @click="estadoModalElimina = true" class="-mt-1 float-right" :disabled="form.processing">
-            <font-awesome-icon icon="trash" class="mr-2" />
-            Eliminar
-          </JetDangerButton>
+          <div class="flex items-center justify-between w-full">
+            <div class="flex flex-col text-left">
+              <span class="font-bold text-lg text-slate-100">{{ accion === "new" ? "Crear {{modelName}}" : "Editar {{modelName}}" }}</span>
+              <span v-if="formDescription" class="text-xs text-slate-400 mt-1">{{ formDescription }}</span>
+            </div>
+            <JetDangerButton v-if="accion === 'edit' && showDeleteAction" @click="estadoModalElimina = true" class="text-xs py-1.5 px-3 uppercase" :disabled="form.processing">
+              <font-awesome-icon icon="trash" class="mr-1.5" />
+              Eliminar
+            </JetDangerButton>
+          </div>
         </template>
         <template #content>
 {{modalInputs}}
@@ -1768,19 +1946,23 @@ const borraRegistroDo = () => {
           </div>
           <div class="w-1/2">
             <JetButton v-if="accion === 'new'" @click="nuevoRegistroDo" :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="float-right">
-              <template v-if="form.processing">
-                <font-awesome-icon icon="spinner" class="mr-2 animate-spin" />Creando...
-              </template>
-              <template v-else>
-                <font-awesome-icon icon="plus" class="mr-2" />Crear Registro
+              <template v-slot>
+                <template v-if="form.processing">
+                  <font-awesome-icon icon="spinner" class="mr-2 animate-spin" />Creando...
+                </template>
+                <template v-else>
+                  <font-awesome-icon icon="plus" class="mr-2" />Crear Registro
+                </template>
               </template>
             </JetButton>
             <JetButton v-if="accion === 'edit'" @click="editaRegistroDo" :class="{ 'opacity-25': form.processing }" class="float-right" :disabled="form.processing">
-              <template v-if="form.processing">
-                <font-awesome-icon icon="spinner" class="mr-2 animate-spin" />Guardando...
-              </template>
-              <template v-else>
-                <font-awesome-icon icon="floppy-disk" class="mr-2" />Guardar Cambios
+              <template v-slot>
+                <template v-if="form.processing">
+                  <font-awesome-icon icon="spinner" class="mr-2 animate-spin" />Guardando...
+                </template>
+                <template v-else>
+                  <font-awesome-icon icon="floppy-disk" class="mr-2" />Guardar Cambios
+                </template>
               </template>
             </JetButton>
           </div>
@@ -1807,6 +1989,21 @@ const borraRegistroDo = () => {
     </JetConfirmationModal>
   </AppLayout>
 </template>
+
+<style scoped>
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.25s ease-in-out;
+}
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(15px);
+}
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-15px);
+}
+</style>
 VUE;
     }
 
@@ -2123,7 +2320,7 @@ const toggleAssociation = async (targetId) => {
             :class="[
               selectedSourceId === item.id
                 ? 'bg-brand-500/10 border-brand-500/30 text-brand-400 font-semibold'
-                : 'bg-dark-elevated/20 border-dark-border/40 text-slate-300 hover:bg-dark-elevated/40'
+                : 'bg-dark-elevated/20 border-dark-border text-slate-300 hover:bg-dark-elevated/40'
             ]"
           >
             <span>{{ item.name }}</span>

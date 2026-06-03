@@ -104,7 +104,7 @@ const maxWidthClass = computed(() => {
 
 <template>
     <teleport to="body">
-        <Transition name="nested">
+        <Transition name="nested" :duration="350">
             <div
                 v-if="show"
                 class="fixed inset-0 overflow-y-auto px-4 py-16 sm:px-0 z-50"
