@@ -524,6 +524,22 @@ class DesignerSeedDemoCommand extends Command
             ['email' => 'maria@demo.com'],
             ['name' => 'María Gómez', 'password' => bcrypt('password'), 'titulo' => 'Alumno']
         );
+        $user4 = \App\Models\User::firstOrCreate(
+            ['email' => 'carlos@demo.com'],
+            ['name' => 'Carlos Mendoza', 'password' => bcrypt('password'), 'titulo' => 'Alumno']
+        );
+        $user5 = \App\Models\User::firstOrCreate(
+            ['email' => 'ana@demo.com'],
+            ['name' => 'Ana Rivera', 'password' => bcrypt('password'), 'titulo' => 'Alumno']
+        );
+        $user6 = \App\Models\User::firstOrCreate(
+            ['email' => 'luis@demo.com'],
+            ['name' => 'Luis Pérez', 'password' => bcrypt('password'), 'titulo' => 'Alumno']
+        );
+        $user7 = \App\Models\User::firstOrCreate(
+            ['email' => 'sofia@demo.com'],
+            ['name' => 'Sofía Castro', 'password' => bcrypt('password'), 'titulo' => 'Alumno']
+        );
 
         $materiaLaravel = \App\Models\Designer\Materia::create([
             'nombre' => 'Laravel Básico',
@@ -539,6 +555,16 @@ class DesignerSeedDemoCommand extends Command
             'nombre' => 'Bases de Datos Relacionales',
             'codigo' => 'DB-303',
             'temario' => 'uploads/temario_database.pdf'
+        ]);
+        $materiaReact = \App\Models\Designer\Materia::create([
+            'nombre' => 'React Native Móvil',
+            'codigo' => 'REACT-301',
+            'temario' => 'uploads/temario_database.pdf'
+        ]);
+        $materiaGit = \App\Models\Designer\Materia::create([
+            'nombre' => 'Git y Control de Versiones',
+            'codigo' => 'GIT-102',
+            'temario' => 'uploads/temario_laravel.pdf'
         ]);
 
         $cursoFullstack = \App\Models\Designer\Curso::create([
@@ -563,14 +589,15 @@ class DesignerSeedDemoCommand extends Command
             'fecha_inicio' => '2026-09-01'
         ]);
 
-        $cursoFullstack->materias()->sync([$materiaLaravel->id, $materiaVue->id, $materiaDatabase->id]);
-        $cursoFrontend->materias()->sync([$materiaVue->id]);
+        $cursoFullstack->materias()->sync([$materiaLaravel->id, $materiaVue->id, $materiaDatabase->id, $materiaGit->id]);
+        $cursoFrontend->materias()->sync([$materiaVue->id, $materiaReact->id]);
         $cursoDatabase->materias()->sync([$materiaDatabase->id]);
 
-        $cursoFullstack->users()->sync([$user1->id, $user2->id]);
-        $cursoFrontend->users()->sync([$user2->id, $user3->id]);
-        $cursoDatabase->users()->sync([$user1->id, $user3->id]);
+        $cursoFullstack->users()->sync([$user1->id, $user2->id, $user4->id, $user5->id, $user6->id]);
+        $cursoFrontend->users()->sync([$user2->id, $user3->id, $user6->id, $user7->id]);
+        $cursoDatabase->users()->sync([$user1->id, $user3->id, $user5->id]);
 
+        // Calificaciones para Laravel Básico
         \App\Models\Designer\Calificacion::create([
             'nota' => 9.5,
             'fecha' => '2026-06-03',
@@ -580,6 +607,32 @@ class DesignerSeedDemoCommand extends Command
             'curso_id' => $cursoFullstack->id
         ]);
         \App\Models\Designer\Calificacion::create([
+            'nota' => 8.5,
+            'fecha' => '2026-06-03',
+            'comentario' => 'Buen proyecto e integracion.',
+            'user_id' => $user2->id,
+            'materia_id' => $materiaLaravel->id,
+            'curso_id' => $cursoFullstack->id
+        ]);
+        \App\Models\Designer\Calificacion::create([
+            'nota' => 7.0,
+            'fecha' => '2026-06-04',
+            'comentario' => 'Satisfecho, necesita pulir detalles en base de datos.',
+            'user_id' => $user4->id,
+            'materia_id' => $materiaLaravel->id,
+            'curso_id' => $cursoFullstack->id
+        ]);
+        \App\Models\Designer\Calificacion::create([
+            'nota' => 9.8,
+            'fecha' => '2026-06-04',
+            'comentario' => 'Trabajo impecable.',
+            'user_id' => $user5->id,
+            'materia_id' => $materiaLaravel->id,
+            'curso_id' => $cursoFullstack->id
+        ]);
+
+        // Calificaciones para Vue.js Avanzado
+        \App\Models\Designer\Calificacion::create([
             'nota' => 8.0,
             'fecha' => '2026-06-03',
             'comentario' => 'Buen dominio de los componentes reactivos.',
@@ -587,6 +640,90 @@ class DesignerSeedDemoCommand extends Command
             'materia_id' => $materiaVue->id,
             'curso_id' => $cursoFrontend->id
         ]);
+        \App\Models\Designer\Calificacion::create([
+            'nota' => 9.0,
+            'fecha' => '2026-06-04',
+            'comentario' => 'Excelente uso de Pinia y Composition API.',
+            'user_id' => $user3->id,
+            'materia_id' => $materiaVue->id,
+            'curso_id' => $cursoFrontend->id
+        ]);
+        \App\Models\Designer\Calificacion::create([
+            'nota' => 10.0,
+            'fecha' => '2026-06-04',
+            'comentario' => 'Perfecta entrega de SPA optimizada.',
+            'user_id' => $user7->id,
+            'materia_id' => $materiaVue->id,
+            'curso_id' => $cursoFrontend->id
+        ]);
+
+        // Calificaciones para Bases de Datos Relacionales
+        \App\Models\Designer\Calificacion::create([
+            'nota' => 8.7,
+            'fecha' => '2026-06-04',
+            'comentario' => 'Bien estructurado el diagrama entidad relación.',
+            'user_id' => $user1->id,
+            'materia_id' => $materiaDatabase->id,
+            'curso_id' => $cursoFullstack->id
+        ]);
+        \App\Models\Designer\Calificacion::create([
+            'nota' => 9.2,
+            'fecha' => '2026-06-04',
+            'comentario' => 'Muy buenas consultas complejas y optimizaciones.',
+            'user_id' => $user3->id,
+            'materia_id' => $materiaDatabase->id,
+            'curso_id' => $cursoDatabase->id
+        ]);
+        \App\Models\Designer\Calificacion::create([
+            'nota' => 7.8,
+            'fecha' => '2026-06-04',
+            'comentario' => 'Buen rendimiento general.',
+            'user_id' => $user5->id,
+            'materia_id' => $materiaDatabase->id,
+            'curso_id' => $cursoDatabase->id
+        ]);
+
+        // Calificaciones para React Native Móvil
+        \App\Models\Designer\Calificacion::create([
+            'nota' => 9.1,
+            'fecha' => '2026-06-04',
+            'comentario' => 'Excelente aplicación móvil híbrida.',
+            'user_id' => $user6->id,
+            'materia_id' => $materiaReact->id,
+            'curso_id' => $cursoFrontend->id
+        ]);
+
+        // Calificaciones para Git y Control de Versiones
+        \App\Models\Designer\Calificacion::create([
+            'nota' => 10.0,
+            'fecha' => '2026-06-04',
+            'comentario' => 'Perfecto entendimiento de ramas y merge conflicts.',
+            'user_id' => $user1->id,
+            'materia_id' => $materiaGit->id,
+            'curso_id' => $cursoFullstack->id
+        ]);
+
+        // Seed the grouped report with totals
+        \App\Models\Report::updateOrCreate(
+            ['name' => 'Calificaciones por Materia con Totales'],
+            [
+                'entity_name' => 'Calificacion',
+                'fields' => ['user_id', 'nota'],
+                'filters' => ['type' => 'group', 'operator' => 'and', 'rules' => []],
+                'filters_operator' => 'and',
+                'sort_by' => 'materia_id',
+                'sort_order' => 'asc',
+                'group_by' => 'materia_id',
+                'aggregations' => [
+                    [
+                        'field' => 'nota',
+                        'function' => 'AVG',
+                        'label' => 'Promedio de Notas'
+                    ]
+                ],
+                'user_id' => $user1->id
+            ]
+        );
 
         $this->info('¡Entidades de prueba cargadas, archivos creados y base de datos sincronizada correctamente!');
         return Command::SUCCESS;

@@ -135,8 +135,11 @@ class ReportController extends Controller
             'entity_name' => 'required|string',
             'fields' => 'required|array|min:1',
             'filters' => 'nullable|array',
+            'filters_operator' => 'nullable|in:and,or',
             'sort_by' => 'nullable|string',
             'sort_order' => 'required|in:asc,desc',
+            'group_by' => 'nullable|string',
+            'aggregations' => 'nullable|array',
         ]);
 
         $validated['user_id'] = \Auth::id();
@@ -158,8 +161,11 @@ class ReportController extends Controller
             'name' => 'required|string|max:255',
             'fields' => 'required|array|min:1',
             'filters' => 'nullable|array',
+            'filters_operator' => 'nullable|in:and,or',
             'sort_by' => 'nullable|string',
             'sort_order' => 'required|in:asc,desc',
+            'group_by' => 'nullable|string',
+            'aggregations' => 'nullable|array',
         ]);
 
         $report->update($validated);
@@ -179,6 +185,45 @@ class ReportController extends Controller
         return redirect()->route('reportes.index')->with('message', 'Plantilla de reporte eliminada con éxito.');
     }
 
+    public function livePreview(Request $request)
+    {
+        $validated = $request->validate([
+            'entity_name' => 'required|string',
+            'fields' => 'required|array|min:1',
+            'filters' => 'nullable|array',
+            'filters_operator' => 'nullable|in:and,or',
+            'sort_by' => 'nullable|string',
+            'sort_order' => 'required|in:asc,desc',
+            'group_by' => 'nullable|string',
+            'aggregations' => 'nullable|array',
+        ]);
+
+        $tempReport = new Report($validated);
+        $entities = $this->getEntitiesMetadata();
+
+        try {
+            $data = $this->buildReportQuery($tempReport, $entities);
+            $formatted = $this->formatReportData($tempReport, $data, $entities);
+
+            $headers = count($formatted) > 0 
+                ? array_values(array_filter(array_keys($formatted[0]), function($key) {
+                    return strpos($key, '_') !== 0;
+                })) 
+                : [];
+
+            return response()->json([
+                'ok' => true,
+                'data' => $formatted,
+                'headers' => $headers
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'ok' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
     public function preview($id)
     {
         $report = Report::findOrFail($id);
@@ -187,10 +232,16 @@ class ReportController extends Controller
         $data = $this->buildReportQuery($report, $entities);
         $formatted = $this->formatReportData($report, $data, $entities);
 
+        $headers = count($formatted) > 0 
+            ? array_values(array_filter(array_keys($formatted[0]), function($key) {
+                return strpos($key, '_') !== 0;
+            })) 
+            : [];
+
         return response()->json([
             'ok' => true,
             'data' => $formatted,
-            'headers' => count($formatted) > 0 ? array_keys($formatted[0]) : []
+            'headers' => $headers
         ]);
     }
 
@@ -202,8 +253,19 @@ class ReportController extends Controller
         $data = $this->buildReportQuery($report, $entities);
         $formatted = $this->formatReportData($report, $data, $entities);
 
-        $headings = count($formatted) > 0 ? array_keys($formatted[0]) : $report->fields;
-        $export = new DynamicReportExport(collect($formatted), $headings);
+        $headings = count($formatted) > 0 
+            ? array_values(array_filter(array_keys($formatted[0]), function($key) {
+                return strpos($key, '_') !== 0;
+            })) 
+            : $report->fields;
+
+        $formattedExport = collect($formatted)->map(function ($row) {
+            return collect($row)->filter(function ($value, $key) {
+                return strpos($key, '_') !== 0;
+            })->all();
+        });
+
+        $export = new DynamicReportExport($formattedExport, $headings);
 
         $fileName = Str::slug($report->name) . '_' . date('YmdHis') . '.xlsx';
 
@@ -223,16 +285,16 @@ class ReportController extends Controller
     private function buildReportQuery($report, $entities)
     {
         $entityName = $report->entity_name;
+        $entityMetadata = collect($entities)->firstWhere('name', $entityName);
         $modelClass = $entityName === 'User' ? 'App\\Models\\User' : 'App\\Models\\Designer\\' . $entityName;
 
         if (!class_exists($modelClass)) {
-            throw new \Exception("La entidad {$entityName} no existe o no ha sido generada.");
+            throw new \Exception("Model class not found: " . $modelClass);
         }
 
         $query = $modelClass::query();
 
         // Find relations for eager loading
-        $entityMetadata = collect($entities)->firstWhere('name', $entityName);
         foreach ($entityMetadata['relations'] ?? [] as $rel) {
             if ($rel['type'] === 'belongsTo') {
                 $relName = $rel['relation_name'] ?? Str::camel($rel['target']);
@@ -240,29 +302,115 @@ class ReportController extends Controller
             }
         }
 
-        // Apply filters
+        // Apply filters (recursive nested groups support)
         if (!empty($report->filters)) {
-            foreach ($report->filters as $filter) {
-                $field = $filter['field'] ?? null;
-                $operator = $filter['operator'] ?? '=';
-                $value = $filter['value'] ?? null;
-
-                if ($field && $value !== null) {
-                    if ($operator === 'like') {
-                        $query->where($field, 'LIKE', '%' . $value . '%');
-                    } else {
-                        $query->where($field, $operator, $value);
-                    }
-                }
-            }
+            $defaultOperator = $report->filters_operator ?? 'and';
+            $this->applyFilterNode($query, $report->filters, $defaultOperator);
         }
 
         // Apply sorting
+        if ($report->group_by) {
+            $query->orderBy($report->group_by, 'asc');
+        }
         if ($report->sort_by) {
             $query->orderBy($report->sort_by, $report->sort_order ?: 'asc');
         }
 
         return $query->get();
+    }
+
+    private function applyFilterNode($query, $node, $defaultOperator = 'and')
+    {
+        // For backward compatibility: if it's a flat array of rules
+        if (isset($node[0]) && !isset($node[0]['type'])) {
+            $query->where(function ($subQuery) use ($node, $defaultOperator) {
+                foreach ($node as $index => $rule) {
+                    $this->applyRule($subQuery, $rule, $defaultOperator, $index === 0);
+                }
+            });
+            return;
+        }
+
+        // If it's a single rule node
+        if (isset($node['type']) && $node['type'] === 'rule') {
+            $this->applyRule($query, $node, $defaultOperator, true);
+            return;
+        }
+
+        // If it's a group node
+        if (isset($node['type']) && $node['type'] === 'group') {
+            $groupOperator = $node['operator'] ?? 'and';
+            $rules = $node['rules'] ?? [];
+
+            if (empty($rules)) {
+                return;
+            }
+
+            $query->where(function ($subQuery) use ($rules, $groupOperator) {
+                foreach ($rules as $index => $subNode) {
+                    $joinOperator = ($groupOperator === 'or' && $index > 0) ? 'or' : 'and';
+
+                    if (isset($subNode['type']) && $subNode['type'] === 'group') {
+                        if ($joinOperator === 'or') {
+                            $subQuery->orWhere(function ($innerQuery) use ($subNode) {
+                                $this->applyFilterNode($innerQuery, $subNode);
+                            });
+                        } else {
+                            $subQuery->where(function ($innerQuery) use ($subNode) {
+                                $this->applyFilterNode($innerQuery, $subNode);
+                            });
+                        }
+                    } else {
+                        // It's a rule
+                        $this->applyRule($subQuery, $subNode, $groupOperator, $index === 0);
+                    }
+                }
+            });
+        }
+    }
+
+    private function applyRule($query, $rule, $operatorType, $isFirst = false)
+    {
+        $field = $rule['field'] ?? null;
+        $operator = $rule['operator'] ?? '=';
+        $value = $rule['value'] ?? null;
+
+        if ($field && $value !== null) {
+            // Dynamic values evaluation
+            if ($value === '{HOY}') {
+                $value = now()->toDateString();
+            } elseif ($value === '{AYER}') {
+                $value = now()->subDay()->toDateString();
+            } elseif ($value === '{INICIO_MES}') {
+                $value = now()->startOfMonth()->toDateString();
+            } elseif ($value === '{FIN_MES}') {
+                $value = now()->endOfMonth()->toDateString();
+            } elseif ($value === '{USUARIO_AUTENTICADO}') {
+                $value = auth()->id();
+            }
+
+            $whereMethod = ($operatorType === 'or' && !$isFirst) ? 'orWhere' : 'where';
+
+            if (str_contains($field, '.')) {
+                [$relation, $relField] = explode('.', $field);
+                $relationMethod = Str::camel($relation);
+                $whereHasMethod = ($operatorType === 'or' && !$isFirst) ? 'orWhereHas' : 'whereHas';
+
+                $query->$whereHasMethod($relationMethod, function ($q) use ($relField, $operator, $value) {
+                    if ($operator === 'like') {
+                        $q->where($relField, 'LIKE', '%' . $value . '%');
+                    } else {
+                        $q->where($relField, $operator, $value);
+                    }
+                });
+            } else {
+                if ($operator === 'like') {
+                    $query->$whereMethod($field, 'LIKE', '%' . $value . '%');
+                } else {
+                    $query->$whereMethod($field, $operator, $value);
+                }
+            }
+        }
     }
 
     private function formatReportData($report, $data, $entities)
@@ -298,6 +446,27 @@ class ReportController extends Controller
 
                 $row[$label] = $value;
             }
+
+            // Include group metadata for visual grouping on the frontend
+            if ($report->group_by) {
+                $groupByField = $report->group_by;
+                $groupByFieldMeta = $fieldsMeta->firstWhere('name', $groupByField);
+                $groupByLabel = $groupByFieldMeta['label'] ?? $groupByField;
+                $groupByValue = $item->{$groupByField};
+
+                if (isset($relationMap[$groupByField])) {
+                    $rel = $relationMap[$groupByField];
+                    $relName = $rel['relation_name'] ?? Str::camel($rel['target']);
+                    $related = $item->{$relName};
+                    if ($related) {
+                        $groupByValue = $related->nombre ?? $related->name ?? $related->titulo ?? $related->title ?? $related->id;
+                    }
+                }
+
+                $row['_group_by_label'] = $groupByLabel;
+                $row['_group_by_value'] = $groupByValue;
+            }
+
             return $row;
         })->toArray();
     }

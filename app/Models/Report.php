@@ -12,14 +12,18 @@ class Report extends Model
         'entity_name',
         'fields',
         'filters',
+        'filters_operator',
         'sort_by',
         'sort_order',
+        'group_by',
+        'aggregations',
         'user_id',
     ];
 
     protected $casts = [
         'fields' => 'array',
         'filters' => 'array',
+        'aggregations' => 'array',
     ];
 
     public function user(): BelongsTo

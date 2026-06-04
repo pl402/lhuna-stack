@@ -893,7 +893,7 @@ onUnmounted(() => {
 
 <template>
   <AppLayout title="Diseñador de Entidades" :mainScrollable="false">
-    <div class="w-full flex-1 flex flex-col min-h-0 bg-dark-base overflow-hidden transition-colors duration-300">
+    <div class="w-full flex-1 flex flex-col min-h-0 bg-transparent overflow-hidden transition-colors duration-300">
       
       <!-- Top Tab Navigation Bar -->
       <div class="px-6 py-2 border-b border-dark-border bg-dark-surface/40 flex items-center justify-between shrink-0">
@@ -1217,7 +1217,8 @@ onUnmounted(() => {
         <Transition name="drawer">
           <div 
             v-if="isDrawerOpen && selectedNode" 
-            class="w-[450px] border-l border-dark-border bg-dark-surface/90 backdrop-blur-2xl h-full flex flex-col z-20 shadow-2xl relative"
+            style="background-color: rgb(var(--color-bg-surface)) !important; z-index: 20;"
+            class="relative w-[450px] border-l border-dark-border h-full flex flex-col shadow-2xl"
           >
             <!-- Drawer Header -->
             <div class="p-4 border-b border-dark-border flex items-center justify-between">
@@ -1504,10 +1505,10 @@ onUnmounted(() => {
         </div>
 
         <!-- UI Layout Designer Mode -->
-        <div v-else-if="activeTab === 'ui'" class="flex-1 flex min-h-0 relative bg-dark-base overflow-hidden" key="ui">
+        <div v-else-if="activeTab === 'ui'" class="flex-1 flex min-h-0 relative overflow-hidden" key="ui">
         
         <!-- Canvas Central de Diseño de Bloques -->
-        <div class="flex-1 flex flex-col min-h-0 bg-dark-base relative p-6 pt-20">
+        <div class="flex-1 flex flex-col min-h-0 relative p-6 pt-20">
           
           <!-- Top Floating Toolbar -->
           <div class="absolute top-4 left-4 z-10 flex gap-2">
@@ -1707,7 +1708,7 @@ onUnmounted(() => {
         </div>
 
         <!-- Sidebar: Entity Settings and Unassigned Fields (On the right) -->
-        <div class="w-80 border-l border-dark-border bg-dark-surface/50 flex flex-col p-4 shrink-0 text-left">
+        <div style="background-color: rgb(var(--color-bg-surface)) !important; z-index: 10;" class="relative w-80 border-l border-dark-border flex flex-col p-4 shrink-0 text-left">
           
           <!-- Dropdown selector to switch entities -->
           <div class="mb-4">
@@ -1946,7 +1947,11 @@ onUnmounted(() => {
 }
 
 /* Custom Vue Flow variables to fit Dark/Light UI themes */
-.vue-flow {
+.vue-flow,
+.vue-flow__pane,
+.vue-flow__viewport,
+.vue-flow__container {
+  background: transparent !important;
   background-color: transparent !important;
 }
 

@@ -86,6 +86,7 @@ Route::middleware([
         Route::get("/crear", [\App\Http\Controllers\ReportController::class, "create"])->name("reportes.create");
         Route::get("/{id}/editar", [\App\Http\Controllers\ReportController::class, "edit"])->name("reportes.edit");
         Route::post("/", [\App\Http\Controllers\ReportController::class, "store"])->name("reportes.store");
+        Route::post("/preview", [\App\Http\Controllers\ReportController::class, "livePreview"])->name("reportes.live_preview");
         Route::post("/{id}", [\App\Http\Controllers\ReportController::class, "update"])->name("reportes.update");
         Route::delete("/{id}", [\App\Http\Controllers\ReportController::class, "destroy"])->name("reportes.destroy");
         Route::get("/buscar/{filtro}", [\App\Http\Controllers\ReportController::class, "search"])->name("reportes.search");

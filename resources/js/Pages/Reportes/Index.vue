@@ -1,7 +1,7 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
-import { Link, router, toRefs } from "@inertiajs/vue3";
-import { ref, computed, watch, onMounted, onUnmounted } from "vue";
+import { Link, router } from "@inertiajs/vue3";
+import { ref, computed, watch, onMounted, onUnmounted, toRefs } from "vue";
 import GlowCard from "@/Components/GlowCard.vue";
 import Tabla from "@/Components/Tabla.vue";
 import JetButton from "@/Jetstream/Button.vue";
@@ -130,6 +130,55 @@ const showPreviewModal = ref(false);
 const showDeleteModal = ref(false);
 const reportToDelete = ref(null);
 
+const groupedPreviewData = computed(() => {
+  if (!selectedReport.value?.group_by || previewData.value.length === 0) {
+    return null;
+  }
+  const groups = {};
+  previewData.value.forEach((row, idx) => {
+    const groupVal = row._group_by_value !== undefined ? row._group_by_value : "Otros";
+    if (!groups[groupVal]) {
+      groups[groupVal] = [];
+    }
+    const rowWithKey = {
+      ...row,
+      _row_key: row.id !== undefined ? `row-${row.id}` : `row-idx-${idx}-${JSON.stringify(row)}`
+    };
+    groups[groupVal].push(rowWithKey);
+  });
+  return groups;
+});
+
+const getAggregationsForHeader = (headerLabel) => {
+  if (!selectedReport.value?.aggregations) return [];
+  const entity = props.entities.find(e => e.name === selectedReport.value.entity_name);
+  return selectedReport.value.aggregations.filter(agg => {
+    const fieldMeta = entity?.fields.find(f => f.name === agg.field);
+    const label = fieldMeta?.label || agg.field;
+    return label === headerLabel;
+  });
+};
+
+const calculateAggregationValue = (rows, headerLabel, func) => {
+  const values = rows.map(r => parseFloat(r[headerLabel])).filter(v => !isNaN(v));
+  if (values.length === 0) return 0;
+  
+  switch (func.toUpperCase()) {
+    case 'SUM':
+      return values.reduce((sum, v) => sum + v, 0).toFixed(2);
+    case 'AVG':
+      return (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(2);
+    case 'MIN':
+      return Math.min(...values).toFixed(2);
+    case 'MAX':
+      return Math.max(...values).toFixed(2);
+    case 'COUNT':
+      return values.length;
+    default:
+      return 0;
+  }
+};
+
 const getEntityLabel = (entityName) => {
   const entity = props.entities.find((e) => e.name === entityName);
   return entity ? entity.plural_label : entityName;
@@ -152,6 +201,7 @@ const loadPreview = async (report) => {
     if (response.data && response.data.ok) {
       previewData.value = response.data.data;
       previewHeaders.value = response.data.headers;
+      return true;
     }
   } catch (err) {
     notify(
@@ -165,6 +215,16 @@ const loadPreview = async (report) => {
     showPreviewModal.value = false;
   } finally {
     loadingPreview.value = false;
+  }
+  return false;
+};
+
+const printReportDirect = async (report) => {
+  const success = await loadPreview(report);
+  if (success) {
+    setTimeout(() => {
+      printReport();
+    }, 500);
   }
 };
 
@@ -329,7 +389,7 @@ const editaRegistro = (id) => {
                     <!-- Preview -->
                     <button
                       @click="loadPreview(report)"
-                      class="inline-flex items-center justify-center px-3 py-2 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded-l border-r border-blue-600/50 transition duration-200 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30"
+                      class="inline-flex items-center justify-center px-3 py-2 bg-purple-500 hover:bg-purple-600 active:bg-purple-700 text-white rounded-l border-r border-purple-600/50 transition duration-200 shadow-md shadow-purple-500/20 hover:shadow-lg hover:shadow-purple-500/30"
                       title="Ver Vista Previa"
                     >
                       <font-awesome-icon icon="eye" class="text-xs w-4 h-4" />
@@ -342,23 +402,23 @@ const editaRegistro = (id) => {
                     >
                       <font-awesome-icon icon="file-excel" class="text-xs w-4 h-4" />
                     </a>
+                    <!-- PDF -->
+                    <button
+                      @click="printReportDirect(report)"
+                      class="inline-flex items-center justify-center px-3 py-2 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white border-r border-red-600/50 transition duration-200 shadow-md shadow-red-500/20 hover:shadow-lg hover:shadow-red-500/30"
+                      title="Imprimir / PDF"
+                    >
+                      <font-awesome-icon icon="file-pdf" class="text-xs w-4 h-4" />
+                    </button>
                     <!-- Edit -->
                     <button
                       @click="editaRegistro(report.id)"
-                      class="inline-flex items-center justify-center px-3 py-2 bg-slate-600 hover:bg-slate-700 active:bg-slate-800 text-white border-r border-slate-700 transition duration-200 shadow-md shadow-slate-600/20 hover:shadow-lg hover:shadow-slate-600/30"
+                      class="inline-flex items-center justify-center px-3 py-2 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded-r transition duration-200 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30"
                       title="Editar"
                     >
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                       </svg>
-                    </button>
-                    <!-- Delete -->
-                    <button
-                      @click="confirmDelete(report)"
-                      class="inline-flex items-center justify-center px-3 py-2 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white rounded-r transition duration-200 shadow-md shadow-red-500/20 hover:shadow-lg hover:shadow-red-500/30"
-                      title="Eliminar"
-                    >
-                      <font-awesome-icon icon="trash" class="text-xs w-4 h-4" />
                     </button>
                   </div>
                 </td>
@@ -437,36 +497,105 @@ const editaRegistro = (id) => {
           <span class="text-sm">Procesando consulta en tiempo real...</span>
         </div>
 
-        <div v-else-if="previewData.length > 0" class="overflow-x-auto border border-dark-border rounded-xl">
+        <div v-else-if="previewData.length > 0">
           <div id="printable-report-area">
-            <table class="min-w-full divide-y divide-dark-border/40 text-left bg-dark-surface/10">
-              <thead class="bg-dark-elevated/40">
-                <tr>
-                  <th
-                    v-for="header in previewHeaders"
-                    :key="header"
-                    class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-dark-border/60"
+            <!-- Grouped Layout -->
+            <div v-if="groupedPreviewData" class="space-y-6">
+              <div v-for="(rows, groupName) in groupedPreviewData" :key="groupName" class="mb-6 text-left">
+                <!-- Group Header -->
+                <div class="flex items-center gap-2 mb-2 bg-dark-elevated/20 p-2.5 rounded-lg border border-dark-border/40">
+                  <div class="h-2 w-2 rounded-full bg-brand-500 animate-pulse"></div>
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300">
+                    {{ rows[0]?._group_by_label || 'Grupo' }}: <span class="text-brand-400 font-semibold">{{ groupName }}</span>
+                  </h4>
+                  <span class="text-[10px] text-slate-500 font-semibold ml-auto">
+                    {{ rows.length }} registros
+                  </span>
+                </div>
+
+                <!-- Table -->
+                <div class="border border-dark-border rounded-xl overflow-hidden bg-dark-surface/10">
+                  <table class="min-w-full divide-y divide-dark-border/40 text-left bg-dark-surface/10">
+                    <thead class="bg-dark-elevated sticky top-0 z-10">
+                      <tr>
+                        <th
+                          v-for="(header, hIdx) in previewHeaders.filter(h => h !== rows[0]?._group_by_label)"
+                          :key="header"
+                          class="px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-dark-border/60 bg-dark-elevated transition-all duration-300"
+                          :class="{
+                            'rounded-tl-xl': hIdx === 0,
+                            'rounded-tr-xl': hIdx === previewHeaders.filter(h => h !== rows[0]?._group_by_label).length - 1
+                          }"
+                        >
+                          {{ header }}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-dark-border/20">
+                      <tr
+                        v-for="row in rows"
+                        :key="row._row_key"
+                        class="hover:bg-dark-elevated/20 transition-all duration-300"
+                      >
+                        <td
+                          v-for="header in previewHeaders.filter(h => h !== rows[0]?._group_by_label)"
+                          :key="header"
+                          class="px-4 py-3 text-sm text-slate-300 font-mono"
+                        >
+                          {{ row[header] }}
+                        </td>
+                      </tr>
+                    </tbody>
+                    <tfoot v-if="selectedReport?.aggregations && selectedReport.aggregations.length > 0" class="bg-dark-elevated/40 border-t border-dark-border/60">
+                      <tr>
+                        <td
+                          v-for="header in previewHeaders.filter(h => h !== rows[0]?._group_by_label)"
+                          :key="header"
+                          class="px-4 py-3 text-xs font-bold text-slate-300"
+                        >
+                          <div v-for="agg in getAggregationsForHeader(header)" :key="agg.label" class="flex flex-col gap-0.5">
+                            <span class="text-[9px] text-slate-500 uppercase font-semibold">{{ agg.label || agg.function }}</span>
+                            <span class="text-brand-400 font-mono text-sm font-bold">{{ calculateAggregationValue(rows, header, agg.function) }}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Flat Layout -->
+            <div v-else class="overflow-x-auto border border-dark-border rounded-xl">
+              <table class="min-w-full divide-y divide-dark-border/40 text-left bg-dark-surface/10">
+                <thead class="bg-dark-elevated/40">
+                  <tr>
+                    <th
+                      v-for="header in previewHeaders"
+                      :key="header"
+                      class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-dark-border/60"
+                    >
+                      {{ header }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-dark-border/20">
+                  <tr
+                    v-for="(row, rIdx) in previewData"
+                    :key="rIdx"
+                    class="hover:bg-dark-elevated/20 transition-colors"
                   >
-                    {{ header }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-dark-border/20">
-                <tr
-                  v-for="(row, rIdx) in previewData"
-                  :key="rIdx"
-                  class="hover:bg-dark-elevated/20 transition-colors"
-                >
-                  <td
-                    v-for="(header, hIdx) in previewHeaders"
-                    :key="hIdx"
-                    class="px-4 py-3.5 text-sm text-slate-300"
-                  >
-                    {{ row[header] }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                    <td
+                      v-for="(header, hIdx) in previewHeaders"
+                      :key="hIdx"
+                      class="px-4 py-3.5 text-sm text-slate-300"
+                    >
+                      {{ row[header] }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -491,13 +620,13 @@ const editaRegistro = (id) => {
         </div>
       </template>
       <template #footer>
-        <div class="flex gap-3 justify-end w-full">
-          <div class="w-1/2">
-            <JetSecondaryButton @click="showDeleteModal = false" class="w-full">Cancelar</JetSecondaryButton>
-          </div>
-          <div class="w-1/2">
-            <JetDangerButton @click="deleteReport" class="w-full">Eliminar</JetDangerButton>
-          </div>
+        <div class="w-1/2 text-left">
+          <JetSecondaryButton @click="showDeleteModal = false" class="bg-opacity-95" type="button">Cancelar</JetSecondaryButton>
+        </div>
+        <div class="w-1/2">
+          <JetDangerButton @click="deleteReport" class="float-right">
+            <font-awesome-icon icon="trash" class="mr-2" />Eliminar Registro
+          </JetDangerButton>
         </div>
       </template>
     </JetConfirmationModal>
